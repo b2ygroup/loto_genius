@@ -8,7 +8,7 @@ from collections import Counter
 from itertools import combinations
 import math
 import pandas as pd # Essencial para pd.isna() se usado
-import re # Essencial para parse_ganhadores_cidades se usado
+import re           # Essencial para parse_ganhadores_cidades se usado
 
 app = Flask(__name__)
 CORS(app)
@@ -16,7 +16,6 @@ CORS(app)
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(APP_ROOT, 'lottery_data')
 
-# LOTTERY_CONFIG (como definido anteriormente)
 LOTTERY_CONFIG = {
     "megasena": {
         "nome_exibicao": "Mega-Sena", "min": 1, "max": 60, "count": 6, "color": "#209869",
@@ -39,21 +38,19 @@ LOTTERY_CONFIG = {
     }
 }
 
-# platform_stats_data (como definido anteriormente)
 platform_stats_data = {
     "jogos_gerados_total": random.randint(18500, 30500),
     "jogos_premiados_estimativa": random.randint(250, 750),
     "valor_premios_estimativa_bruto": random.uniform(95000, 350000)
 }
 
-# --- Funções Auxiliares (format_currency, parse_currency_to_float, etc.) ---
-# COLOQUE SUAS FUNÇÕES AUXILIARES COMPLETAS AQUI (COMO NA RESPOSTA 39)
-def format_currency(value): # ... (implementação completa)
+# --- Funções Auxiliares ---
+def format_currency(value):
     if isinstance(value, (int, float)):
         return f"R$ {value:_.2f}".replace('.', ',').replace('_', '.')
     return "R$ 0,00"
 
-def parse_currency_to_float(currency_str): # ... (implementação completa)
+def parse_currency_to_float(currency_str):
     if pd.isna(currency_str): return 0.0
     if not isinstance(currency_str, str): currency_str = str(currency_str)
     cleaned_str = currency_str.replace("R$", "").replace(".", "").replace(",", ".").strip()
@@ -61,7 +58,7 @@ def parse_currency_to_float(currency_str): # ... (implementação completa)
     try: return float(cleaned_str)
     except ValueError: return 0.0
 
-def parse_ganhadores_cidades(cidade_uf_str, num_ganhadores_str): # ... (implementação completa)
+def parse_ganhadores_cidades(cidade_uf_str, num_ganhadores_str):
     cidades_parsed = []
     try:
         num_ganhadores_cleaned = str(num_ganhadores_str).strip()
@@ -95,7 +92,8 @@ def parse_ganhadores_cidades(cidade_uf_str, num_ganhadores_str): # ... (implemen
     elif num_ganhadores > 0: cidades_parsed = ["Não especificada"] * num_ganhadores
     return cidades_parsed, num_ganhadores
 
-def load_processed_lottery_data(lottery_key): # ... (implementação completa)
+def load_processed_lottery_data(lottery_key):
+    # Usar app.logger para logs que aparecerão na Vercel
     app.logger.info(f"Tentando carregar dados processados para {lottery_key.upper()} de {DATA_DIR}")
     config = LOTTERY_CONFIG.get(lottery_key)
     if not config:
@@ -116,7 +114,7 @@ def load_processed_lottery_data(lottery_key): # ... (implementação completa)
         app.logger.error(f"CRÍTICO ao ler ou parsear JSON {processed_json_path} para {lottery_key.upper()}: {e}")
         return None
 
-def get_data_for_stats(lottery_name_lower): # ... (implementação completa)
+def get_data_for_stats(lottery_name_lower):
     if lottery_name_lower not in LOTTERY_CONFIG:
         return None, {"erro": f"Loteria '{lottery_name_lower}' não configurada."}, 404
     all_results = load_processed_lottery_data(lottery_name_lower)
@@ -124,7 +122,7 @@ def get_data_for_stats(lottery_name_lower): # ... (implementação completa)
         return None, {"erro": f"Dados de {lottery_name_lower.upper()} indisponíveis."}, 404
     return all_results, None, None
 
-def combinations_count(n, k): # ... (implementação completa)
+def combinations_count(n, k):
     if k < 0 or k > n: return 0
     if k == 0 or k == n: return 1
     if k > n // 2: k = n - k
@@ -132,7 +130,7 @@ def combinations_count(n, k): # ... (implementação completa)
     for i in range(k): res = res * (n - i) // (i + 1)
     return res
 
-def calcular_numeros_quentes(todos_resultados, qtd_sorteios_analise, qtd_numeros_retorno): # ... (implementação completa)
+def calcular_numeros_quentes(todos_resultados, qtd_sorteios_analise, qtd_numeros_retorno):
     if not todos_resultados or qtd_sorteios_analise <= 0: return []
     ultimos_n = todos_resultados[:min(len(todos_resultados), qtd_sorteios_analise)]
     numeros_recentes = [num for r in ultimos_n for num in r.get("numeros", [])]
@@ -140,7 +138,7 @@ def calcular_numeros_quentes(todos_resultados, qtd_sorteios_analise, qtd_numeros
     contagem = Counter(numeros_recentes)
     return [num for num, freq in contagem.most_common(qtd_numeros_retorno)]
 
-def calcular_numeros_frios(todos_resultados, universo_numeros, qtd_numeros_retorno): # ... (implementação completa)
+def calcular_numeros_frios(todos_resultados, universo_numeros, qtd_numeros_retorno):
     if not todos_resultados: return random.sample(list(universo_numeros), min(len(universo_numeros), qtd_numeros_retorno))
     ultima_aparicao_concurso = {num: 0 for num in universo_numeros}
     concurso_mais_recente = 0
@@ -157,18 +155,19 @@ def calcular_numeros_frios(todos_resultados, universo_numeros, qtd_numeros_retor
     return [num for num, atraso in frios_ordenados[:qtd_numeros_retorno]]
 
 # --- ROTAS DA API ---
-@app.route('/')
-def api_root_info():
-    return jsonify({"message": "API Loto Genius Python (api/main.py)", 
-                    "note": "Endpoints principais estão em /api/main/..." })
+# O vercel.json com "src": "/api/(.*)" fará com que o Flask receba o path completo.
+# Portanto, as rotas Flask devem incluir o prefixo /api/main/
+
+@app.route('/') # Esta rota será acionada se a chamada for apenas para a raiz da função (ex: /api/)
+def api_base_root():
+    return jsonify({"message": "API Loto Genius Python (api/main.py). Endpoints em /api/main/..."})
 
 @app.route('/api/main/')
 def api_main_home():
-    return jsonify({"mensagem": "API Loto Genius AI Funcionando!", "versao": "3.0.0 - Palpites Cósmicos V1"})
+    return jsonify({"mensagem": "API Loto Genius AI Funcionando!", "versao": "3.0.1 - Rotas Revisadas"})
 
 @app.route('/api/main/platform-stats', methods=['GET'])
-def get_platform_stats(): # Função de rota
-    # ... (sua lógica interna como antes)
+def get_platform_stats():
     platform_stats_data["jogos_gerados_total"] += random.randint(1, 7)
     if random.random() < 0.03:
         platform_stats_data["jogos_premiados_estimativa"] += random.randint(1,2)
@@ -181,7 +180,6 @@ def get_platform_stats(): # Função de rota
 
 @app.route('/api/main/recent-winning-pools', methods=['GET'])
 def get_recent_winning_pools():
-    # ... (sua lógica interna como antes)
     pools = [
         {"name": "Bolão da Virada Genius", "lottery": "Mega-Sena", "prize": format_currency(random.uniform(150000, 750000)), "date": "31/12/2024"},
         {"name": "Grupo Independência Forte", "lottery": "Lotofácil", "prize": format_currency(random.uniform(5000, 15000)), "date": "07/09/2024"},
@@ -191,7 +189,6 @@ def get_recent_winning_pools():
 
 @app.route('/api/main/top-winners', methods=['GET'])
 def get_top_winners():
-    # ... (sua lógica interna como antes)
     winners = [
         {"nick": "MestreDaSorte", "prize_total": format_currency(random.uniform(250000, 1200000))},
         {"nick": "LeoSupremo", "prize_total": format_currency(random.uniform(180000, 700000))},
@@ -201,8 +198,7 @@ def get_top_winners():
     return jsonify(winners[:random.randint(2,len(winners))])
 
 @app.route('/api/main/resultados/<lottery_name>', methods=['GET'])
-def get_resultados_api(lottery_name):
-    # ... (sua lógica interna como antes)
+def get_resultados_api(lottery_name): # O nome da função não precisa ser '_route'
     lottery_name_lower = lottery_name.lower()
     all_results = load_processed_lottery_data(lottery_name_lower)
     if not all_results:
@@ -220,7 +216,6 @@ def get_resultados_api(lottery_name):
 
 @app.route('/api/main/stats/frequencia/<lottery_name>', methods=['GET'])
 def get_frequencia_numeros(lottery_name):
-    # ... (sua lógica interna como antes)
     lottery_name_lower = lottery_name.lower()
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
     if error_response: return jsonify(error_response), status_code
@@ -233,7 +228,6 @@ def get_frequencia_numeros(lottery_name):
 
 @app.route('/api/main/stats/pares-frequentes/<lottery_name>', methods=['GET'])
 def get_pares_frequentes(lottery_name):
-    # ... (sua lógica interna como antes)
     lottery_name_lower = lottery_name.lower()
     config = LOTTERY_CONFIG.get(lottery_name_lower)
     if not config: return jsonify({"erro": "Loteria não configurada."}), 404
@@ -253,7 +247,6 @@ def get_pares_frequentes(lottery_name):
 
 @app.route('/api/main/stats/cidades-premiadas/<lottery_name>', methods=['GET'])
 def get_cidades_premiadas(lottery_name):
-    # ... (sua lógica interna como antes)
     lottery_name_lower = lottery_name.lower()
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
     if error_response: return jsonify(error_response), status_code
@@ -272,7 +265,6 @@ def get_cidades_premiadas(lottery_name):
 
 @app.route('/api/main/stats/maiores-premios-cidade/<lottery_name>', methods=['GET'])
 def get_maiores_premios_cidade(lottery_name):
-    # ... (sua lógica interna como antes)
     lottery_name_lower = lottery_name.lower()
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
     if error_response: return jsonify(error_response), status_code
@@ -292,7 +284,6 @@ def get_maiores_premios_cidade(lottery_name):
 
 @app.route('/api/main/jogo-manual/probabilidade', methods=['POST'])
 def calcular_probabilidade_jogo():
-    # ... (sua lógica interna como antes)
     data = request.get_json()
     if not data or 'lottery_type' not in data or 'numeros_usuario' not in data:
         return jsonify({"erro": "Dados incompletos (lottery_type, numeros_usuario)."}), 400
@@ -344,7 +335,6 @@ def calcular_probabilidade_jogo():
     })
 
 def gerar_jogo_ia(lottery_name, todos_resultados_historicos, estrategia_req="aleatorio_inteligente", is_premium_user=False):
-    # ... (lógica original completa da sua função gerar_jogo_ia)
     config = LOTTERY_CONFIG[lottery_name]
     numeros_a_gerar = config.get("count_apostadas", config.get("count"))
     min_num, max_num = config["min"], config["max"]
@@ -427,7 +417,6 @@ def gerar_jogo_ia(lottery_name, todos_resultados_historicos, estrategia_req="ale
 
 @app.route('/api/main/gerar_jogo/<lottery_name>', methods=['GET'])
 def gerar_jogo_api(lottery_name):
-    # ... (sua lógica interna como antes)
     estrategia_req = request.args.get('estrategia', 'aleatorio_inteligente')
     is_premium_simulado = request.args.get('premium_user', 'false').lower() == 'true'
     lottery_name_lower = lottery_name.lower()
@@ -449,7 +438,6 @@ def gerar_jogo_api(lottery_name):
 
 # --- NOVAS FUNÇÕES E ENDPOINT PARA PALPITE ESOTÉRICO ---
 def gerar_numeros_baseados_em_data_simples(data_nascimento_str, num_numeros, min_val, max_val):
-    # ... (implementação como na resposta 39)
     numeros_base = set()
     soma_total_digitos = 0
     if data_nascimento_str and isinstance(data_nascimento_str, str):
@@ -472,7 +460,6 @@ def gerar_numeros_baseados_em_data_simples(data_nascimento_str, num_numeros, min
     return sorted(palpite_final)[:num_numeros]
 
 def verificar_historico_combinacao(lottery_name_lower, combinacao_palpite):
-    # ... (implementação como na resposta 39)
     todos_resultados = load_processed_lottery_data(lottery_name_lower)
     if not todos_resultados:
         app.logger.warning(f"Histórico não carregado para {lottery_name_lower} ao verificar palpite.")
@@ -495,7 +482,6 @@ def verificar_historico_combinacao(lottery_name_lower, combinacao_palpite):
 
 @app.route('/api/main/palpite-esoterico/<lottery_name>', methods=['POST'])
 def gerar_palpite_esoterico_route(lottery_name):
-    # ... (implementação como na resposta 39)
     lottery_name_lower = lottery_name.lower()
     config = LOTTERY_CONFIG.get(lottery_name_lower)
     if not config: return jsonify({"erro": "Loteria não configurada."}), 404
@@ -527,7 +513,7 @@ def gerar_palpite_esoterico_route(lottery_name):
     }), 200
 
 # if __name__ == '__main__':
-#     import logging
-#     logging.basicConfig(level=logging.INFO)
-#     app.logger.info(f"Servidor Flask (versão para api/) rodando localmente para teste.")
-#     app.run(host='0.0.0.0', port=5000, debug=True)
+#     import logging
+#     logging.basicConfig(level=logging.INFO)
+#     app.logger.info(f"Servidor Flask (versão para api/) rodando localmente para teste.")
+#     app.run(host='0.0.0.0', port=5000, debug=True)
