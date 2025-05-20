@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loto Genius AI - Sua Sorte Inteligente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+    <script defer src="firebase-config.js"></script>
+    <script defer src="script.js"></script>
+</head>
+<body>
+
+    <div id="accessible-splash-screen" role="dialog" aria-modal="true" aria-labelledby="splash-title" aria-describedby="splash-status-message">
+        <div class="splash-content-wrapper">
+            <div class="splash-logo-tech" aria-hidden="true">
+                <span class="char l">L</span><span class="char o1">o</span><span class="char t">t</span><span class="char o2">o</span>
+                <span class="char g">G</span><span class="char e">e</span><span class="char n">n</span><span class="char i">i</span><span class="char u">u</span><span class="char s">s</span>
+            </div>
+            <h1 id="splash-title" class="splash-main-title" aria-live="polite">Loto Genius AI</h1>
+            <p id="splash-status-message" class="splash-subtitle-message" aria-live="polite">Carregando... Decifrando os segredos da sorte!</p>
+            <div class="progress-bar-container" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progresso do carregamento">
+                <div class="progress-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <header role="banner">
+        <div class="logo-container"><h1>Loto Genius AI</h1></div>
+        <nav id="main-nav" style="display:none;" aria-label="Navegação Principal">
+            <button id="nav-dashboard-btn" class="nav-item active" title="Painel Principal" aria-label="Ir para o Painel Principal"><i class="fas fa-tachometer-alt" aria-hidden="true"></i> <span class="nav-text">Painel</span></button>
+            <button id="nav-my-games-btn" class="nav-item" title="Meus Jogos" aria-label="Ver Meus Jogos Salvos"><i class="fas fa-ticket-alt" aria-hidden="true"></i> <span class="nav-text">Meus Jogos</span></button>
+            <button id="nav-pools-btn" class="nav-item" title="Bolões" aria-label="Ver Bolões Comunitários"><i class="fas fa-users" aria-hidden="true"></i> <span class="nav-text">Bolões</span></button>
+        </nav>
+        <div id="auth-section" aria-label="Autenticação do Usuário">
+            <button id="login-modal-btn" class="auth-btn" aria-label="Abrir modal de login">Login</button>
+            <button id="register-modal-btn" class="auth-btn" aria-label="Abrir modal de registro">Registrar</button>
+            <div id="user-info" style="display:none;"><span id="user-email" aria-live="polite"></span><button id="logout-btn" class="auth-btn logout" aria-label="Sair da conta"><i class="fas fa-sign-out-alt" aria-hidden="true"></i></button></div>
+        </div>
+    </header>
+
+    <main id="app-content" style="display:none;" role="main">
+        <section id="dashboard-section" class="main-section active-section" aria-labelledby="dashboard-title">
+            <h2 id="dashboard-title" class="visually-hidden">Painel Principal e Gerador de Jogos</h2>
+            <section id="platform-highlights" class="card" aria-labelledby="platform-highlights-title">
+                <h3 id="platform-highlights-title" class="card-title-accessible"><i class="fas fa-star" aria-hidden="true"></i> Loto Genius em Números</h3>
+                <div class="highlights-grid">
+                    <div class="highlight-item"><i class="fas fa-dice-d20" aria-hidden="true"></i><span id="stats-jogos-gerados" class="stat-number">--</span><p>Palpites Gerados pela IA</p></div>
+                    <div class="highlight-item"><i class="fas fa-trophy" aria-hidden="true"></i><span id="stats-jogos-premiados" class="stat-number">--</span><p>Palpites Premiados (Estimativa)</p></div>
+                    <div class="highlight-item"><i class="fas fa-sack-dollar" aria-hidden="true"></i><span id="stats-valor-premios" class="stat-number">R$ --</span><p>Em Prêmios Potenciais (Estimativa)</p></div>
+                </div>
+            </section>
+
+            <div class="ad-placeholder banner-top-dashboard carousel-ad" role="complementary" aria-label="Espaço para anúncio superior">
+                <img src="https://placehold.co/728x90/1a1a2e/47aeff?text=Anuncio+Dinâmico+1&fontsize=16" alt="Anúncio 1" class="carousel-item active">
+                <img src="https://placehold.co/728x90/162447/e0e0e0?text=Anuncio+Dinâmico+2&fontsize=16" alt="Anúncio 2" class="carousel-item">
+                <img src="https://placehold.co/728x90/1f4068/ffffff?text=Anuncio+Dinâmico+3&fontsize=16" alt="Anúncio 3" class="carousel-item">
+            </div>
+
+            <div class="grid-container">
+                <div class="card large-card" id="lottery-selection-card" aria-labelledby="generator-title">
+                    <h2 id="generator-title"><i class="fas fa-cogs" aria-hidden="true"></i> Gerador Inteligente</h2>
+                    
+                    <label for="lottery-type">Selecione a Loteria:</label>
+                    <select id="lottery-type">
+                        <option value="megasena">Mega-Sena</option>
+                        <option value="lotofacil">Lotofácil</option>
+                        <option value="lotomania">Lotomania</option>
+                        <option value="quina">Quina</option>
+                    </select>
+
+                    <label for="ia-strategy-select">Escolha a Estratégia da IA:</label>
+                    <select id="ia-strategy-select">
+                        <option value="aleatorio_inteligente" selected>Aleatório Inteligente</option>
+                        <option value="foco_quentes">Foco nos Quentes (Recentes) ✨ Premium</option> 
+                        <option value="foco_frios">Foco nos Frios (Atrasados)</option>
+                        <option value="equilibrio_par_impar">Equilíbrio Par/Ímpar</option>
+                    </select>
+                    
+                    <div style="margin-top: 10px; margin-bottom:10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: flex-start;">
+                        <input type="checkbox" id="simulate-premium-checkbox" style="width: auto; margin-right: 8px; vertical-align: middle;">
+                        <label for="simulate-premium-checkbox" style="font-size: 0.85rem; color: #a2d2ff; font-weight: normal; margin:0;">
+                            Simular Usuário Premium (Teste)
+                        </label>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button id="generate-game-btn" class="action-btn primary-action" aria-label="Gerar Palpite com Inteligência Artificial"><i class="fas fa-magic" aria-hidden="true"></i> Gerar Palpite IA</button>
+                    </div>
+                    <div id="game-generation-output" class="game-card" style="display:none;" aria-live="polite">
+                        <h4><i class="fas fa-lightbulb" aria-hidden="true"></i> Palpite Sugerido:</h4>
+                        <div id="generated-game-numbers" class="game-numbers" aria-label="Números do palpite gerado"></div>
+                        <p id="generated-game-strategy" class="strategy-text"></p>
+                        <div class="game-card-actions">
+                            <button id="save-game-btn" class="action-btn small-btn" title="Salvar este jogo" style="display:none;" aria-label="Salvar este palpite"><i class="fas fa-save" aria-hidden="true"></i> Salvar</button>
+                            <button id="check-generated-game-btn" class="action-btn small-btn" title="Conferir este jogo" style="display:none;" aria-label="Conferir este palpite com os últimos resultados"><i class="fas fa-check-circle" aria-hidden="true"></i> Conferir</button>
+                        </div>
+                        <div id="generated-game-check-result" class="check-result-display" aria-live="polite"></div>
+                    </div>
+                </div>
+
+                <div class="card" id="results-display-card" aria-labelledby="results-title">
+                    <h3 id="results-title"><i class="fas fa-poll" aria-hidden="true"></i> Últimos Resultados</h3>
+                    <div class="results-header">
+                        <span id="results-lottery-name">Mega-Sena</span>
+                        <button id="fetch-results-btn" class="action-btn small-btn refresh-btn" title="Atualizar Resultados" aria-label="Atualizar últimos resultados da loteria selecionada"><i class="fas fa-sync-alt" aria-hidden="true"></i></button>
+                    </div>
+                    <pre id="api-results" class="code-block" aria-live="polite">Selecione uma loteria e clique em atualizar.</pre>
+                </div>
+                
+                <div class="card" id="manual-game-probability-card" aria-labelledby="manual-game-prob-title">
+                    <h3 id="manual-game-prob-title"><i class="fas fa-calculator"></i> Probabilidade do Meu Jogo</h3>
+                    
+                    <label for="manual-prob-lottery-type">Selecione a Loteria:</label>
+                    <select id="manual-prob-lottery-type">
+                        <option value="megasena" data-count="6" data-min="1" data-max="60">Mega-Sena (6 números de 1-60)</option>
+                        <option value="lotofacil" data-count="15" data-min="1" data-max="25">Lotofácil (15 números de 1-25)</option>
+                        <option value="lotomania" data-count="50" data-min="0" data-max="99">Lotomania (Aposta 50 de 0-99)</option>
+                        <option value="quina" data-count="5" data-min="1" data-max="80">Quina (5 números de 1-80)</option>
+                    </select>
+    
+                    <label for="manual-prob-user-numbers">Digite seus números (separados por vírgula):</label>
+                    <textarea id="manual-prob-user-numbers" rows="3" placeholder="Ex: 01,02,03,04,05,06"></textarea>
+                    <p id="manual-prob-numbers-count-feedback" class="input-feedback">Números digitados: 0 de 6.</p>
+                    
+                    <button id="manual-calculate-prob-btn" class="action-btn primary-action"><i class="fas fa-percent"></i> Calcular Probabilidade</button>
+                    
+                    <div id="manual-probability-result-display" class="result-display-box" aria-live="polite" style="margin-top:15px;">
+                        Aguardando seu jogo...
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="grid-container-side">
+                <section id="winning-pools-preview" class="card" aria-labelledby="winning-pools-title">
+                    <h3 id="winning-pools-title"><i class="fas fa-users-crown" aria-hidden="true"></i> Bolões Premiados Recentes (Simulado)</h3>
+                    <ul id="recent-pools-list"><li>Carregando bolões...</li></ul>
+                </section>
+                <section id="top-winners-preview" class="card" aria-labelledby="top-winners-title">
+                    <h3 id="top-winners-title"><i class="fas fa-medal" aria-hidden="true"></i> Top Ganhadores da Plataforma (Simulado)</h3>
+                    <ol id="top-winners-list"><li>Carregando ranking...</li></ol>
+                </section>
+                <div class="card" id="frequency-stats-card" aria-labelledby="frequency-stats-title">
+                    <h3 id="frequency-stats-title"><i class="fas fa-sort-numeric-up-alt"></i> Números Mais Sorteados (<span id="freq-stats-lottery-name">Mega-Sena</span>)</h3>
+                    <div id="frequency-list-container" class="stats-list-container"><p class="loading-stats">Carregando estatísticas...</p></div>
+                </div>
+                <div class="card" id="pair-frequency-stats-card" aria-labelledby="pair-frequency-stats-title">
+                    <h3 id="pair-frequency-stats-title"><i class="fas fa-project-diagram"></i> Pares Mais Frequentes (<span id="pair-freq-stats-lottery-name">Mega-Sena</span>)</h3>
+                    <div id="pair-frequency-list-container" class="stats-list-container"><p class="loading-stats">Carregando estatísticas...</p></div>
+                </div>
+                 <div class="card" id="city-stats-card" aria-labelledby="city-stats-title">
+                    <h3 id="city-stats-title"><i class="fas fa-city"></i> Cidades Premiadas (<span id="city-stats-lottery-name">Mega-Sena</span>)</h3>
+                    <p class="stats-subtitle">(Ganhadores do prêmio principal)</p>
+                    <div id="city-list-container" class="stats-list-container"><p class="loading-stats">Carregando estatísticas...</p></div>
+                </div>
+                <div class="card" id="city-prize-sum-card" aria-labelledby="city-prize-sum-title">
+                    <h3 id="city-prize-sum-title"><i class="fas fa-hand-holding-usd"></i> Maiores Prêmios por Cidade (<span id="city-prize-sum-lottery-name">Mega-Sena</span>)</h3>
+                    <p class="stats-subtitle">(Soma dos prêmios principais)</p>
+                    <div id="city-prize-sum-list-container" class="stats-list-container"><p class="loading-stats">Carregando estatísticas...</p></div>
+                </div>
+            </div>
+             <div class="ad-placeholder banner-bottom-dashboard carousel-ad" role="complementary" aria-label="Espaço para anúncio inferior">
+                <img src="https://placehold.co/300x250/1a1a2e/47aeff?text=Anuncio+Lateral+1&fontsize=16" alt="Anúncio Lateral 1" class="carousel-item active">
+                <img src="https://placehold.co/300x250/162447/e0e0e0?text=Anuncio+Lateral+2&fontsize=16" alt="Anúncio Lateral 2" class="carousel-item">
+            </div>
+        </section>
+
+        <section id="my-games-section" class="main-section" aria-labelledby="my-games-title">
+            <h2 id="my-games-title"><i class="fas fa-history" aria-hidden="true"></i> Meus Jogos Salvos</h2>
+            <div id="saved-games-filters" style="margin-bottom: 1rem; display:flex; gap:10px; align-items:center;">
+                <label for="filter-lottery-mygames">Filtrar:</label>
+                <select id="filter-lottery-mygames" aria-label="Filtrar jogos salvos por loteria">
+                    <option value="todos">Todas</option>
+                    <option value="megasena">Mega-Sena</option><option value="lotofacil">Lotofácil</option>
+                    <option value="lotomania">Lotomania</option><option value="quina">Quina</option>
+                </select>
+            </div>
+            <div id="saved-games-container" class="grid-container cards-display">
+                <p id="no-saved-games" style="display:none;">Você ainda não tem jogos salvos.</p>
+            </div>
+        </section>
+
+        <section id="pools-section" class="main-section" aria-labelledby="pools-title">
+            <h2 id="pools-title"><i class="fas fa-users" aria-hidden="true"></i> Bolões Comunitários</h2>
+            <p>Em breve: Crie e participe de bolões inteligentes para aumentar suas chances!</p>
+        </section>
+    </main>
+
+    <div id="login-modal" class="modal" role="dialog" aria-labelledby="login-modal-title" aria-modal="true">
+        <div class="modal-content">
+            <button class="close-btn" id="close-login-modal" aria-label="Fechar modal de login">&times;</button>
+            <h2 id="login-modal-title">Login</h2>
+            <label for="login-email" class="visually-hidden">Email</label>
+            <input type="email" id="login-email" placeholder="Seu Email" required aria-required="true">
+            <label for="login-password" class="visually-hidden">Senha</label>
+            <input type="password" id="login-password" placeholder="Sua Senha" required aria-required="true">
+            <button id="login-submit-btn" class="modal-btn">Entrar</button>
+            <p id="login-error" class="error-message" aria-live="assertive"></p>
+        </div>
+    </div>
+
+    <div id="register-modal" class="modal" role="dialog" aria-labelledby="register-modal-title" aria-modal="true">
+        <div class="modal-content">
+            <button class="close-btn" id="close-register-modal" aria-label="Fechar modal de registro">&times;</button>
+            <h2 id="register-modal-title">Criar Conta</h2>
+            <label for="register-email" class="visually-hidden">Email</label>
+            <input type="email" id="register-email" placeholder="Seu Email" required aria-required="true">
+            <label for="register-password" class="visually-hidden">Senha</label>
+            <input type="password" id="register-password" placeholder="Crie uma Senha (mín. 6 caracteres)" required aria-required="true">
+            <label for="register-confirm-password" class="visually-hidden">Confirme a Senha</label>
+            <input type="password" id="register-confirm-password" placeholder="Confirme a Senha" required aria-required="true">
+            <button id="register-submit-btn" class="modal-btn">Registrar</button>
+            <p id="register-error" class="error-message" aria-live="assertive"></p>
+        </div>
+    </div>
+
+    <footer role="contentinfo">
+        <p>&copy; <span id="current-year">2025</span> Loto Genius AI. Jogue com consciência e responsabilidade.</p>
+    </footer>
+    <div id="global-error-msg" role="alert" aria-live="assertive"></div>
+    <div id="confetti-canvas" aria-hidden="true"></div>
+
+</body>
+</html>
