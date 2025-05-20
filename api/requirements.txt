@@ -1,4 +1,4 @@
 Flask
 Flask-CORS
-pandas
-# openpyxl # Geralmente não é necessário se você só está usando pd.isna() do pandas
+pandas 
+# openpyxl # Provavelmente não necessário para o api/main.py se ele só lê JSONs
