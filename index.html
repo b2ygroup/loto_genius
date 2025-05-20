@@ -48,6 +48,7 @@
     <main id="app-content" style="display:none;" role="main">
         <section id="dashboard-section" class="main-section active-section" aria-labelledby="dashboard-title">
             <h2 id="dashboard-title" class="visually-hidden">Painel Principal e Gerador de Jogos</h2>
+            
             <section id="platform-highlights" class="card" aria-labelledby="platform-highlights-title">
                 <h3 id="platform-highlights-title" class="card-title-accessible"><i class="fas fa-star" aria-hidden="true"></i> Loto Genius em Números</h3>
                 <div class="highlights-grid">
@@ -61,6 +62,7 @@
                 <img src="https://placehold.co/728x90/1a1a2e/47aeff?text=Anuncio+Dinâmico+1&fontsize=16" alt="Anúncio 1" class="carousel-item active">
                 <img src="https://placehold.co/728x90/162447/e0e0e0?text=Anuncio+Dinâmico+2&fontsize=16" alt="Anúncio 2" class="carousel-item">
                 <img src="https://placehold.co/728x90/1f4068/ffffff?text=Anuncio+Dinâmico+3&fontsize=16" alt="Anúncio 3" class="carousel-item">
+                 <p>Seu anúncio dinâmico aqui (728x90)</p>
             </div>
 
             <div class="grid-container">
@@ -105,6 +107,35 @@
                     </div>
                 </div>
 
+                <div class="card large-card" id="esoteric-hunch-card" aria-labelledby="esoteric-title">
+                    <h2 id="esoteric-title"><i class="fas fa-hat-wizard" aria-hidden="true"></i> Palpites Cósmicos & Numerológicos</h2>
+                    
+                    <label for="esoteric-lottery-type">Selecione a Loteria:</label>
+                    <select id="esoteric-lottery-type">
+                        <option value="megasena">Mega-Sena</option>
+                        <option value="lotofacil">Lotofácil</option>
+                        <option value="lotomania">Lotomania</option>
+                        <option value="quina">Quina</option>
+                    </select>
+
+                    <label for="birth-date-input">Sua Data de Nascimento (DDMMAAAA):</label>
+                    <input type="text" id="birth-date-input" placeholder="Ex: 25121990" maxlength="8" inputmode="numeric" pattern="\d{8}">
+                    
+                    <div class="button-group">
+                        <button id="generate-esoteric-hunch-btn" class="action-btn primary-action" aria-label="Gerar Palpite Esotérico"><i class="fas fa-meteor" aria-hidden="true"></i> Gerar Palpite Cósmico</button>
+                    </div>
+
+                    <div id="esoteric-hunch-output" class="game-card" style="display:none; margin-top: 1rem;" aria-live="polite">
+                        <h4><i class="fas fa-wand-sparkles" aria-hidden="true"></i> Seu Palpite Cósmico:</h4>
+                        <div id="esoteric-hunch-numbers" class="game-numbers" aria-label="Números do palpite esotérico"></div>
+                        <p id="esoteric-hunch-method" class="strategy-text"></p>
+                        <div id="esoteric-hunch-history-check" class="check-result-display" style="margin-top: 0.5rem; font-size: 0.85em;">
+                            </div>
+                        <div id="esoteric-register-prompt" style="display:none; margin-top: 10px; padding: 10px; background-color: #3b3b6e; border-radius: 4px; text-align: center;">
+                            <p>Para gerar mais palpites cósmicos, por favor, <button class="auth-btn small-btn" id="esoteric-prompt-register-btn">registre-se</button> ou <button class="auth-btn small-btn" id="esoteric-prompt-login-btn">faça login</button>!</p>
+                        </div>
+                    </div>
+                </div>
                 <div class="card" id="results-display-card" aria-labelledby="results-title">
                     <h3 id="results-title"><i class="fas fa-poll" aria-hidden="true"></i> Últimos Resultados</h3>
                     <div class="results-header">
@@ -116,7 +147,6 @@
                 
                 <div class="card" id="manual-game-probability-card" aria-labelledby="manual-game-prob-title">
                     <h3 id="manual-game-prob-title"><i class="fas fa-calculator"></i> Probabilidade do Meu Jogo</h3>
-                    
                     <label for="manual-prob-lottery-type">Selecione a Loteria:</label>
                     <select id="manual-prob-lottery-type">
                         <option value="megasena" data-count="6" data-min="1" data-max="60">Mega-Sena (6 números de 1-60)</option>
@@ -124,18 +154,14 @@
                         <option value="lotomania" data-count="50" data-min="0" data-max="99">Lotomania (Aposta 50 de 0-99)</option>
                         <option value="quina" data-count="5" data-min="1" data-max="80">Quina (5 números de 1-80)</option>
                     </select>
-    
                     <label for="manual-prob-user-numbers">Digite seus números (separados por vírgula):</label>
                     <textarea id="manual-prob-user-numbers" rows="3" placeholder="Ex: 01,02,03,04,05,06"></textarea>
                     <p id="manual-prob-numbers-count-feedback" class="input-feedback">Números digitados: 0 de 6.</p>
-                    
                     <button id="manual-calculate-prob-btn" class="action-btn primary-action"><i class="fas fa-percent"></i> Calcular Probabilidade</button>
-                    
                     <div id="manual-probability-result-display" class="result-display-box" aria-live="polite" style="margin-top:15px;">
                         Aguardando seu jogo...
                     </div>
                 </div>
-
             </div>
 
             <div class="grid-container-side">
@@ -149,26 +175,27 @@
                 </section>
                 <div class="card" id="frequency-stats-card" aria-labelledby="frequency-stats-title">
                     <h3 id="frequency-stats-title"><i class="fas fa-sort-numeric-up-alt"></i> Números Mais Sorteados (<span id="freq-stats-lottery-name">Mega-Sena</span>)</h3>
-                    <div id="frequency-list-container" class="stats-list-container"><p class="loading-stats">Carregando estatísticas...</p></div>
+                    <div id="frequency-list-container" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div> Carregando...</p></div>
                 </div>
                 <div class="card" id="pair-frequency-stats-card" aria-labelledby="pair-frequency-stats-title">
                     <h3 id="pair-frequency-stats-title"><i class="fas fa-project-diagram"></i> Pares Mais Frequentes (<span id="pair-freq-stats-lottery-name">Mega-Sena</span>)</h3>
-                    <div id="pair-frequency-list-container" class="stats-list-container"><p class="loading-stats">Carregando estatísticas...</p></div>
+                    <div id="pair-frequency-list-container" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div> Carregando...</p></div>
                 </div>
                  <div class="card" id="city-stats-card" aria-labelledby="city-stats-title">
                     <h3 id="city-stats-title"><i class="fas fa-city"></i> Cidades Premiadas (<span id="city-stats-lottery-name">Mega-Sena</span>)</h3>
                     <p class="stats-subtitle">(Ganhadores do prêmio principal)</p>
-                    <div id="city-list-container" class="stats-list-container"><p class="loading-stats">Carregando estatísticas...</p></div>
+                    <div id="city-list-container" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div> Carregando...</p></div>
                 </div>
                 <div class="card" id="city-prize-sum-card" aria-labelledby="city-prize-sum-title">
                     <h3 id="city-prize-sum-title"><i class="fas fa-hand-holding-usd"></i> Maiores Prêmios por Cidade (<span id="city-prize-sum-lottery-name">Mega-Sena</span>)</h3>
                     <p class="stats-subtitle">(Soma dos prêmios principais)</p>
-                    <div id="city-prize-sum-list-container" class="stats-list-container"><p class="loading-stats">Carregando estatísticas...</p></div>
+                    <div id="city-prize-sum-list-container" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div> Carregando...</p></div>
                 </div>
             </div>
              <div class="ad-placeholder banner-bottom-dashboard carousel-ad" role="complementary" aria-label="Espaço para anúncio inferior">
                 <img src="https://placehold.co/300x250/1a1a2e/47aeff?text=Anuncio+Lateral+1&fontsize=16" alt="Anúncio Lateral 1" class="carousel-item active">
                 <img src="https://placehold.co/300x250/162447/e0e0e0?text=Anuncio+Lateral+2&fontsize=16" alt="Anúncio Lateral 2" class="carousel-item">
+                <p>Seu anúncio aqui (300x250)</p>
             </div>
         </section>
 

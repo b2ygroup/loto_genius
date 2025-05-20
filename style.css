@@ -683,3 +683,114 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     0% { transform: translateY(0vh) rotateZ(0deg); }
     100% { transform: translateY(105vh) rotateZ(720deg); }
 }
+/* style.css */
+
+/* ... (Todos os seus estilos existentes aqui) ... */
+
+
+/* ESTILOS ADICIONAIS PARA PALPITES ESOTÉRICOS */
+#esoteric-hunch-card label { 
+    display: block;
+    margin-top: 0.8rem;
+    margin-bottom: 0.2rem;
+    font-size: 0.9rem;
+    color: #a2d2ff;
+    font-weight: 500;
+}
+#esoteric-hunch-card label[for="esoteric-lottery-type"] { /* Primeira label do card */
+    margin-top: 0; 
+}
+
+#esoteric-hunch-card select,
+#esoteric-hunch-card input[type="text"] {
+    width: 100%;
+    padding: 0.7rem;
+    margin-bottom: 1rem;
+    border-radius: 6px;
+    border: 1px solid #3b3b6e;
+    background-color: #2a2a50;
+    color: #e0e0e0;
+    font-size: 0.95rem;
+    font-family: 'Roboto', sans-serif; 
+}
+
+#esoteric-hunch-card select:focus,
+#esoteric-hunch-card input[type="text"]:focus {
+    outline: none;
+    border-color: #47aeff;
+    box-shadow: 0 0 6px rgba(71, 174, 255, 0.4);
+}
+
+#esoteric-hunch-card .button-group {
+    margin-top: 0.5rem;
+}
+
+#esoteric-hunch-output .strategy-text { /* Reutiliza a classe strategy-text */
+    font-size: 0.85rem;
+    color: #c5c6c7;
+    font-style: italic;
+    margin-bottom: 0.8rem;
+    text-align: center;
+}
+
+#esoteric-hunch-output .check-result-display { /* Reutiliza a classe */
+    margin-top: 0.8rem;
+    padding: 0.8rem; /* Aumentei o padding */
+    background-color: rgba(18, 18, 36, 0.7); /* Fundo um pouco mais escuro e transparente */
+    border: 1px dashed #5c5c8a; /* Borda diferente para destacar */
+    border-radius: 4px;
+    font-size: 0.85rem;
+    line-height: 1.6; /* Melhor legibilidade */
+}
+#esoteric-hunch-output .check-result-display strong {
+    color: #82e0aa; /* Verde mais suave para o título do histórico */
+}
+#esoteric-hunch-output .check-result-display span[style*="#2ecc71"] { /* Acertos */
+    font-weight: bold;
+}
+#esoteric-hunch-output .check-result-display span[style*="#ff4765"] { /* Não acertos */
+    font-weight: bold;
+}
+
+
+/* Estilo para o prompt de registro no card esotérico */
+#esoteric-register-prompt {
+    font-size: 0.9rem;
+    border: 1px dashed #f1c40f;
+    color: #f1c40f;
+    margin-top: 15px; /* Mais espaço acima */
+    padding: 12px;    /* Mais padding interno */
+    border-radius: 6px; /* Bordas mais arredondadas */
+}
+#esoteric-register-prompt p {
+    margin: 0;
+}
+#esoteric-register-prompt button.auth-btn {
+    margin: 0 5px;
+    padding: 0.4rem 0.8rem; 
+    font-size: 0.85rem;
+    border-color: #f1c40f;
+    color: #f1c40f;
+    background-color: transparent; /* Fundo transparente */
+}
+#esoteric-register-prompt button.auth-btn:hover {
+    background-color: #f1c40f;
+    color: #1a1a2e;
+    box-shadow: 0 0 8px rgba(241, 196, 15, 0.5);
+}
+
+/* Ícones para o título do card esotérico */
+#esoteric-title .fa-hat-wizard, 
+#esoteric-hunch-output h4 .fa-wand-sparkles {
+    margin-right: 10px; /* Mais espaço */
+    color: #be93f9; /* Cor roxa/lilás para um toque místico */
+}
+#generate-esoteric-hunch-btn .fa-meteor {
+    margin-right: 8px;
+}
+
+/* Ajuste no game-card dentro do esoteric-hunch-output para melhor espaçamento */
+#esoteric-hunch-output.game-card {
+    padding: 1.2rem; /* Mais padding interno */
+    background-color: #25254c; /* Um pouco diferente para destacar do card pai */
+}
