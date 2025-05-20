@@ -7,11 +7,20 @@ import json
 from collections import Counter
 from itertools import combinations
 import math
-import pandas as pd # Essencial para pd.isna() se usado
-import re           # Essencial para parse_ganhadores_cidades se usado
+import pandas as pd
+import re
+import logging # Para configurar o logger do Flask
 
 app = Flask(__name__)
 CORS(app)
+
+# Configurar o logger do Flask para aparecer nos logs da Vercel
+app.logger.setLevel(logging.INFO)
+# Se rodando localmente e quiser ver no console:
+# handler = logging.StreamHandler()
+# handler.setLevel(logging.INFO)
+# app.logger.addHandler(handler)
+
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(APP_ROOT, 'lottery_data')
@@ -44,7 +53,6 @@ platform_stats_data = {
     "valor_premios_estimativa_bruto": random.uniform(95000, 350000)
 }
 
-# --- Funções Auxiliares ---
 def format_currency(value):
     if isinstance(value, (int, float)):
         return f"R$ {value:_.2f}".replace('.', ',').replace('_', '.')
@@ -93,160 +101,156 @@ def parse_ganhadores_cidades(cidade_uf_str, num_ganhadores_str):
     return cidades_parsed, num_ganhadores
 
 def load_processed_lottery_data(lottery_key):
-    # Usar app.logger para logs que aparecerão na Vercel
-    app.logger.info(f"Tentando carregar dados processados para {lottery_key.upper()} de {DATA_DIR}")
+    app.logger.info(f"[load_data] Tentando carregar para {lottery_key.upper()} de {DATA_DIR}")
     config = LOTTERY_CONFIG.get(lottery_key)
     if not config:
-        app.logger.error(f"Configuração não encontrada para {lottery_key}")
+        app.logger.error(f"[load_data] Config não encontrada para {lottery_key}")
         return None
     processed_json_path = config.get("processed_json_file")
     if not processed_json_path:
-        app.logger.error(f"Caminho do arquivo JSON processado não configurado para {lottery_key}")
+        app.logger.error(f"[load_data] Caminho JSON não configurado para {lottery_key}")
         return None
     if not os.path.exists(processed_json_path):
-        app.logger.error(f"Arquivo JSON processado NÃO ENCONTRADO em: {processed_json_path}")
+        app.logger.error(f"[load_data] ARQUIVO JSON NÃO ENCONTRADO: {processed_json_path}")
         return None
     try:
         with open(processed_json_path, 'r', encoding='utf-8') as f: data = json.load(f)
-        app.logger.info(f"Dados de {lottery_key.upper()} carregados de {processed_json_path}")
+        app.logger.info(f"[load_data] Sucesso ao carregar {lottery_key.upper()} de {processed_json_path}")
         return data
     except Exception as e:
-        app.logger.error(f"CRÍTICO ao ler ou parsear JSON {processed_json_path} para {lottery_key.upper()}: {e}")
+        app.logger.error(f"[load_data] ERRO ao ler/parsear JSON {processed_json_path} para {lottery_key.upper()}: {e}")
         return None
 
 def get_data_for_stats(lottery_name_lower):
+    app.logger.info(f"[get_data_for_stats] Solicitado para {lottery_name_lower}")
     if lottery_name_lower not in LOTTERY_CONFIG:
+        app.logger.warning(f"[get_data_for_stats] Loteria não configurada: {lottery_name_lower}")
         return None, {"erro": f"Loteria '{lottery_name_lower}' não configurada."}, 404
     all_results = load_processed_lottery_data(lottery_name_lower)
     if not all_results:
+        app.logger.warning(f"[get_data_for_stats] Dados indisponíveis para {lottery_name_lower} após load_processed_lottery_data.")
         return None, {"erro": f"Dados de {lottery_name_lower.upper()} indisponíveis."}, 404
+    app.logger.info(f"[get_data_for_stats] Dados carregados com sucesso para {lottery_name_lower}.")
     return all_results, None, None
-
-def combinations_count(n, k):
-    if k < 0 or k > n: return 0
-    if k == 0 or k == n: return 1
-    if k > n // 2: k = n - k
-    res = 1
-    for i in range(k): res = res * (n - i) // (i + 1)
-    return res
-
-def calcular_numeros_quentes(todos_resultados, qtd_sorteios_analise, qtd_numeros_retorno):
-    if not todos_resultados or qtd_sorteios_analise <= 0: return []
-    ultimos_n = todos_resultados[:min(len(todos_resultados), qtd_sorteios_analise)]
-    numeros_recentes = [num for r in ultimos_n for num in r.get("numeros", [])]
-    if not numeros_recentes: return []
-    contagem = Counter(numeros_recentes)
-    return [num for num, freq in contagem.most_common(qtd_numeros_retorno)]
-
-def calcular_numeros_frios(todos_resultados, universo_numeros, qtd_numeros_retorno):
-    if not todos_resultados: return random.sample(list(universo_numeros), min(len(universo_numeros), qtd_numeros_retorno))
-    ultima_aparicao_concurso = {num: 0 for num in universo_numeros}
-    concurso_mais_recente = 0
-    if todos_resultados and todos_resultados[0].get("concurso"):
-        concurso_mais_recente = todos_resultados[0].get("concurso")
-    else: concurso_mais_recente = len(todos_resultados)
-    for i, sorteio in enumerate(todos_resultados):
-        concurso_atual = sorteio.get("concurso", concurso_mais_recente - i)
-        for num in sorteio.get("numeros", []):
-            if num in ultima_aparicao_concurso and ultima_aparicao_concurso[num] == 0:
-                ultima_aparicao_concurso[num] = concurso_atual
-    atrasos = {num: (concurso_mais_recente - ultima_aparicao_concurso[num]) if ultima_aparicao_concurso[num] != 0 else float('inf') for num in universo_numeros}
-    frios_ordenados = sorted(atrasos.items(), key=lambda item: (-item[1], item[0]))
-    return [num for num, atraso in frios_ordenados[:qtd_numeros_retorno]]
-
+    
 # --- ROTAS DA API ---
 # O vercel.json com "src": "/api/(.*)" fará com que o Flask receba o path completo.
 # Portanto, as rotas Flask devem incluir o prefixo /api/main/
 
-@app.route('/') # Esta rota será acionada se a chamada for apenas para a raiz da função (ex: /api/)
+@app.route('/') # Acessível via /api/ se houver uma rota no vercel.json como "src": "/api", "dest": "api/main.py"
 def api_base_root():
-    return jsonify({"message": "API Loto Genius Python (api/main.py). Endpoints em /api/main/..."})
+    app.logger.info(f"Rota / acessada (raiz da função em api/main.py)")
+    return jsonify({"message": "API Loto Genius Python (api/main.py).", 
+                    "note": "Endpoints principais estão em /api/main/..." })
 
 @app.route('/api/main/')
 def api_main_home():
-    return jsonify({"mensagem": "API Loto Genius AI Funcionando!", "versao": "3.0.1 - Rotas Revisadas"})
+    app.logger.info(f"Rota /api/main/ acessada")
+    return jsonify({"mensagem": "API Loto Genius AI Funcionando!", "versao": "3.1.0 - Logs e Rotas Verificadas"})
 
 @app.route('/api/main/platform-stats', methods=['GET'])
 def get_platform_stats():
+    app.logger.info(f"Endpoint /api/main/platform-stats acessado")
+    # ... (sua lógica como antes) ...
     platform_stats_data["jogos_gerados_total"] += random.randint(1, 7)
     if random.random() < 0.03:
         platform_stats_data["jogos_premiados_estimativa"] += random.randint(1,2)
         platform_stats_data["valor_premios_estimativa_bruto"] += random.uniform(1000, 15000)
-    return jsonify({
+    response_data = {
         "jogos_gerados_total": platform_stats_data["jogos_gerados_total"],
         "jogos_premiados_estimativa": platform_stats_data["jogos_premiados_estimativa"],
         "valor_premios_estimativa_formatado": format_currency(platform_stats_data["valor_premios_estimativa_bruto"])
-    })
+    }
+    app.logger.info(f"Retornando platform-stats: {response_data}")
+    return jsonify(response_data)
 
 @app.route('/api/main/recent-winning-pools', methods=['GET'])
 def get_recent_winning_pools():
+    app.logger.info(f"Endpoint /api/main/recent-winning-pools acessado")
+    # ... (sua lógica como antes) ...
     pools = [
         {"name": "Bolão da Virada Genius", "lottery": "Mega-Sena", "prize": format_currency(random.uniform(150000, 750000)), "date": "31/12/2024"},
         {"name": "Grupo Independência Forte", "lottery": "Lotofácil", "prize": format_currency(random.uniform(5000, 15000)), "date": "07/09/2024"},
         {"name": "Amigos da Quina Junina", "lottery": "Quina", "prize": format_currency(random.uniform(20000, 100000)), "date": "23/06/2024"},
     ]
+    app.logger.info(f"Retornando recent-winning-pools")
     return jsonify(random.sample(pools, k=min(len(pools), random.randint(1,3))))
 
 @app.route('/api/main/top-winners', methods=['GET'])
 def get_top_winners():
+    app.logger.info(f"Endpoint /api/main/top-winners acessado")
+    # ... (sua lógica como antes) ...
     winners = [
         {"nick": "MestreDaSorte", "prize_total": format_currency(random.uniform(250000, 1200000))},
         {"nick": "LeoSupremo", "prize_total": format_currency(random.uniform(180000, 700000))},
         {"nick": "DamaDeCopas", "prize_total": format_currency(random.uniform(120000, 500000))},
     ]
     random.shuffle(winners)
+    app.logger.info(f"Retornando top-winners")
     return jsonify(winners[:random.randint(2,len(winners))])
 
 @app.route('/api/main/resultados/<lottery_name>', methods=['GET'])
-def get_resultados_api(lottery_name): # O nome da função não precisa ser '_route'
+def get_resultados_api(lottery_name):
+    app.logger.info(f"Endpoint /api/main/resultados/{lottery_name} acessado")
     lottery_name_lower = lottery_name.lower()
     all_results = load_processed_lottery_data(lottery_name_lower)
     if not all_results:
+        app.logger.warning(f"Resultados não encontrados para {lottery_name_lower} em get_resultados_api")
         return jsonify({"aviso": f"Dados para {lottery_name.upper()} indisponíveis.", "numeros": []}), 404
     latest_result = all_results[0]
-    return jsonify({
-        "ultimo_concurso": latest_result.get("concurso"),
-        "data": latest_result.get("data"),
+    response_data = {
+        "ultimo_concurso": latest_result.get("concurso"), "data": latest_result.get("data"),
         "numeros": latest_result.get("numeros"),
         "ganhadores_principal_contagem": latest_result.get("ganhadores_principal_contagem"),
         "cidades_ganhadoras_principal": latest_result.get("cidades_ganhadoras_principal"),
         "rateio_principal_valor": latest_result.get("rateio_principal_valor"),
         "fonte": f"Dados Processados - {lottery_name.upper()}"
-    })
+    }
+    app.logger.info(f"Retornando resultados para {lottery_name}")
+    return jsonify(response_data)
 
+# --- Endpoints de Estatísticas ---
+# COPIE E COLE AQUI SUAS FUNÇÕES COMPLETAS de estatísticas, garantindo que as rotas comecem com /api/main/
+# Exemplo para uma delas:
 @app.route('/api/main/stats/frequencia/<lottery_name>', methods=['GET'])
 def get_frequencia_numeros(lottery_name):
+    app.logger.info(f"Endpoint /api/main/stats/frequencia/{lottery_name} acessado")
     lottery_name_lower = lottery_name.lower()
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
-    if error_response: return jsonify(error_response), status_code
+    if error_response:
+        app.logger.warning(f"Erro ao obter dados para stats/frequencia/{lottery_name}: {error_response}")
+        return jsonify(error_response), status_code
+    # ... (resto da sua lógica como antes)
     todos_numeros = [num for sorteio in all_results if "numeros" in sorteio for num in sorteio["numeros"]]
     if not todos_numeros: return jsonify({"data": [], "mensagem": "Nenhum número nos dados."}), 200
     contagem = Counter(todos_numeros)
     frequencia_ordenada = sorted(contagem.items(), key=lambda item: (-item[1], item[0]))
     frequencia_formatada = [{"numero": str(num).zfill(2), "frequencia": freq} for num, freq in frequencia_ordenada]
+    app.logger.info(f"Retornando stats/frequencia para {lottery_name}")
     return jsonify({"data": frequencia_formatada, "total_sorteios_analisados": len(all_results)})
 
 @app.route('/api/main/stats/pares-frequentes/<lottery_name>', methods=['GET'])
 def get_pares_frequentes(lottery_name):
+    app.logger.info(f"Endpoint /api/main/stats/pares-frequentes/{lottery_name} acessado")
+    # ... (COLE SUA LÓGICA COMPLETA AQUI)
     lottery_name_lower = lottery_name.lower()
     config = LOTTERY_CONFIG.get(lottery_name_lower)
     if not config: return jsonify({"erro": "Loteria não configurada."}), 404
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
     if error_response: return jsonify(error_response), status_code
     numeros_por_sorteio = config.get("count_sorteadas", config.get("count"))
-    todos_os_itens_combinacao = [
-        tuple(par) for s in all_results
-        if s.get("numeros") and len(s["numeros"]) == numeros_por_sorteio
-        for par in combinations(sorted(s["numeros"]), 2)
-    ]
+    todos_os_itens_combinacao = [tuple(par) for s in all_results if s.get("numeros") and len(s["numeros"]) == numeros_por_sorteio for par in combinations(sorted(s["numeros"]), 2)]
     if not todos_os_itens_combinacao: return jsonify({"data": [], "mensagem": "Não foi possível gerar pares."}), 200
     contagem_itens = Counter(todos_os_itens_combinacao)
     itens_ordenados = sorted(contagem_itens.items(), key=lambda item: (-item[1], item[0]))
     itens_formatados = [{"par": [str(n).zfill(2) for n in item_numeros], "frequencia": freq} for item_numeros, freq in itens_ordenados]
     return jsonify({"data": itens_formatados[:30]})
 
+
 @app.route('/api/main/stats/cidades-premiadas/<lottery_name>', methods=['GET'])
 def get_cidades_premiadas(lottery_name):
+    app.logger.info(f"Endpoint /api/main/stats/cidades-premiadas/{lottery_name} acessado")
+    # ... (COLE SUA LÓGICA COMPLETA AQUI)
     lottery_name_lower = lottery_name.lower()
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
     if error_response: return jsonify(error_response), status_code
@@ -265,6 +269,8 @@ def get_cidades_premiadas(lottery_name):
 
 @app.route('/api/main/stats/maiores-premios-cidade/<lottery_name>', methods=['GET'])
 def get_maiores_premios_cidade(lottery_name):
+    app.logger.info(f"Endpoint /api/main/stats/maiores-premios-cidade/{lottery_name} acessado")
+    # ... (COLE SUA LÓGICA COMPLETA AQUI)
     lottery_name_lower = lottery_name.lower()
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
     if error_response: return jsonify(error_response), status_code
@@ -284,6 +290,8 @@ def get_maiores_premios_cidade(lottery_name):
 
 @app.route('/api/main/jogo-manual/probabilidade', methods=['POST'])
 def calcular_probabilidade_jogo():
+    app.logger.info(f"Endpoint /api/main/jogo-manual/probabilidade acessado")
+    # ... (COLE SUA LÓGICA COMPLETA AQUI)
     data = request.get_json()
     if not data or 'lottery_type' not in data or 'numeros_usuario' not in data:
         return jsonify({"erro": "Dados incompletos (lottery_type, numeros_usuario)."}), 400
@@ -305,12 +313,10 @@ def calcular_probabilidade_jogo():
             if not (config['min'] <= num <= config['max']):
                 return jsonify({"erro": f"Número {num} fora do range ({config['min']}-{config['max']}) para {nome_loteria}."}), 400
             numeros_usuario.append(num)
-    except ValueError:
-        return jsonify({"erro": "Números devem ser inteiros válidos."}), 400
-    if len(set(numeros_usuario)) != len(numeros_usuario):
-        return jsonify({"erro": "Números repetidos não permitidos."}), 400
+    except ValueError: return jsonify({"erro": "Números devem ser inteiros válidos."}), 400
+    if len(set(numeros_usuario)) != len(numeros_usuario): return jsonify({"erro": "Números repetidos não permitidos."}), 400
     if len(numeros_usuario) != numeros_marcados_pelo_usuario_no_volante:
-           return jsonify({"erro": f"Para {nome_loteria}, você deve fornecer {numeros_marcados_pelo_usuario_no_volante} números para este cálculo."}), 400
+           return jsonify({"erro": f"Para {nome_loteria}, você deve fornecer {numeros_marcados_pelo_usuario_no_volante} números."}), 400
     probabilidade_decimal = 0; probabilidade_texto = "Não aplicável."
     if lottery_type == "lotomania":
         if numeros_marcados_pelo_usuario_no_volante == 50 and numeros_sorteados_para_premio_max == 20:
@@ -334,7 +340,10 @@ def calcular_probabilidade_jogo():
         "descricao": f"Probabilidade de acertar o prêmio máximo ({numeros_sorteados_para_premio_max} acertos) com o jogo fornecido."
     })
 
+# --- GERADOR INTELIGENTE (ANTIGO) ---
 def gerar_jogo_ia(lottery_name, todos_resultados_historicos, estrategia_req="aleatorio_inteligente", is_premium_user=False):
+    app.logger.info(f"[gerar_jogo_ia] Solicitado para {lottery_name}, estratégia {estrategia_req}, premium: {is_premium_user}")
+    # ... (COLE SUA LÓGICA COMPLETA AQUI)
     config = LOTTERY_CONFIG[lottery_name]
     numeros_a_gerar = config.get("count_apostadas", config.get("count"))
     min_num, max_num = config["min"], config["max"]
@@ -359,7 +368,7 @@ def gerar_jogo_ia(lottery_name, todos_resultados_historicos, estrategia_req="ale
             if len(numeros_restantes_possiveis) >= numeros_a_completar:
                 jogo_final.extend(random.sample(numeros_restantes_possiveis, numeros_a_completar))
             else: jogo_final = []
-    elif estrategia_req == "foco_frios":
+    elif estrategia_req == "foco_frios": # ... (e outras estratégias)
         estrategia_aplicada = f"{config['nome_exibicao']}: Foco nos Frios (Atrasados)"
         num_frios_a_selecionar = numeros_a_gerar // 2
         num_frios_para_amostra = num_frios_a_selecionar + 5
@@ -373,7 +382,7 @@ def gerar_jogo_ia(lottery_name, todos_resultados_historicos, estrategia_req="ale
             if len(numeros_restantes_possiveis) >= numeros_a_completar:
                 jogo_final.extend(random.sample(numeros_restantes_possiveis, numeros_a_completar))
             else: jogo_final = []
-    elif estrategia_req == "equilibrio_par_impar":
+    elif estrategia_req == "equilibrio_par_impar": # ... (e outras estratégias)
         estrategia_aplicada = f"{config['nome_exibicao']}: Equilíbrio Par/Ímpar"
         pares_target, impares_target = 0,0
         if lottery_name == "megasena" and numeros_a_gerar == 6: pares_target, impares_target = 3,3
@@ -413,62 +422,84 @@ def gerar_jogo_ia(lottery_name, todos_resultados_historicos, estrategia_req="ale
                jogo_final = sorted(random.sample(universo_numeros, numeros_a_gerar))
                estrategia_aplicada = f"{config.get('nome_exibicao', lottery_name.capitalize())}: Aleatório Simples (Emergência)"
            else: return {"jogo": [], "estrategia_usada": "Falha Crítica na Geração (Range)"}
+    app.logger.info(f"[gerar_jogo_ia] Jogo gerado para {lottery_name}: {jogo_final} com estratégia {estrategia_aplicada}")
     return {"jogo": sorted(list(set(jogo_final))), "estrategia_usada": estrategia_aplicada}
 
 @app.route('/api/main/gerar_jogo/<lottery_name>', methods=['GET'])
-def gerar_jogo_api(lottery_name):
+def gerar_jogo_api(lottery_name): # ROTA ANTIGA CORRIGIDA
+    app.logger.info(f"Endpoint /api/main/gerar_jogo/{lottery_name} acessado com args: {request.args}")
     estrategia_req = request.args.get('estrategia', 'aleatorio_inteligente')
     is_premium_simulado = request.args.get('premium_user', 'false').lower() == 'true'
     lottery_name_lower = lottery_name.lower()
+    
     todos_resultados_para_ia, error_resp_stats, _ = get_data_for_stats(lottery_name_lower)
     if error_resp_stats and lottery_name_lower in LOTTERY_CONFIG:
-        app.logger.warning(f"Dados históricos para {lottery_name_lower} não puderam ser carregados para IA.")
-        todos_resultados_para_ia = []
-    elif error_resp_stats:
-         return jsonify(error_resp_stats), 404
+        app.logger.warning(f"Dados históricos para {lottery_name_lower} não puderam ser carregados para IA em gerar_jogo_api.")
+        todos_resultados_para_ia = [] # Permite que a IA funcione com dados vazios se necessário
+    elif error_resp_stats: # Loteria nem existe na config
+         app.logger.error(f"Erro ao obter dados para IA em gerar_jogo_api para {lottery_name_lower}: {error_resp_stats}")
+         return jsonify(error_resp_stats), 404 # Ou o status_code de error_resp_stats
+
     resultado_geracao = gerar_jogo_ia(lottery_name_lower, todos_resultados_para_ia, estrategia_req, is_premium_simulado)
+    
     if resultado_geracao.get("erro_premium"):
+        app.logger.info(f"Acesso premium negado para gerar_jogo/{lottery_name} com estratégia {estrategia_req}")
         return jsonify({"erro": "Acesso Negado", "detalhes": resultado_geracao.get("estrategia_usada"), "premium_requerido": True}), 403
+    
     if not resultado_geracao.get("jogo") or len(resultado_geracao.get("jogo")) == 0 :
+        app.logger.error(f"Falha na geração de jogo para {lottery_name} com estratégia {estrategia_req}. Resultado: {resultado_geracao}")
         detalhe_erro = resultado_geracao.get("estrategia_usada", "Falha interna na geração.")
         if "Erro" not in detalhe_erro and "Falha" not in detalhe_erro: detalhe_erro = "Não foi possível gerar um palpite válido."
         return jsonify({"erro": f"Não foi possível gerar jogo para {lottery_name}.", "detalhes": detalhe_erro}), 500
+
     if resultado_geracao.get("jogo"): platform_stats_data["jogos_gerados_total"] += 1
+    app.logger.info(f"Jogo gerado com sucesso para {lottery_name} (estratégia {estrategia_req}).")
     return jsonify(resultado_geracao)
 
 # --- NOVAS FUNÇÕES E ENDPOINT PARA PALPITE ESOTÉRICO ---
 def gerar_numeros_baseados_em_data_simples(data_nascimento_str, num_numeros, min_val, max_val):
+    # ... (lógica como na resposta 39)
     numeros_base = set()
     soma_total_digitos = 0
     if data_nascimento_str and isinstance(data_nascimento_str, str):
         for digito in data_nascimento_str:
             if digito.isdigit(): soma_total_digitos += int(digito)
-    while soma_total_digitos > 9:
+    while soma_total_digitos > 9: # Redução numerológica básica
         soma_total_digitos = sum(int(d) for d in str(soma_total_digitos))
     if soma_total_digitos > 0 and min_val <= soma_total_digitos <= max_val:
         numeros_base.add(soma_total_digitos)
+    
+    # Lógica de preenchimento e fallback
     palpite_final = list(numeros_base)
     tentativas_aleatorias = 0
-    while len(palpite_final) < num_numeros and tentativas_aleatorias < (num_numeros * 10):
+    max_tentativas = num_numeros * 10 # Evitar loops infinitos
+    while len(palpite_final) < num_numeros and tentativas_aleatorias < max_tentativas:
         num_aleatorio = random.randint(min_val, max_val)
         if num_aleatorio not in palpite_final: palpite_final.append(num_aleatorio)
         tentativas_aleatorias += 1
-    elementos_possiveis = [n for n in range(min_val, max_val + 1) if n not in palpite_final]
-    random.shuffle(elementos_possiveis)
-    while len(palpite_final) < num_numeros and elementos_possiveis:
-        palpite_final.append(elementos_possiveis.pop(0))
+    
+    if len(palpite_final) < num_numeros: # Se ainda faltam números
+        elementos_possiveis = [n for n in range(min_val, max_val + 1) if n not in palpite_final]
+        random.shuffle(elementos_possiveis)
+        necessarios = num_numeros - len(palpite_final)
+        palpite_final.extend(elementos_possiveis[:necessarios])
+
     return sorted(palpite_final)[:num_numeros]
 
+
 def verificar_historico_combinacao(lottery_name_lower, combinacao_palpite):
+    # ... (lógica como na resposta 39)
+    app.logger.info(f"[verificar_historico] Verificando {combinacao_palpite} para {lottery_name_lower}")
     todos_resultados = load_processed_lottery_data(lottery_name_lower)
     if not todos_resultados:
-        app.logger.warning(f"Histórico não carregado para {lottery_name_lower} ao verificar palpite.")
+        app.logger.warning(f"[verificar_historico] Histórico não carregado para {lottery_name_lower}")
         return 0, 0.0
     ocorrencias = 0; valor_total_ganho = 0.0
     try: palpite_formatado = sorted([int(n) for n in combinacao_palpite])
-    except (ValueError, TypeError):
-        app.logger.error(f"Erro ao formatar palpite para verificação histórica: {combinacao_palpite}")
+    except (ValueError, TypeError) as e:
+        app.logger.error(f"[verificar_historico] Erro ao formatar palpite: {combinacao_palpite}, Erro: {e}")
         return 0, 0.0
+    
     for sorteio in todos_resultados:
         numeros_sorteados = sorteio.get("numeros")
         if numeros_sorteados and isinstance(numeros_sorteados, list):
@@ -478,27 +509,45 @@ def verificar_historico_combinacao(lottery_name_lower, combinacao_palpite):
                     ocorrencias += 1
                     valor_total_ganho += float(sorteio.get("rateio_principal_valor", 0.0))
             except (ValueError, TypeError): continue 
+    app.logger.info(f"[verificar_historico] Palpite {palpite_formatado} para {lottery_name_lower}: {ocorrencias} ocorrências, R${valor_total_ganho:.2f} ganhos.")
     return ocorrencias, valor_total_ganho
+
 
 @app.route('/api/main/palpite-esoterico/<lottery_name>', methods=['POST'])
 def gerar_palpite_esoterico_route(lottery_name):
+    app.logger.info(f"Endpoint /api/main/palpite-esoterico/{lottery_name} acessado")
     lottery_name_lower = lottery_name.lower()
     config = LOTTERY_CONFIG.get(lottery_name_lower)
-    if not config: return jsonify({"erro": "Loteria não configurada."}), 404
+    if not config: 
+        app.logger.warning(f"Loteria não configurada para palpite esotérico: {lottery_name}")
+        return jsonify({"erro": "Loteria não configurada."}), 404
+    
     dados_usuario = request.get_json()
-    if not dados_usuario: return jsonify({"erro": "Dados da requisição não fornecidos (esperado JSON)."}), 400
+    if not dados_usuario:
+        app.logger.warning("Dados da requisição não fornecidos para palpite esotérico.")
+        return jsonify({"erro": "Dados da requisição não fornecidos (esperado JSON)."}), 400
+    
     data_nascimento_str = dados_usuario.get("data_nascimento")
-    if not data_nascimento_str: return jsonify({"erro": "Parâmetro 'data_nascimento' não fornecido."}), 400
+    if not data_nascimento_str:
+        app.logger.warning("Parâmetro 'data_nascimento' não fornecido para palpite esotérico.")
+        return jsonify({"erro": "Parâmetro 'data_nascimento' não fornecido."}), 400
+
     num_a_gerar = config.get("count_apostadas", config.get("count", config.get("count_sorteadas")))
     min_val = config["min"]; max_val = config["max"]
+    
+    app.logger.info(f"Gerando palpite esotérico para {lottery_name} com data {data_nascimento_str}")
     palpite_gerado = gerar_numeros_baseados_em_data_simples(data_nascimento_str, num_a_gerar, min_val, max_val)
-    metodo_usado = f"Baseado em Dados Esotéricos (data_nascimento: {data_nascimento_str}) - Lógica Simplificada"
+    metodo_usado = f"Baseado em Dados Esotéricos (data_nasc: {data_nascimento_str}) - Simples"
+
     if not palpite_gerado or len(palpite_gerado) != num_a_gerar:
-        app.logger.error(f"Falha ao gerar palpite esotérico: {palpite_gerado}")
+        app.logger.error(f"Falha ao gerar palpite esotérico com números corretos: {palpite_gerado}, esperado: {num_a_gerar}")
         palpite_gerado = sorted(random.sample(range(min_val, max_val + 1), num_a_gerar))
         metodo_usado = "Aleatório (fallback pós-falha esotérica)"
+        app.logger.info(f"Fallback para palpite aleatório: {palpite_gerado}")
+
     ocorrencias, valor_ganho = verificar_historico_combinacao(lottery_name_lower, palpite_gerado)
-    return jsonify({
+    
+    response_data = {
         "loteria": config["nome_exibicao"],
         "palpite_gerado": palpite_gerado,
         "parametros_usados": {"data_nascimento_input": data_nascimento_str},
@@ -510,10 +559,24 @@ def gerar_palpite_esoterico_route(lottery_name):
             "valor_total_ganho_faixa_principal_formatado": format_currency(valor_ganho),
             "valor_total_ganho_faixa_principal_float": valor_ganho
         }
-    }), 200
+    }
+    app.logger.info(f"Retornando palpite esotérico: {response_data}")
+    return jsonify(response_data), 200
 
 # if __name__ == '__main__':
+# # Este bloco é para teste local e não é usado pela Vercel.
+# # Para ver os logs do app.logger localmente, configure o logging:
 #     import logging
-#     logging.basicConfig(level=logging.INFO)
+#     logging.basicConfig(level=logging.DEBUG) # Use DEBUG para ver mais detalhes
+#     # Ou, para formatar como a Vercel (aproximadamente):
+#     # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#     # ch = logging.StreamHandler()
+#     # ch.setFormatter(formatter)
+#     # app.logger.handlers.clear() # Limpa handlers padrão do Flask se houver
+#     # app.logger.addHandler(ch)
+#     # app.logger.propagate = False # Evita duplicidade se root logger também tiver handler
+
 #     app.logger.info(f"Servidor Flask (versão para api/) rodando localmente para teste.")
-#     app.run(host='0.0.0.0', port=5000, debug=True)
+#     app.logger.info(f"Lendo dados de: {DATA_DIR}")
+#     # (código de verificação de JSONs pode ser adicionado aqui)
+#     app.run(host='0.0.0.0', port=5000, debug=True) # debug=True ajuda na depuração local
