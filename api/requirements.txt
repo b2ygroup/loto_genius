@@ -1,6 +1,4 @@
 Flask
 Flask-CORS
-# Adicione pandas e openpyxl aqui APENAS SE o seu api/main.py realmente os importar e usar.
-# Se eles são usados SÓ pelo processador_local_loterias.py, não os coloque aqui.
-# pandas
-# openpyxl
+pandas
+# openpyxl # Geralmente não é necessário se você só está usando pd.isna() do pandas
