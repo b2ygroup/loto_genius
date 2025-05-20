@@ -28,7 +28,7 @@ LOTTERY_CONFIG = {
 }
 
 platform_stats_data = {
-    "jogos_gerados_total": random.randint(20000, 33000), # Aumentei um pouco para diferenciar
+    "jogos_gerados_total": random.randint(20000, 33000),
     "jogos_premiados_estimativa": random.randint(300, 800),
     "valor_premios_estimativa_bruto": random.uniform(100000, 380000)
 }
@@ -38,7 +38,6 @@ def format_currency(value):
     return "R$ 0,00"
 
 def parse_currency_to_float(currency_str):
-    # Sua implementação robusta de parse_currency_to_float aqui
     if pd.isna(currency_str): return 0.0
     if not isinstance(currency_str, str): currency_str = str(currency_str)
     cleaned_str = currency_str.replace("R$", "").replace(".", "").replace(",", ".").strip()
@@ -48,7 +47,6 @@ def parse_currency_to_float(currency_str):
 
 
 def parse_ganhadores_cidades(cidade_uf_str, num_ganhadores_str):
-    # Sua implementação robusta de parse_ganhadores_cidades aqui
     cidades_parsed = []
     try:
         num_ganhadores_cleaned = str(num_ganhadores_str).strip()
@@ -93,10 +91,8 @@ def load_processed_lottery_data(lottery_key):
 
     if not os.path.exists(abs_json_path): 
         app.logger.error(f"[load_data] ARQUIVO JSON NÃO ENCONTRADO em: {abs_json_path}")
-        # Tenta listar conteúdo de DATA_DIR para debug
         try:
             app.logger.info(f"[load_data] Conteúdo de DATA_DIR ({DATA_DIR}): {os.listdir(DATA_DIR)}")
-            # E o conteúdo de APP_ROOT para ter certeza
             app.logger.info(f"[load_data] Conteúdo de APP_ROOT ({APP_ROOT}): {os.listdir(APP_ROOT)}")
         except Exception as e_list:
             app.logger.error(f"[load_data] Erro ao listar diretórios: {e_list}")
@@ -115,10 +111,10 @@ def get_data_for_stats(lottery_name_lower):
     all_results = load_processed_lottery_data(lottery_name_lower)
     if not all_results:
         app.logger.warning(f"[get_data_for_stats] Dados indisponíveis para {lottery_name_lower}")
-        return None, {"erro": f"Dados de {lottery_name_lower.upper()} indisponíveis. Verifique se os arquivos JSON existem em 'api/lottery_data/' e foram incluídos no deploy."}, 404 # Mensagem de erro mais específica
+        return None, {"erro": f"Dados de {lottery_name_lower.upper()} indisponíveis. Verifique se os arquivos JSON existem em 'api/lottery_data/' e foram incluídos no deploy."}, 404
     return all_results, None, None
     
-def combinations_count(n, k): # ... (lógica como antes)
+def combinations_count(n, k):
     if k < 0 or k > n: return 0
     if k == 0 or k == n: return 1
     if k > n // 2: k = n - k
@@ -135,7 +131,7 @@ def api_base_root():
 @app.route('/api/main/') 
 def api_main_home():
     app.logger.info(f"Rota /api/main/ acessada. Path: {request.path}")
-    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.1.0"})
+    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.2.0"}) # Versão atualizada
 
 @app.route('/api/main/platform-stats', methods=['GET'])
 def get_platform_stats():
@@ -172,7 +168,7 @@ def get_resultados_api(lottery_name):
     latest_result = all_results[0]
     return jsonify({"ultimo_concurso": latest_result.get("concurso"),"data": latest_result.get("data"),"numeros": latest_result.get("numeros"),"ganhadores_principal_contagem": latest_result.get("ganhadores_principal_contagem"),"cidades_ganhadoras_principal": latest_result.get("cidades_ganhadoras_principal"),"rateio_principal_valor": latest_result.get("rateio_principal_valor"),"fonte": f"Dados Processados - {lottery_name.upper()}"})
 
-# --- Endpoints de Estatísticas (todos com prefixo /api/main/) ---
+# --- Endpoints de Estatísticas ---
 @app.route('/api/main/stats/frequencia/<lottery_name>', methods=['GET'])
 def get_frequencia_numeros(lottery_name):
     app.logger.info(f"Endpoint /api/main/stats/frequencia/{lottery_name} acessado. Path: {request.path}")
@@ -240,7 +236,6 @@ def get_maiores_premios_cidade(lottery_name):
 @app.route('/api/main/jogo-manual/probabilidade', methods=['POST'])
 def calcular_probabilidade_jogo():
     app.logger.info(f"Endpoint /api/main/jogo-manual/probabilidade acessado. Path: {request.path}")
-    # ... (lógica completa como antes)
     data = request.get_json();
     if not data or 'lottery_type' not in data or 'numeros_usuario' not in data: return jsonify({"erro": "Dados incompletos."}), 400
     lottery_type = data['lottery_type'].lower()
@@ -278,8 +273,8 @@ def calcular_probabilidade_jogo():
     return jsonify({"loteria": nome_loteria, "jogo_usuario": sorted(numeros_usuario), "probabilidade_decimal": prob_dec, "probabilidade_texto": prob_txt, "descricao": f"Probabilidade de acertar o prêmio máximo."})
 
 
-# --- GERADOR DE JOGO (ANTIGO Gerador Inteligente, AGORA SIMPLIFICADO PARA 'ALEATORIO_RAPIDO') ---
-def gerar_jogo_ia_aleatorio_rapido(lottery_name): # Não precisa de todos_resultados_historicos
+# --- GERADORES DE JOGO ---
+def gerar_jogo_ia_aleatorio_rapido(lottery_name):
     app.logger.info(f"[gerar_jogo_ia_aleatorio_rapido] Solicitado para {lottery_name}")
     config = LOTTERY_CONFIG.get(lottery_name)
     if not config:
@@ -318,9 +313,105 @@ def gerar_jogo_api(lottery_name):
     app.logger.info(f"Jogo aleatório rápido gerado com sucesso para {lottery_name}.")
     return jsonify(resultado_geracao)
 
-# --- NOVAS FUNÇÕES E ENDPOINT PARA PALPITE ESOTÉRICO ---
+# ++ NOVA ESTRATÉGIA: NÚMEROS QUENTES ++
+def get_hot_numbers_strategy(all_results, num_concursos_analisar, num_numeros_gerar, lottery_min, lottery_max):
+    app.logger.info(f"[get_hot_numbers_strategy] Analisando {num_concursos_analisar} concursos para gerar {num_numeros_gerar} números.")
+    
+    if not all_results:
+        app.logger.warning("[get_hot_numbers_strategy] Não há resultados históricos para analisar.")
+        return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar)) # Fallback
+
+    recent_results = all_results[:num_concursos_analisar]
+    if not recent_results:
+        app.logger.warning(f"[get_hot_numbers_strategy] Não há resultados suficientes ({len(all_results)}) para analisar os últimos {num_concursos_analisar} concursos. Usando todos disponíveis se houver.")
+        recent_results = all_results if len(all_results) > 0 else [] # Usar todos se a fatia for vazia mas all_results não
+        if not recent_results: # Ainda sem resultados para analisar
+             return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar)) # Fallback
+
+    all_drawn_numbers_in_slice = []
+    for result in recent_results:
+        if "numeros" in result and isinstance(result["numeros"], list):
+            all_drawn_numbers_in_slice.extend(result["numeros"])
+    
+    if not all_drawn_numbers_in_slice:
+        app.logger.warning("[get_hot_numbers_strategy] Nenhum número encontrado nos resultados recentes para contagem.")
+        return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
+
+    number_counts = Counter(all_drawn_numbers_in_slice)
+    hot_numbers_sorted_by_freq = sorted(number_counts.items(), key=lambda item: (-item[1], item[0]))
+    
+    generated_game = []
+    for num, count in hot_numbers_sorted_by_freq:
+        if len(generated_game) < num_numeros_gerar:
+            generated_game.append(num)
+        else:
+            break
+            
+    app.logger.info(f"[get_hot_numbers_strategy] Números quentes preliminares: {generated_game}")
+
+    if len(generated_game) < num_numeros_gerar:
+        app.logger.info(f"[get_hot_numbers_strategy] Completando com números aleatórios pois só foram encontrados {len(generated_game)} quentes.")
+        possible_numbers = list(range(lottery_min, lottery_max + 1))
+        random.shuffle(possible_numbers)
+        for num in possible_numbers:
+            if len(generated_game) == num_numeros_gerar:
+                break
+            if num not in generated_game:
+                generated_game.append(num)
+    
+    return sorted(generated_game)
+
+@app.route('/api/main/gerar_jogo/numeros_quentes/<lottery_name>', methods=['GET'])
+def gerar_jogo_numeros_quentes_api(lottery_name):
+    app.logger.info(f"Endpoint /api/main/gerar_jogo/numeros_quentes/{lottery_name} acessado. Args: {request.args}")
+    lottery_name_lower = lottery_name.lower()
+
+    config = LOTTERY_CONFIG.get(lottery_name_lower)
+    if not config:
+        app.logger.warning(f"Loteria inválida solicitada para gerar_jogo_numeros_quentes: {lottery_name_lower}")
+        return jsonify({"erro": f"Loteria '{lottery_name}' não configurada."}), 404
+
+    all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
+    if error_response:
+        return jsonify(error_response), status_code
+    
+    if not all_results:
+        app.logger.error(f"Não foi possível carregar dados históricos para {lottery_name_lower} para a estratégia de números quentes.")
+        return jsonify({"erro": f"Dados históricos para {lottery_name.upper()} indisponíveis."}), 500
+
+    try:
+        num_concursos_analisar = int(request.args.get('num_concursos_analisar', 20))
+        if num_concursos_analisar <= 0 or num_concursos_analisar > len(all_results): # Limitar ao total de resultados
+            num_concursos_analisar = min(20, len(all_results)) if len(all_results) > 0 else 1
+    except ValueError:
+        num_concursos_analisar = min(20, len(all_results)) if len(all_results) > 0 else 1
+
+
+    numeros_a_gerar = config.get("count_apostadas", config.get("count"))
+    lottery_min = config["min"]
+    lottery_max = config["max"]
+
+    jogo_final = get_hot_numbers_strategy(all_results, num_concursos_analisar, numeros_a_gerar, lottery_min, lottery_max)
+
+    if not jogo_final or len(jogo_final) != numeros_a_gerar:
+        app.logger.error(f"Falha na geração de jogo 'Números Quentes' para {lottery_name}. Resultado: {jogo_final}. Usando fallback.")
+        fallback_result = gerar_jogo_ia_aleatorio_rapido(lottery_name_lower) # Usar o aleatório rápido como fallback
+        return jsonify({
+            "jogo": fallback_result.get("jogo", []),
+            "estrategia_usada": f"{config.get('nome_exibicao', lottery_name.capitalize())}: Números Quentes (Fallback para Aleatório) - Analisados: {num_concursos_analisar} concursos",
+            "aviso": "Estratégia de números quentes não produziu resultado esperado, usando fallback."
+        }), 200
+
+    estrategia_aplicada = f"{config.get('nome_exibicao', lottery_name.capitalize())}: Números Quentes (Analisados: {num_concursos_analisar} concursos)"
+    
+    if jogo_final: platform_stats_data["jogos_gerados_total"] += 1
+    app.logger.info(f"Jogo 'Números Quentes' gerado para {lottery_name}: {jogo_final}")
+    return jsonify({"jogo": jogo_final, "estrategia_usada": estrategia_aplicada})
+# ++ FIM DA NOVA ESTRATÉGIA ++
+
+
+# --- PALPITE ESOTÉRICO ---
 def gerar_numeros_baseados_em_data_simples(data_nascimento_str, num_numeros, min_val, max_val):
-    # ... (lógica como antes, com logs) ...
     app.logger.info(f"Gerando palpite esotérico simples com data: {data_nascimento_str} para {num_numeros} números entre {min_val}-{max_val}")
     numeros_base = set(); soma_total_digitos = 0
     if data_nascimento_str and isinstance(data_nascimento_str, str):
@@ -341,7 +432,6 @@ def gerar_numeros_baseados_em_data_simples(data_nascimento_str, num_numeros, min
     return final_result
 
 def verificar_historico_combinacao(lottery_name_lower, combinacao_palpite):
-    # ... (lógica como antes, com logs) ...
     app.logger.info(f"[verificar_historico] Verificando {combinacao_palpite} para {lottery_name_lower}")
     todos_resultados = load_processed_lottery_data(lottery_name_lower)
     if not todos_resultados: app.logger.warning(f"[verificar_historico] Histórico não carregado para {lottery_name_lower}"); return 0, 0.0
@@ -362,7 +452,6 @@ def verificar_historico_combinacao(lottery_name_lower, combinacao_palpite):
 
 @app.route('/api/main/palpite-esoterico/<lottery_name>', methods=['POST'])
 def gerar_palpite_esoterico_route(lottery_name):
-    # ... (lógica como antes, com logs) ...
     app.logger.info(f"Endpoint /api/main/palpite-esoterico/{lottery_name} acessado. Path: {request.path}. JSON: {request.get_json(silent=True)}")
     lottery_name_lower = lottery_name.lower(); config = LOTTERY_CONFIG.get(lottery_name_lower)
     if not config: app.logger.warning(f"Loteria não config para palpite esotérico: {lottery_name}"); return jsonify({"erro": "Loteria não configurada."}), 404
@@ -393,6 +482,6 @@ def gerar_palpite_esoterico_route(lottery_name):
     app.logger.info(f"Retornando palpite esotérico para {lottery_name}: {response_data}")
     return jsonify(response_data), 200
 
-# Para Vercel, não precisamos do app.run() aqui. Ela usa o objeto 'app'.
+# Para Vercel
 # if __name__ == '__main__':
 #     app.run(host='0.0.0.0', port=5000, debug=True)

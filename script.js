@@ -1,6 +1,6 @@
-// script.js (SEU CÓDIGO da Resposta #47 + Minhas Integrações FINAIS v10.10 - CORRIGIDO LOGIN/REG/LOGOUT)
+// script.js (Completo com Números Quentes e adaptações para salvar/conferir)
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver 10.10 (Integração Final Completa - CORRIGIDO LOGIN/REG/LOGOUT)");
+    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver com Números Quentes");
     const domContentLoadedTimestamp = Date.now();
 
     // --- Constantes de Tempo da Splash Screen ---
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const topWinnersList = document.getElementById('top-winners-list');
     const confettiCanvas = document.getElementById('confetti-canvas');
 
-    // NOVOS Seletores para Palpite Aleatório Rápido
+    // Seletores Palpite Aleatório Rápido
     const quickHunchLotteryTypeSelect = document.getElementById('quick-hunch-lottery-type');
     const generateQuickHunchBtn = document.getElementById('generate-quick-hunch-btn');
     const quickHunchOutputDiv = document.getElementById('quick-hunch-output');
@@ -58,7 +58,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkQuickHunchBtn = document.getElementById('check-quick-hunch-btn');
     const quickHunchCheckResultDiv = document.getElementById('quick-hunch-check-result');
 
-    // NOVOS Seletores para Palpites Cósmicos
+    // ++ NOVOS SELETORES PARA PALPITE NÚMEROS QUENTES ++
+    const hotNumbersLotteryTypeSelect = document.getElementById('hot-numbers-lottery-type');
+    const hotNumbersAnalyzeCountInput = document.getElementById('hot-numbers-analyze-count');
+    const generateHotNumbersHunchBtn = document.getElementById('generate-hot-numbers-hunch-btn');
+    const hotNumbersHunchOutputDiv = document.getElementById('hot-numbers-hunch-output');
+    const hotNumbersHunchNumbersDiv = document.getElementById('hot-numbers-hunch-numbers');
+    const hotNumbersHunchStrategyP = document.getElementById('hot-numbers-hunch-strategy');
+    const saveHotHunchBtn = document.getElementById('save-hot-hunch-btn');
+    const checkHotHunchBtn = document.getElementById('check-hot-hunch-btn');
+    const hotHunchCheckResultDiv = document.getElementById('hot-hunch-check-result');
+    // ++ FIM DOS NOVOS SELETORES ++
+
+    // Seletores Palpites Cósmicos
     const esotericLotteryTypeSelect = document.getElementById('esoteric-lottery-type');
     const birthDateInput = document.getElementById('birth-date-input');
     const generateEsotericHunchBtn = document.getElementById('generate-esoteric-hunch-btn');
@@ -70,13 +82,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveEsotericHunchBtn = document.getElementById('save-esoteric-hunch-btn');
     const checkEsotericHunchBtn = document.getElementById('check-esoteric-hunch-btn');
 
-    // NOVOS Seletores para Banner Promocional
+    // Seletores Banner Promocional
     const cosmicPromoBanner = document.getElementById('cosmic-promo-banner');
     const promoRegisterBtn = document.getElementById('promo-register-btn');
     const promoLoginBtn = document.getElementById('promo-login-btn');
 
-    // Seletores para Resultados e Estatísticas (o select principal agora é o do Palpite Rápido)
-    const mainDisplayLotterySelect = quickHunchLotteryTypeSelect; // Este controlará os displays de stats/results
+    // Seletores para Resultados e Estatísticas
+    const mainDisplayLotterySelect = quickHunchLotteryTypeSelect;
     const apiResultsPre = document.getElementById('api-results');
     const resultsLotteryNameSpan = document.getElementById('results-lottery-name');
     const fetchResultsBtn = document.getElementById('fetch-results-btn');
@@ -125,14 +137,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:") {
         BACKEND_URL_BASE = 'http://127.0.0.1:5000';
     } else {
-        BACKEND_URL_BASE = ''; // Para Vercel, usa caminhos relativos para /api/...
+        BACKEND_URL_BASE = '';
     }
 
     let firebaseApp, firebaseAuth, firestoreDB, currentUser = null;
     let lastFetchedResults = {};
-    // Variável para armazenar o último palpite gerado (seja rápido ou esotérico) e seus elementos associados
     let lastGeneratedHunch = {
-        type: null, // 'quick' ou 'esoteric'
+        type: null, // 'quick', 'esoteric', 'hot'
         lottery: null,
         jogo: [],
         estrategia_metodo: '',
@@ -153,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ================================================================================================
-    // === INÍCIO DAS DEFINIÇÕES DE FUNÇÕES (MOVIDAS PARA CIMA PARA EVITAR ReferenceError) ===
+    // === INÍCIO DAS DEFINIÇÕES DE FUNÇÕES ===
     // ================================================================================================
 
     function showGlobalError(message) { if (errorDiv) { errorDiv.textContent = message; errorDiv.style.display = 'block'; } else { console.error("SCRIPT.JS: Global error div não encontrado:", message); } }
@@ -335,7 +346,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function openModal(modalElement) { if (modalElement) { modalElement.style.display = 'flex'; document.body.style.overflow = 'hidden'; } else {console.warn("openModal: modalElement não encontrado")} }
     function closeModal(modalElement) { if (modalElement) { modalElement.style.display = 'none'; document.body.style.overflow = ''; if (modalElement === loginModal && loginEmailInput && loginPasswordInput && loginErrorP) { loginEmailInput.value = ''; loginPasswordInput.value = ''; loginErrorP.textContent = ''; } else if (modalElement === registerModal && registerEmailInput && registerPasswordInput && registerConfirmPasswordInput && registerErrorP) { registerEmailInput.value = ''; registerPasswordInput.value = ''; registerConfirmPasswordInput.value = ''; registerErrorP.textContent = ''; } }  else {console.warn("closeModal: modalElement não encontrado")} }
 
-    // ++ FUNÇÃO PARA CONFIGURAR LISTENERS DE AUTENTICAÇÃO ++
     function setupAuthEventListeners() {
         console.log("SCRIPT.JS: Setting up auth event listeners.");
         if(loginSubmitBtn) {
@@ -345,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(loginErrorP) loginErrorP.textContent = "Erro de inicialização. Tente novamente.";
                     return;
                 }
-                if (!loginEmailInput || !loginPasswordInput || !loginErrorP) return; // Adicionado para consistência
+                if (!loginEmailInput || !loginPasswordInput || !loginErrorP) return;
                 const email = loginEmailInput.value; const password = loginPasswordInput.value;
                 loginErrorP.textContent = ""; if (!email || !password) { loginErrorP.textContent = "Preencha email e senha."; return; }
 
@@ -371,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(registerErrorP) registerErrorP.textContent = "Erro de inicialização. Tente novamente.";
                     return;
                 }
-                if (!registerEmailInput || !registerPasswordInput || !registerConfirmPasswordInput || !registerErrorP) return; // Adicionado para consistência
+                if (!registerEmailInput || !registerPasswordInput || !registerConfirmPasswordInput || !registerErrorP) return;
                 const email = registerEmailInput.value; const password = registerPasswordInput.value; const confirmPassword = registerConfirmPasswordInput.value;
                 registerErrorP.textContent = ""; if (!email || !password || !confirmPassword) { registerErrorP.textContent = "Preencha todos os campos."; return; }
                 if (password !== confirmPassword) { registerErrorP.textContent = "As senhas não coincidem."; return; }
@@ -393,15 +403,13 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn("SCRIPT.JS: registerSubmitBtn não encontrado para adicionar listener.");
         }
 
-        // MOVER O LISTENER DO LOGOUTBTN PARA CÁ
         if(logoutBtn) {
             logoutBtn.addEventListener('click', () => {
-                if (firebaseAuth && currentUser) { // Garante que firebaseAuth e um usuário logado existem
+                if (firebaseAuth && currentUser) {
                     console.log("SCRIPT.JS: Logout button clicked, attempting signOut for user:", currentUser.email);
                     firebaseAuth.signOut()
                         .then(() => {
                             console.log("SCRIPT.JS: Firebase signOut successful. User logged out.");
-                            // A UI será atualizada pelo onAuthStateChanged que detectará o usuário como null.
                         })
                         .catch((error) => {
                             console.error("SCRIPT.JS: Firebase signOut error:", error);
@@ -415,7 +423,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn("SCRIPT.JS: logoutBtn não encontrado para adicionar listener.");
         }
     }
-    // ++ FIM DA FUNÇÃO ++
 
     function initializeFirebase() {
         console.log("SCRIPT.JS: initializeFirebase chamada");
@@ -427,7 +434,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 firestoreDB = firebase.firestore(firebaseApp);
                 console.log("SCRIPT.JS: Firebase App, Auth, Firestore inicializados.");
 
-                // CHAMAR A FUNÇÃO DE CONFIGURAÇÃO DOS LISTENERS DE AUTENTICAÇÃO AQUI
                 if (typeof setupAuthEventListeners === "function") {
                     setupAuthEventListeners();
                 } else {
@@ -555,7 +561,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function createGameCardElement(docId, gameData) { /* Sua implementação original */ }
     function updateManualProbNumbersFeedback() { /* Sua implementação original */ }
 
-    // === FUNÇÃO showAppContentNow (MODIFICADA) ===
     function showAppContentNow() {
         console.log("SCRIPT.JS: showAppContentNow INICIADA.");
         if (accessibleSplashScreen && !accessibleSplashScreen.classList.contains('hidden')) {
@@ -604,9 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("SCRIPT.JS: Elemento CRÍTICO #app-content NÃO encontrado no DOM!");
         }
     }
-    // === FIM DE showAppContentNow ===
 
-    // === FUNÇÃO updateLoginUI (MODIFICADA para Palpites Cósmicos e Banner) ===
     function updateLoginUI(user) {
         console.log("SCRIPT.JS: updateLoginUI chamada, usuário:", user ? user.email : "Nenhum");
         const navItems = document.querySelectorAll('#main-nav .nav-item');
@@ -640,11 +643,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof updateSaveButtonVisibility === "function") {
             updateSaveButtonVisibility('quick');
             updateSaveButtonVisibility('esoteric');
+            updateSaveButtonVisibility('hot'); // ++ Adicionado para novo tipo
         }
     }
-    // === FIM DA MODIFICAÇÃO updateLoginUI ===
 
-    // === FUNÇÃO PARA GERADOR RÁPIDO (NOVO/REFEITO) ===
+    // === GERADOR PALPITE ALEATÓRIO RÁPIDO ===
     async function generateAndDisplayQuickHunch() {
         console.log("SCRIPT.JS: generateAndDisplayQuickHunch chamado");
         if (!quickHunchLotteryTypeSelect || !generateQuickHunchBtn || !quickHunchOutputDiv || !quickHunchNumbersDiv || !quickHunchStrategyP) {
@@ -680,9 +683,86 @@ document.addEventListener('DOMContentLoaded', () => {
             generateQuickHunchBtn.disabled = false;
         }
     }
-    // === FIM DA FUNÇÃO PARA GERADOR RÁPIDO ===
 
-    // === FUNÇÃO PARA GERAR E EXIBIR PALPITE ESOTÉRICO ===
+    // ++ NOVA FUNÇÃO PARA GERAR E EXIBIR PALPITE NÚMEROS QUENTES ++
+    async function generateAndDisplayHotNumbersHunch() {
+        console.log("SCRIPT.JS: generateAndDisplayHotNumbersHunch chamado");
+        if (!hotNumbersLotteryTypeSelect || !generateHotNumbersHunchBtn || !hotNumbersAnalyzeCountInput ||
+            !hotNumbersHunchOutputDiv || !hotNumbersHunchNumbersDiv || !hotNumbersHunchStrategyP) {
+            console.error("SCRIPT.JS: Elementos DOM para Palpite Números Quentes não encontrados.");
+            return;
+        }
+
+        const lottery = hotNumbersLotteryTypeSelect.value;
+        let analyzeCount = parseInt(hotNumbersAnalyzeCountInput.value, 10);
+
+        if (isNaN(analyzeCount) || analyzeCount <= 0) {
+            alert("Por favor, insira um número válido de concursos para analisar (mín. 1).");
+            hotNumbersAnalyzeCountInput.focus();
+            analyzeCount = 20; 
+            hotNumbersAnalyzeCountInput.value = analyzeCount;
+        }
+        // Limitar o analyzeCount para não ser maior que o total de resultados (o backend também faz isso, mas é bom ter no frontend)
+        // Esta informação (total de resultados) não está prontamente disponível aqui sem uma chamada extra.
+        // O backend já tem uma lógica para lidar com isso (usar min(20, len(all_results))).
+
+        generateHotNumbersHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando Análise...';
+        generateHotNumbersHunchBtn.disabled = true;
+        hotNumbersHunchOutputDiv.style.display = 'block';
+        hotNumbersHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>';
+        hotNumbersHunchStrategyP.textContent = 'Analisando os números mais frequentes...';
+        
+        if(saveHotHunchBtn) saveHotHunchBtn.style.display = 'none';
+        if(checkHotHunchBtn) checkHotHunchBtn.style.display = 'none';
+        if(hotHunchCheckResultDiv) hotHunchCheckResultDiv.innerHTML = '';
+
+        try {
+            const data = await fetchData(`api/main/gerar_jogo/numeros_quentes/${lottery}?num_concursos_analisar=${analyzeCount}`);
+            console.log("SCRIPT.JS: Palpite Números Quentes - Dados recebidos:", data);
+
+            if (data.erro) { throw new Error(data.detalhes || data.erro); }
+            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) {
+                throw new Error("Palpite inválido retornado pela estratégia de números quentes.");
+            }
+
+            if (typeof renderGameNumbers === "function") {
+                renderGameNumbers(hotNumbersHunchNumbersDiv, data.jogo, [], [], lottery);
+            } else {
+                console.error("SCRIPT.JS: Função renderGameNumbers não definida!");
+            }
+            hotNumbersHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Números Quentes'}`;
+            if (data.aviso) { // Exibe o aviso do backend se houver (ex: fallback)
+                hotNumbersHunchStrategyP.textContent += ` (${data.aviso})`;
+            }
+
+            lastGeneratedHunch = {
+                type: 'hot',
+                lottery: lottery,
+                jogo: data.jogo,
+                estrategia_metodo: data.estrategia_usada || 'Números Quentes',
+                outputDiv: hotNumbersHunchOutputDiv,
+                numbersDiv: hotNumbersHunchNumbersDiv,
+                checkResultDiv: hotHunchCheckResultDiv,
+                saveButton: saveHotHunchBtn,
+                checkButton: checkHotHunchBtn
+            };
+
+            if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('hot');
+            if (checkHotHunchBtn) checkHotHunchBtn.style.display = 'inline-block';
+
+        } catch (error) {
+            console.error("SCRIPT.JS: Erro ao gerar palpite de números quentes:", error);
+            hotNumbersHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha ao gerar palpite.'}</p>`;
+            hotNumbersHunchStrategyP.textContent = 'Erro ao gerar.';
+            lastGeneratedHunch = { type: null };
+        } finally {
+            generateHotNumbersHunchBtn.innerHTML = '<i class="fas fa-chart-line"></i> Gerar Palpite Quente';
+            generateHotNumbersHunchBtn.disabled = false;
+        }
+    }
+    // ++ FIM DA NOVA FUNÇÃO ++
+
+    // === GERADOR PALPITE ESOTÉRICO ===
     async function generateAndDisplayEsotericHunch() {
         console.log("SCRIPT.JS: generateAndDisplayEsotericHunch chamado");
         if (!esotericLotteryTypeSelect || !birthDateInput || !generateEsotericHunchBtn || !esotericHunchOutputDiv || !esotericHunchNumbersDiv || !esotericHunchMethodP || !esotericHunchHistoryCheckDiv) {
@@ -733,23 +813,32 @@ document.addEventListener('DOMContentLoaded', () => {
             generateEsotericHunchBtn.disabled = false;
         }
     }
-    // === FIM DA FUNÇÃO PALPITE ESOTÉRICO ===
 
-    // === FUNÇÕES DE UTILIDADE PARA BOTÕES DE SALVAR/CONFERIR ===
-    function updateSaveButtonVisibility(hunchType) {
+    // === FUNÇÕES DE UTILIDADE PARA BOTÕES DE SALVAR/CONFERIR (ADAPTADAS) ===
+    function updateSaveButtonVisibility(hunchType) { // hunchType pode ser 'quick', 'esoteric', 'hot'
         const currentHunch = lastGeneratedHunch;
-        if (!currentHunch || !currentHunch.saveButton || !currentHunch.outputDiv ) {console.warn("SCRIPT.JS: updateSaveButtonVisibility - Elementos não encontrados para tipo", hunchType); return;}
+        if (!currentHunch || !currentHunch.saveButton || !currentHunch.outputDiv) {
+            // Se o botão específico do tipo não foi encontrado (ex: saveHotHunchBtn para type 'hot'), não faz nada.
+            // Isso pode acontecer se a lastGeneratedHunch for de um tipo diferente do que está sendo verificado.
+            return;
+        }
+        // Só mostra o botão de salvar se o tipo do palpite atual corresponde ao tipo que está sendo verificado
         currentHunch.saveButton.style.display = currentUser && currentHunch.type === hunchType && currentHunch.outputDiv.style.display !== 'none' ? 'inline-block' : 'none';
     }
+
     function setupSaveHunchButtonListeners() {
         if (saveQuickHunchBtn) saveQuickHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('quick'));
         if (saveEsotericHunchBtn) saveEsotericHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('esoteric'));
+        if (saveHotHunchBtn) saveHotHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('hot')); // ++ Adicionado
     }
+
     function saveLastGeneratedHunch(expectedHunchType) {
         console.log(`SCRIPT.JS: saveLastGeneratedHunch chamado para tipo: ${expectedHunchType}`);
-        if (!firestoreDB || !currentUser || !lastGeneratedHunch.jogo || !Array.isArray(lastGeneratedHunch.jogo) || lastGeneratedHunch.jogo.length === 0 || lastGeneratedHunch.type !== expectedHunchType) {
-            alert("Logue-se e gere um palpite válido deste tipo para salvar.");
-            console.warn("SCRIPT.JS: Condições para salvar não atendidas:", { firestoreDB, currentUser, lastGeneratedHunch, expectedHunchType });
+        // Validação se o palpite atual é do tipo esperado
+        if (!firestoreDB || !currentUser || !lastGeneratedHunch.jogo || !Array.isArray(lastGeneratedHunch.jogo) || 
+            lastGeneratedHunch.jogo.length === 0 || lastGeneratedHunch.type !== expectedHunchType) {
+            alert("Logue-se e gere um palpite válido deste tipo específico para salvar.");
+            console.warn("SCRIPT.JS: Condições para salvar não atendidas ou tipo de palpite não corresponde:", { firestoreDB, currentUser, lastGeneratedHunch, expectedHunchType });
             return;
         }
         const { lottery, jogo, estrategia_metodo } = lastGeneratedHunch;
@@ -765,20 +854,35 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }).catch((error) => { alert(`Erro ao salvar palpite: ${error.message}`); console.error("SCRIPT.JS: Erro ao salvar palpite:", error); });
     }
+
     function setupCheckHunchButtonListeners() {
         if (checkQuickHunchBtn && quickHunchLotteryTypeSelect) checkQuickHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('quick', quickHunchLotteryTypeSelect));
         if (checkEsotericHunchBtn && esotericLotteryTypeSelect) checkEsotericHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('esoteric', esotericLotteryTypeSelect));
+        if (checkHotHunchBtn && hotNumbersLotteryTypeSelect) checkHotHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('hot', hotNumbersLotteryTypeSelect)); // ++ Adicionado
     }
+
     async function checkLastGeneratedHunch(expectedHunchType, lotterySelectElement) {
         console.log(`SCRIPT.JS: checkLastGeneratedHunch chamado para tipo: ${expectedHunchType}`);
         const currentLottery = lotterySelectElement.value;
         const currentHunch = lastGeneratedHunch;
 
+        // Validação se o palpite atual é do tipo esperado e para a loteria correta
         if (!currentHunch.jogo || !Array.isArray(currentHunch.jogo) || currentHunch.jogo.length === 0 ||
             currentHunch.lottery !== currentLottery || currentHunch.type !== expectedHunchType ||
             !currentHunch.checkResultDiv || !currentHunch.numbersDiv) {
-            if(currentHunch.checkResultDiv) currentHunch.checkResultDiv.innerHTML = '<span class="misses">Gere um palpite deste tipo para esta loteria primeiro.</span>';
-            console.warn("SCRIPT.JS: Condições para conferir não atendidas:", {currentHunch, currentLottery, expectedHunchType});
+            
+            // Tenta encontrar a div de resultado correta se currentHunch.checkResultDiv for nula mas o tipo for conhecido
+            let targetCheckResultDiv = currentHunch.checkResultDiv;
+            if (!targetCheckResultDiv) {
+                if (expectedHunchType === 'quick' && quickHunchCheckResultDiv) targetCheckResultDiv = quickHunchCheckResultDiv;
+                else if (expectedHunchType === 'esoteric' && esotericHunchHistoryCheckDiv) targetCheckResultDiv = esotericHunchHistoryCheckDiv; // Esotérico tem div diferente
+                else if (expectedHunchType === 'hot' && hotHunchCheckResultDiv) targetCheckResultDiv = hotHunchCheckResultDiv;
+            }
+
+            if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = '<span class="misses">Gere um palpite deste tipo para esta loteria primeiro.</span>';
+            else console.warn("SCRIPT.JS: Div de resultado de conferência não encontrada para o tipo:", expectedHunchType);
+            
+            console.warn("SCRIPT.JS: Condições para conferir não atendidas ou tipo/loteria não corresponde:", {currentHunch, currentLottery, expectedHunchType});
             return;
         }
         let resultsToUse = lastFetchedResults[currentLottery];
@@ -797,7 +901,15 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("SCRIPT.JS: Funções checkGame ou renderGameNumbers não definidas!"); currentHunch.checkResultDiv.innerHTML = "Erro interno."; return;
         }
         const result = checkGame(currentHunch.jogo, resultsToUse);
-        currentHunch.checkResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`;
+        // Esotérico tem uma div de histórico, não de resultado de acertos diretos, então tratar diferente
+        if (expectedHunchType === 'esoteric' && currentHunch.checkResultDiv === esotericHunchHistoryCheckDiv) {
+             // A lógica de exibição do histórico já está em generateAndDisplayEsotericHunch.
+             // Poderíamos adicionar uma pequena nota sobre a conferência se desejado, mas não sobrescrever o histórico.
+             console.log("SCRIPT.JS: Conferência para palpite esotérico. Resultado:", result.message);
+             // Poderia adicionar `result.message` em algum lugar se houvesse um espaço dedicado.
+        } else {
+            currentHunch.checkResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`;
+        }
         renderGameNumbers(currentHunch.numbersDiv, currentHunch.jogo, result.hitNumbers, result.almostNumbers, currentLottery);
     }
     // === FIM DAS FUNÇÕES DE SALVAR E CONFERIR ===
@@ -895,9 +1007,10 @@ document.addEventListener('DOMContentLoaded', () => {
          });
      }
 
-    // === NOVOS LISTENERS PARA OS NOVOS GERADORES ===
+    // === LISTENERS PARA OS GERADORES ===
     if (generateQuickHunchBtn) generateQuickHunchBtn.addEventListener('click', generateAndDisplayQuickHunch);
     if (generateEsotericHunchBtn) generateEsotericHunchBtn.addEventListener('click', generateAndDisplayEsotericHunch);
+    if (generateHotNumbersHunchBtn) generateHotNumbersHunchBtn.addEventListener('click', generateAndDisplayHotNumbersHunch); // ++ Adicionado
 
     if (typeof setupSaveHunchButtonListeners === "function") setupSaveHunchButtonListeners();
     if (typeof setupCheckHunchButtonListeners === "function") setupCheckHunchButtonListeners();
@@ -905,7 +1018,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listeners para os botões no banner promocional
     if (promoRegisterBtn && registerModalBtn && typeof openModal === "function") promoRegisterBtn.addEventListener('click', () => openModal(registerModal));
     if (promoLoginBtn && loginModalBtn && typeof openModal === "function") promoLoginBtn.addEventListener('click', () => openModal(loginModal));
-    // === FIM DOS NOVOS EVENT LISTENERS ===
 
     // Listener para filtro de jogos salvos
     if (filterLotteryMyGamesSelect) {
