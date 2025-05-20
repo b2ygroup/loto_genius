@@ -2,31 +2,26 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/main.py",      
+      "src": "api/main.py",
       "use": "@vercel/python"
-  
     },
-  
     { "src": "index.html", "use": "@vercel/static" },
     { "src": "style.css", "use": "@vercel/static" },
     { "src": "script.js", "use": "@vercel/static" },
     { "src": "firebase-config.js", "use": "@vercel/static" },
     { "src": "images/**", "use": "@vercel/static" }
-  
   ],
   "routes": [
-
     {
-      "src": "/api/(.*)",
+      "src": "/api/(.*)", 
       "dest": "api/main.py"
     },
-  
     {
       "src": "/(.*\\.(html|css|js|png|jpg|jpeg|gif|ico|svg|webmanifest|json|map|txt))",
       "dest": "/$1"
     },
     {
-      "src": "/(.*)", 
+      "src": "/(.*)",
       "dest": "/index.html"
     }
   ]
