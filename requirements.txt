@@ -1,4 +1,0 @@
-Flask
-Flask-CORS
-pandas
-openpyxl
