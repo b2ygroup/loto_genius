@@ -1,0 +1,8 @@
+Flask>=2.0
+Flask-CORS>=3.0
+requests>=2.25
+beautifulsoup4>=4.9
+# Adicione gunicorn se for usar para deploy em outras plataformas que não Vercel Serverless
+# gunicorn>=20.0
+pandas
+openpyxl
