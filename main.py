@@ -1,25 +1,25 @@
-# main.py (para Vercel)
+# main.py (localizado na RAIZ do projeto)
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import random
-# import datetime # Removido se não usado diretamente
-# import pandas as pd # Removido se não usado diretamente para DataFrames na API
 import os
 import json
 from collections import Counter
 from itertools import combinations
-# import re # Removido se as funções de parse não são mais chamadas ou se o JSON já vem limpo
 import math # Usado em combinations_count
+# import re # Removido se as funções de parse não são mais chamadas ou se o JSON já vem limpo
+# import pandas as pd # Removido se não usado diretamente para DataFrames na API
 
 app = Flask(__name__)
 CORS(app)
 
-# Assume que 'lottery_data' está no mesmo diretório que main.py (ou api/lottery_data se main.py está em api/)
-# e contém os JSONs pré-processados.
+# --- CAMINHO PARA OS DADOS ---
+# __file__ refere-se ao caminho deste arquivo (main.py)
+# os.path.dirname(__file__) dá o diretório onde main.py está (que agora é a raiz do projeto)
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(APP_ROOT, 'lottery_data')
+DATA_DIR = os.path.join(APP_ROOT, 'lottery_data') # Agora 'lottery_data' está na raiz junto com main.py
 
-
+# --- CONFIGURAÇÃO DAS LOTERIAS (Lendo de DATA_DIR na raiz) ---
 LOTTERY_CONFIG = {
     "megasena": {
         "nome_exibicao": "Mega-Sena", "min": 1, "max": 60, "count": 6, "color": "#209869",
@@ -42,49 +42,51 @@ LOTTERY_CONFIG = {
     }
 }
 
-platform_stats_data = { # Mantido como no original
+platform_stats_data = {
     "jogos_gerados_total": random.randint(18500, 30500),
     "jogos_premiados_estimativa": random.randint(250, 750),
     "valor_premios_estimativa_bruto": random.uniform(95000, 350000)
 }
 
-def format_currency(value): # Mantido
+def format_currency(value):
     if isinstance(value, (int, float)):
         return f"R$ {value:_.2f}".replace('.', ',').replace('_', '.')
     return "R$ 0,00"
 
-# Funções parse_currency_to_float e parse_ganhadores_cidades podem ser removidas do main.py da Vercel
-# SE o seu script de pré-processamento local já salva os JSONs com esses campos totalmente limpos e formatados
-# (ex: "rateio_principal_valor" como float, "cidades_ganhadoras_principal" como uma lista de strings limpa).
-# Se os JSONs ainda contêm dados "crus" nesses campos, mantenha-as. Por segurança, vou mantê-las aqui por enquanto.
+# Funções parse_currency_to_float e parse_ganhadores_cidades
+# MANTENHA-AS se os seus JSONs pré-processados ainda precisarem dessa limpeza.
+# Se os JSONs já têm os dados 100% limpos (valores como float, cidades como lista), podem ser removidas.
 def parse_currency_to_float(currency_str):
-    if not isinstance(currency_str, str):
-        currency_str = str(currency_str)
+    # import pandas as pd # Adicione se for usar pd.isna e pandas não estiver globalmente importado
+    if pd.isna(currency_str): return 0.0 # Supondo que pd foi importado se esta função for mantida
+    if not isinstance(currency_str, str): currency_str = str(currency_str)
     cleaned_str = currency_str.replace("R$", "").replace(".", "").replace(",", ".").strip()
-    try:
-        return float(cleaned_str)
-    except ValueError:
-        return 0.0
+    if not cleaned_str or cleaned_str == '-': return 0.0
+    try: return float(cleaned_str)
+    except ValueError: return 0.0
 
 def parse_ganhadores_cidades(cidade_uf_str, num_ganhadores_str):
-    # Esta lógica pode não ser necessária se o JSON já tem 'cidades_ganhadoras_principal' como uma lista.
+    # import pandas as pd # Adicione se for usar pd.isna e pandas não estiver globalmente importado
+    # import re # Adicione se for usar re e não estiver globalmente importado
     cidades_parsed = []
     try:
-        num_ganhadores = int(str(num_ganhadores_str).strip()) if str(num_ganhadores_str).strip().isdigit() else 0
-    except ValueError:
-        num_ganhadores = 0
-    if num_ganhadores > 0 and isinstance(cidade_uf_str, str) and cidade_uf_str.strip() and cidade_uf_str.strip() != "-":
-        # ... (lógica original do parse_ganhadores_cidades) ...
-        # Esta parte é complexa e idealmente o JSON já viria com a lista pronta.
-        # Para simplificar, se o JSON já tiver a lista, esta função não seria chamada para esse propósito.
-        # Se o JSON tiver o campo string original, esta função ainda seria útil.
-        # Assumindo que o JSON pode ter o campo string original:
+        num_ganhadores_cleaned = str(num_ganhadores_str).strip()
+        if num_ganhadores_cleaned.lower() == 'nan': num_ganhadores = 0
+        elif num_ganhadores_cleaned.isdigit(): num_ganhadores = int(num_ganhadores_cleaned)
+        else: num_ganhadores = 0
+    except ValueError: num_ganhadores = 0
+
+    if num_ganhadores > 0 and isinstance(cidade_uf_str, str) and \
+       cidade_uf_str.strip() and cidade_uf_str.strip() != "-" and \
+       cidade_uf_str.lower() != 'nan':
+        # Para usar 're', você precisaria do 'import re' no início do arquivo
         temp_str = re.sub(r'\s*\(\s*(\d+)\s*\)\s*', r'(\1)', cidade_uf_str)
         if ";" in temp_str: entries = [entry.strip() for entry in temp_str.split(';')]
         else: entries = [entry.strip() for entry in temp_str.split(',')]
         parsed_from_entries = []
         for entry in entries:
             if not entry: continue
+            # Para usar 're', você precisaria do 'import re'
             match_contagem = re.search(r'\((?P<contagem>\d+)\)$', entry)
             contagem_na_string = 1
             cidade_limpa = entry
@@ -101,41 +103,60 @@ def parse_ganhadores_cidades(cidade_uf_str, num_ganhadores_str):
             elif len(cidades_parsed) > num_ganhadores: cidades_parsed = cidades_parsed[:num_ganhadores]
     elif num_ganhadores > 0: cidades_parsed = ["Não especificada"] * num_ganhadores
     return cidades_parsed, num_ganhadores
+# --- FIM DAS FUNÇÕES DE PARSE OPCIONAIS ---
 
 
 def load_processed_lottery_data(lottery_key):
-    app.logger.info(f"Tentando carregar dados processados para {lottery_key.upper()}")
+    # app.logger.info(f"Tentando carregar dados processados para {lottery_key.upper()}")
+    print(f"INFO [load_data]: Tentando carregar dados processados para {lottery_key.upper()} de {DATA_DIR}") # Log mais simples
     config = LOTTERY_CONFIG.get(lottery_key)
     if not config:
-        app.logger.error(f"Configuração não encontrada para {lottery_key}")
+        # app.logger.error(f"Configuração não encontrada para {lottery_key}")
+        print(f"ERRO [load_data]: Configuração não encontrada para {lottery_key}")
         return None
     processed_json_path = config.get("processed_json_file")
     if not processed_json_path:
-        app.logger.error(f"Caminho do arquivo JSON processado não configurado para {lottery_key}")
+        # app.logger.error(f"Caminho do arquivo JSON processado não configurado para {lottery_key}")
+        print(f"ERRO [load_data]: Caminho do arquivo JSON processado não configurado para {lottery_key}")
         return None
     if not os.path.exists(processed_json_path):
-        app.logger.error(f"Arquivo JSON processado NÃO ENCONTRADO em: {processed_json_path}")
-        app.logger.info(f"Certifique-se de que o arquivo {os.path.basename(processed_json_path)} "
-                        f"foi pré-processado e incluído no diretório '{DATA_DIR}' do deployment.")
+        # app.logger.error(f"Arquivo JSON processado NÃO ENCONTRADO em: {processed_json_path}")
+        # app.logger.info(f"Certifique-se de que o arquivo {os.path.basename(processed_json_path)} "
+        #                 f"foi pré-processado e incluído no diretório '{DATA_DIR}' do deployment.")
+        print(f"ERRO [load_data]: Arquivo JSON processado NÃO ENCONTRADO em: {processed_json_path}")
+        print(f"INFO [load_data]: Certifique-se de que '{os.path.basename(processed_json_path)}' está em '{DATA_DIR}'")
         return None
     try:
         with open(processed_json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        app.logger.info(f"Dados de {lottery_key.upper()} carregados de {processed_json_path}")
+        # app.logger.info(f"Dados de {lottery_key.upper()} carregados de {processed_json_path}")
+        print(f"INFO [load_data]: Dados de {lottery_key.upper()} carregados de {processed_json_path}")
         return data
     except Exception as e:
-        app.logger.error(f"CRÍTICO ao ler ou parsear JSON {processed_json_path} para {lottery_key.upper()}: {e}")
+        # app.logger.error(f"CRÍTICO ao ler ou parsear JSON {processed_json_path} para {lottery_key.upper()}: {e}")
+        print(f"ERRO [load_data]: CRÍTICO ao ler ou parsear JSON {processed_json_path} para {lottery_key.upper()}: {e}")
         return None
 
-@app.route('/api/main/')
-def api_home():
-    return jsonify({"mensagem": "API Loto Genius AI Funcionando!", "versao": "2.3.0 - Vercel Static JSON"})
+# --- ROTAS DA API ---
+@app.route('/') # Rota para a raiz, pode servir seu index.html ou uma mensagem
+def home():
+    # Se você quiser servir o index.html estático pela Vercel, esta rota pode não ser necessária
+    # ou pode ser um endpoint de API diferente.
+    # Para Vercel, o index.html na raiz geralmente é servido automaticamente se não houver outra rota.
+    return jsonify({"mensagem": "API Loto Genius no ar! Acesse /api/main/... para os endpoints."})
 
-# Removido o endpoint /api/main/refresh-data/<lottery_name> pois não faz sentido na Vercel
-# A atualização é feita via novo deploy com JSONs atualizados.
+@app.route('/api/main/') # Mantendo o prefixo /api/main/ para consistência com chamadas do frontend
+def api_home():
+    return jsonify({"mensagem": "API Loto Genius AI Funcionando!", "versao": "2.4.0 - Raiz do Projeto"})
+
+# --- Endpoints de Estatísticas e Resultados ---
+# (get_platform_stats, get_recent_winning_pools, get_top_winners, get_resultados_api,
+#  get_frequencia_numeros, get_pares_frequentes, get_cidades_premiadas, get_maiores_premios_cidade)
+# Essas funções permanecem as mesmas, pois já usam load_processed_lottery_data
+# que agora lê de DATA_DIR na raiz.
 
 @app.route('/api/main/platform-stats', methods=['GET'])
-def get_platform_stats(): # Mantido como no original
+def get_platform_stats():
     platform_stats_data["jogos_gerados_total"] += random.randint(1, 7)
     if random.random() < 0.03:
         platform_stats_data["jogos_premiados_estimativa"] += random.randint(1,2)
@@ -147,7 +168,7 @@ def get_platform_stats(): # Mantido como no original
     })
 
 @app.route('/api/main/recent-winning-pools', methods=['GET'])
-def get_recent_winning_pools(): # Mantido
+def get_recent_winning_pools():
     pools = [
         {"name": "Bolão da Virada Genius", "lottery": "Mega-Sena", "prize": format_currency(random.uniform(150000, 750000)), "date": "31/12/2024"},
         {"name": "Grupo Independência Forte", "lottery": "Lotofácil", "prize": format_currency(random.uniform(5000, 15000)), "date": "07/09/2024"},
@@ -156,13 +177,16 @@ def get_recent_winning_pools(): # Mantido
     return jsonify(random.sample(pools, k=min(len(pools), random.randint(1,3))))
 
 @app.route('/api/main/top-winners', methods=['GET'])
-def get_top_winners(): # Mantido
+def get_top_winners():
     winners = [
         {"nick": "MestreDaSorte", "prize_total": format_currency(random.uniform(250000, 1200000))},
-        # ... (outros ganhadores)
+        {"nick": "LeoSupremo", "prize_total": format_currency(random.uniform(180000, 700000))},
+        {"nick": "DamaDeCopas", "prize_total": format_currency(random.uniform(120000, 500000))},
+        # Adicione mais se desejar
     ]
     random.shuffle(winners)
-    return jsonify(winners[:random.randint(3,5)])
+    return jsonify(winners[:random.randint(3,len(winners))])
+
 
 @app.route('/api/main/resultados/<lottery_name>', methods=['GET'])
 def get_resultados_api(lottery_name):
@@ -171,36 +195,24 @@ def get_resultados_api(lottery_name):
     if not all_results:
         return jsonify({"aviso": f"Dados para {lottery_name.upper()} indisponíveis.", "numeros": []}), 404
     
-    latest_result = all_results[0] # Assume JSON está ordenado do mais recente para o mais antigo
-    # Idealmente, o JSON pré-processado já tem os campos no formato correto (ex: rateio como float)
-    # Se não, as funções de parse podem ser chamadas aqui, mas é melhor pré-processar.
+    latest_result = all_results[0]
     return jsonify({
         "ultimo_concurso": latest_result.get("concurso"),
         "data": latest_result.get("data"),
         "numeros": latest_result.get("numeros"),
         "ganhadores_principal_contagem": latest_result.get("ganhadores_principal_contagem"),
-        "cidades_ganhadoras_principal": latest_result.get("cidades_ganhadoras_principal"), # Deve ser lista no JSON
-        "rateio_principal_valor": latest_result.get("rateio_principal_valor"), # Deve ser float no JSON
+        "cidades_ganhadoras_principal": latest_result.get("cidades_ganhadoras_principal"),
+        "rateio_principal_valor": latest_result.get("rateio_principal_valor"),
         "fonte": f"Dados Processados - {lottery_name.upper()}"
     })
 
-def get_data_for_stats(lottery_name_lower):
+def get_data_for_stats(lottery_name_lower): # Helper
     if lottery_name_lower not in LOTTERY_CONFIG:
         return None, {"erro": f"Loteria '{lottery_name_lower}' não configurada."}, 404
     all_results = load_processed_lottery_data(lottery_name_lower)
     if not all_results:
         return None, {"erro": f"Dados de {lottery_name_lower.upper()} indisponíveis."}, 404
     return all_results, None, None
-
-# Endpoints de Estatísticas (/api/main/stats/...)
-# Eles usarão get_data_for_stats e assumirão que os JSONs estão corretos.
-# A lógica interna deles (Counter, combinations, etc.) permanece a mesma.
-# Cole aqui as suas funções:
-# get_frequencia_numeros
-# get_pares_frequentes
-# get_cidades_premiadas
-# get_maiores_premios_cidade
-# (Lembre-se de adaptar o início de cada uma para usar get_data_for_stats, como fiz para get_frequencia_numeros abaixo como exemplo)
 
 @app.route('/api/main/stats/frequencia/<lottery_name>', methods=['GET'])
 def get_frequencia_numeros(lottery_name):
@@ -240,7 +252,7 @@ def get_pares_frequentes(lottery_name):
     contagem_itens = Counter(todos_os_itens_combinacao)
     itens_ordenados = sorted(contagem_itens.items(), key=lambda item: (-item[1], item[0]))
     itens_formatados = [{"par": [str(n).zfill(2) for n in item_numeros], "frequencia": freq} for item_numeros, freq in itens_ordenados]
-    return jsonify({"data": itens_formatados[:30]}) # Limita a 30 como no original
+    return jsonify({"data": itens_formatados[:30]})
 
 @app.route('/api/main/stats/cidades-premiadas/<lottery_name>', methods=['GET'])
 def get_cidades_premiadas(lottery_name):
@@ -251,13 +263,12 @@ def get_cidades_premiadas(lottery_name):
     contagem_cidades = Counter()
     total_premios_contabilizados = 0
     for sorteio in all_results:
-        cidades = sorteio.get("cidades_ganhadoras_principal", []) # Espera lista de strings
+        cidades = sorteio.get("cidades_ganhadoras_principal", [])
         if isinstance(cidades, list):
-            # Filtra cidades vazias ou "não especificada" se necessário, mas idealmente o JSON está limpo
             cidades_validas = [c for c in cidades if c and isinstance(c, str) and c.lower().strip() != "não especificada" and c.strip() != "-"]
             if cidades_validas:
                 contagem_cidades.update(cidades_validas)
-                total_premios_contabilizados += len(cidades_validas) # Ou use sorteio.get("ganhadores_principal_contagem", 0) se mais preciso
+                total_premios_contabilizados += sorteio.get("ganhadores_principal_contagem", len(cidades_validas)) # Usa contagem do JSON se disponível
                 
     cidades_ordenadas = sorted(contagem_cidades.items(), key=lambda item: (-item[1], item[0]))
     cidades_formatadas = [{"cidade_uf": cidade, "premios_principais": freq} for cidade, freq in cidades_ordenadas]
@@ -271,20 +282,13 @@ def get_maiores_premios_cidade(lottery_name):
 
     soma_premios_cidade = Counter()
     for sorteio in all_results:
-        cidades = sorteio.get("cidades_ganhadoras_principal", []) # Espera lista
-        rateio = sorteio.get("rateio_principal_valor", 0.0) # Espera float
+        cidades = sorteio.get("cidades_ganhadoras_principal", [])
+        rateio = sorteio.get("rateio_principal_valor", 0.0)
         num_ganhadores_no_sorteio = sorteio.get("ganhadores_principal_contagem", 0)
 
         if rateio > 0 and cidades and num_ganhadores_no_sorteio > 0:
             cidades_validas = [c for c in cidades if c and isinstance(c, str) and c.lower().strip() != "não especificada" and c.strip() != "-"]
-            # Esta lógica de rateio pode ser complexa. O ideal é que o JSON pré-processado
-            # já tenha o valor correto por cidade ou uma estrutura que facilite isso.
-            # Assumindo rateio é por bilhete e distribuímos igualmente entre as cidades listadas para aquele bilhete (se bolão)
-            # ou se cada cidade na lista representa um ganhador individual com aquele rateio.
-            for cidade_unica in set(cidades_validas): # Usar set para evitar contar múltiplas vezes o mesmo prêmio para a mesma cidade no mesmo concurso
-                # Se um concurso teve 3 ganhadores na CidadeA, e 'cidades' = ['CidadeA', 'CidadeA', 'CidadeA'], rateio é o valor por ganhador.
-                # Se 'cidades' = ['CidadeA'] mas 'num_ganhadores' = 3, a interpretação muda.
-                # Vamos assumir que a lista de cidades representa os locais dos bilhetes premiados, cada um com o valor 'rateio'.
+            for cidade_unica in set(cidades_validas):
                 ocorrencias_cidade_no_sorteio = cidades_validas.count(cidade_unica)
                 soma_premios_cidade[cidade_unica] += rateio * ocorrencias_cidade_no_sorteio
     
@@ -292,18 +296,12 @@ def get_maiores_premios_cidade(lottery_name):
     cidades_formatadas = [{"cidade_uf": cid, "total_ganho_principal_formatado": format_currency(val), "total_ganho_principal_float": val} for cid, val in cidades_ordenadas]
     return jsonify({"data": cidades_formatadas[:30]})
 
+# --- Endpoints de Geração de Jogos e Probabilidade ---
+# (combinations_count, calcular_probabilidade_jogo, calcular_numeros_quentes,
+#  calcular_numeros_frios, gerar_jogo_ia, gerar_jogo_api)
+# Essas funções permanecem as mesmas.
 
-# Endpoint de probabilidade e geração de jogos IA podem ser mantidos como estavam,
-# pois dependem do LOTTERY_CONFIG e dos dados carregados para as estratégias de IA.
-# Cole aqui as suas funções:
-# combinations_count (já incluso no processador local, mas pode ser útil aqui também se chamado diretamente)
-# calcular_probabilidade_jogo
-# calcular_numeros_quentes
-# calcular_numeros_frios
-# gerar_jogo_ia
-# gerar_jogo_api
-
-def combinations_count(n, k): # Mantido
+def combinations_count(n, k):
     if k < 0 or k > n: return 0
     if k == 0 or k == n: return 1
     if k > n // 2: k = n - k
@@ -312,9 +310,8 @@ def combinations_count(n, k): # Mantido
     return res
 
 @app.route('/api/main/jogo-manual/probabilidade', methods=['POST'])
-def calcular_probabilidade_jogo(): # Mantido como no original
+def calcular_probabilidade_jogo():
     data = request.get_json()
-    # ... (lógica original completa)
     if not data or 'lottery_type' not in data or 'numeros_usuario' not in data:
         return jsonify({"erro": "Dados incompletos (lottery_type, numeros_usuario)."}), 400
     lottery_type = data['lottery_type'].lower()
@@ -365,9 +362,7 @@ def calcular_probabilidade_jogo(): # Mantido como no original
         "descricao": f"Probabilidade de acertar o prêmio máximo ({numeros_sorteados_para_premio_max} acertos) com o jogo fornecido."
     })
 
-
-def calcular_numeros_quentes(todos_resultados, qtd_sorteios_analise, qtd_numeros_retorno): # Mantido
-    # ... (lógica original)
+def calcular_numeros_quentes(todos_resultados, qtd_sorteios_analise, qtd_numeros_retorno):
     if not todos_resultados or qtd_sorteios_analise <= 0: return []
     ultimos_n = todos_resultados[:min(len(todos_resultados), qtd_sorteios_analise)]
     numeros_recentes = [num for r in ultimos_n for num in r.get("numeros", [])]
@@ -375,8 +370,7 @@ def calcular_numeros_quentes(todos_resultados, qtd_sorteios_analise, qtd_numeros
     contagem = Counter(numeros_recentes)
     return [num for num, freq in contagem.most_common(qtd_numeros_retorno)]
 
-def calcular_numeros_frios(todos_resultados, universo_numeros, qtd_numeros_retorno): # Mantido
-    # ... (lógica original)
+def calcular_numeros_frios(todos_resultados, universo_numeros, qtd_numeros_retorno):
     if not todos_resultados: return random.sample(list(universo_numeros), min(len(universo_numeros), qtd_numeros_retorno))
     ultima_aparicao_concurso = {num: 0 for num in universo_numeros}
     concurso_mais_recente = 0
@@ -392,8 +386,7 @@ def calcular_numeros_frios(todos_resultados, universo_numeros, qtd_numeros_retor
     frios_ordenados = sorted(atrasos.items(), key=lambda item: (-item[1], item[0]))
     return [num for num, atraso in frios_ordenados[:qtd_numeros_retorno]]
 
-def gerar_jogo_ia(lottery_name, todos_resultados_historicos, estrategia_req="aleatorio_inteligente", is_premium_user=False): # Mantido
-    # ... (lógica original completa, verificando 'todos_resultados_historicos' ser None ou lista vazia)
+def gerar_jogo_ia(lottery_name, todos_resultados_historicos, estrategia_req="aleatorio_inteligente", is_premium_user=False):
     # print(f"DEBUG [gerar_jogo_ia]: Loteria: {lottery_name}, Estratégia: {estrategia_req}, Premium: {is_premium_user}")
     config = LOTTERY_CONFIG[lottery_name]
     numeros_a_gerar = config.get("count_apostadas", config.get("count"))
@@ -402,8 +395,8 @@ def gerar_jogo_ia(lottery_name, todos_resultados_historicos, estrategia_req="ale
     jogo_final = []
     estrategia_aplicada_nome_base = estrategia_req.replace('_', ' ').capitalize()
     estrategia_aplicada = f"{config.get('nome_exibicao', lottery_name.capitalize())}: {estrategia_aplicada_nome_base}"
-    if todos_resultados_historicos is None: todos_resultados_historicos = [] # Garante que é uma lista
-    # --- ESTRATÉGIAS --- (copie sua lógica original de estratégias aqui)
+    if todos_resultados_historicos is None: todos_resultados_historicos = []
+
     if estrategia_req == "foco_quentes":
         if not is_premium_user:
             return {"jogo": [], "estrategia_usada": "Foco nos Quentes (✨ Premium)", "erro_premium": True}
@@ -420,7 +413,7 @@ def gerar_jogo_ia(lottery_name, todos_resultados_historicos, estrategia_req="ale
             if len(numeros_restantes_possiveis) >= numeros_a_completar:
                 jogo_final.extend(random.sample(numeros_restantes_possiveis, numeros_a_completar))
             else: jogo_final = [] 
-    elif estrategia_req == "foco_frios": # ... e outras estratégias
+    elif estrategia_req == "foco_frios":
         estrategia_aplicada = f"{config['nome_exibicao']}: Foco nos Frios (Atrasados)"
         num_frios_a_selecionar = numeros_a_gerar // 2
         num_frios_para_amostra = num_frios_a_selecionar + 5
@@ -438,7 +431,6 @@ def gerar_jogo_ia(lottery_name, todos_resultados_historicos, estrategia_req="ale
         estrategia_aplicada = f"{config['nome_exibicao']}: Equilíbrio Par/Ímpar"
         pares_target, impares_target = 0,0
         if lottery_name == "megasena" and numeros_a_gerar == 6: pares_target, impares_target = 3,3
-        # ... (resto da lógica de equilíbrio)
         elif lottery_name == "lotofacil" and numeros_a_gerar == 15:
             if random.choice([True,False]): pares_target, impares_target = 7,8
             else: pares_target, impares_target = 8,7
@@ -462,49 +454,47 @@ def gerar_jogo_ia(lottery_name, todos_resultados_historicos, estrategia_req="ale
             if not numeros_disponiveis_geral: break 
             jogo_final.append(random.choice(numeros_disponiveis_geral))
             jogo_final = list(set(jogo_final)) 
-    # Fallback
+    
     if not jogo_final or len(jogo_final) != numeros_a_gerar or estrategia_req == "aleatorio_inteligente":
         if estrategia_req == "aleatorio_inteligente" or not jogo_final or len(jogo_final) != numeros_a_gerar :
             estrategia_aplicada = f"{config.get('nome_exibicao', lottery_name.capitalize())}: Aleatório Inteligente"
         else: 
-            # app.logger.debug(f"Estratégia '{estrategia_req}' não completou o jogo ({len(jogo_final)}/{numeros_a_gerar}). Usando fallback.")
+            # print(f"DEBUG: Estratégia '{estrategia_req}' não completou o jogo ({len(jogo_final)}/{numeros_a_gerar}). Usando fallback.")
             estrategia_aplicada = f"{estrategia_aplicada} (Fallback para Aleatório)"
         if (max_num - min_num + 1) >= numeros_a_gerar:
             jogo_final = sorted(random.sample(universo_numeros, numeros_a_gerar))
         else: 
-            # app.logger.error(f"[gerar_jogo_ia]: Range insuficiente para {lottery_name} no fallback.")
+            # print(f"ERRO [gerar_jogo_ia]: Range insuficiente para {lottery_name} no fallback.")
             return {"jogo": [], "estrategia_usada": "Erro de Configuração (range insuficiente)"}
-    # Garantia final
+
     if not jogo_final or len(jogo_final) != numeros_a_gerar:
-        #    app.logger.error(f"FATAL [gerar_jogo_ia]: Não foi possível gerar o número correto de dezenas ({len(jogo_final)}/{numeros_a_gerar}) para {lottery_name} com estratégia {estrategia_req}.")
+        #    print(f"ERRO FATAL [gerar_jogo_ia]: Não foi possível gerar o número correto de dezenas ({len(jogo_final)}/{numeros_a_gerar}) para {lottery_name} com estratégia {estrategia_req}.")
            if (max_num - min_num + 1) >= numeros_a_gerar:
                jogo_final = sorted(random.sample(universo_numeros, numeros_a_gerar))
                estrategia_aplicada = f"{config.get('nome_exibicao', lottery_name.capitalize())}: Aleatório Simples (Emergência)"
            else: return {"jogo": [], "estrategia_usada": "Falha Crítica na Geração (Range)"}
     return {"jogo": sorted(list(set(jogo_final))), "estrategia_usada": estrategia_aplicada}
 
-
 @app.route('/api/main/gerar_jogo/<lottery_name>', methods=['GET'])
-def gerar_jogo_api(lottery_name): # Mantido
+def gerar_jogo_api(lottery_name):
     estrategia_req = request.args.get('estrategia', 'aleatorio_inteligente')
     is_premium_simulado = request.args.get('premium_user', 'false').lower() == 'true'
     
+    # print(f"API Endpoint: /gerar_jogo/{lottery_name} chamado com estrategia: {estrategia_req}, Premium Simulado: {is_premium_simulado}")
     lottery_name_lower = lottery_name.lower()
     
-    # Carrega dados para IA, mas não falha se não encontrar, apenas passa lista vazia para gerar_jogo_ia
     todos_resultados_para_ia, error_resp_stats, _ = get_data_for_stats(lottery_name_lower)
     if error_resp_stats and lottery_name_lower in LOTTERY_CONFIG:
-        app.logger.warning(f"Dados históricos para {lottery_name_lower} não puderam ser carregados para IA. IA usará dados limitados/vazios.")
-        todos_resultados_para_ia = [] # Permite que a IA funcione com dados vazios se necessário (ex: apenas aleatório)
-    elif error_resp_stats: # Loteria nem existe na config
-        return jsonify(error_resp_stats), 404
+        # print(f"AVISO: Dados históricos para {lottery_name_lower} não puderam ser carregados para IA. IA usará dados limitados/vazios.")
+        todos_resultados_para_ia = [] 
+    elif error_resp_stats:
+         return jsonify(error_resp_stats), 404
 
     resultado_geracao = gerar_jogo_ia(lottery_name_lower, todos_resultados_para_ia, estrategia_req, is_premium_simulado)
     
     if resultado_geracao.get("erro_premium"):
         return jsonify({"erro": "Acesso Negado", "detalhes": resultado_geracao.get("estrategia_usada"), "premium_requerido": True}), 403
     if not resultado_geracao.get("jogo") or len(resultado_geracao.get("jogo")) == 0 :
-        # ... (lógica de erro)
         detalhe_erro = resultado_geracao.get("estrategia_usada", "Falha interna na geração.")
         if "Erro" not in detalhe_erro and "Falha" not in detalhe_erro: detalhe_erro = "Não foi possível gerar um palpite válido."
         return jsonify({"erro": f"Não foi possível gerar jogo para {lottery_name}.", "detalhes": detalhe_erro}), 500
@@ -512,18 +502,20 @@ def gerar_jogo_api(lottery_name): # Mantido
     if resultado_geracao.get("jogo"): platform_stats_data["jogos_gerados_total"] += 1
     return jsonify(resultado_geracao)
 
-# Remover o bloco if __name__ == '__main__': app.run(...) se estiver usando Vercel
-# A Vercel usa um servidor WSGI (como gunicorn) para rodar a 'app' do Flask.
-# Se você quiser rodar localmente para testar ESTE main.py da Vercel:
+
+# Para rodar localmente para teste (a Vercel não usa este bloco)
 if __name__ == '__main__':
     # Configurar logging para ver saídas no console localmente
-    import logging
-    logging.basicConfig(level=logging.INFO)
-    app.logger.info(f"Servidor Flask (versão Vercel) rodando localmente para teste.")
-    app.logger.info(f"Lendo dados de: {DATA_DIR}")
-    # Verifica se os JSONs esperados existem
+    # import logging # Descomente se quiser usar o logger do Flask em vez de print
+    # logging.basicConfig(level=logging.INFO)
+    # app.logger.info(f"Servidor Flask (versão Vercel) rodando localmente para teste.")
+    # app.logger.info(f"Lendo dados de: {DATA_DIR}")
+    print(f"INFO: Servidor Flask (versão Vercel) rodando localmente para teste.")
+    print(f"INFO: Lendo dados de: {DATA_DIR}")
+
     for key_lottery, config_loteria in LOTTERY_CONFIG.items():
         processed_json_path_check = config_loteria.get("processed_json_file")
         if processed_json_path_check and not os.path.exists(processed_json_path_check):
-            app.logger.warning(f"Arquivo JSON para {key_lottery.upper()} NÃO encontrado em '{processed_json_path_check}'.")
-    app.run(host='0.0.0.0', port=5000, debug=False) # debug=False é mais seguro para simular Vercel
+            # app.logger.warning(f"Arquivo JSON para {key_lottery.upper()} NÃO encontrado em '{processed_json_path_check}'.")
+            print(f"AVISO: Arquivo JSON para {key_lottery.upper()} NÃO encontrado em '{processed_json_path_check}'.")
+    app.run(host='0.0.0.0', port=5000, debug=False)

@@ -2,47 +2,34 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/main.py",
+      "src": "main.py",  
       "use": "@vercel/python",
-      "config": { "maxLambdaSize": "50mb" } 
+      "config": {
+        "maxLambdaSize": "50mb"
+ 
+      }
     },
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "style.css",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "script.js",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "firebase-config.js",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "images/**", 
-      "use": "@vercel/static"
-    }
-
+  
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "style.css", "use": "@vercel/static" },
+    { "src": "script.js", "use": "@vercel/static" },
+    { "src": "firebase-config.js", "use": "@vercel/static" },
+    { "src": "images/**", "use": "@vercel/static" }
   ],
   "routes": [
-
+ 
     {
-      "src": "/api/main/(.*)",
-      "dest": "/api/main.py"
+      "src": "/api/main/(.*)", 
+      "dest": "main.py"       
     },
 
     {
       "src": "/(.*\\.(html|css|js|png|jpg|jpeg|gif|ico|svg|webmanifest|json|map|txt))",
-      "dest": "/$1"
+      "dest": "/$1" 
     },
-  
     { 
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/index.html" 
     }
   ]
 }
