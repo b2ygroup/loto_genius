@@ -45,6 +45,12 @@
         </div>
     </header>
 
+    <div id="main-carousel-banner-container" class="main-carousel-wrapper">
+        <div id="banner-top-dashboard" class="ad-placeholder banner-top-dashboard carousel-ad" role="complementary" aria-label="Banner principal rotativo">
+            <p>Carregando anúncio...</p> 
+        </div>
+    </div>
+
     <main id="app-content" style="display:none;" role="main">
         <section id="dashboard-section" class="main-section active-section" aria-labelledby="dashboard-title">
             <h2 id="dashboard-title" class="visually-hidden">Painel Principal e Geradores</h2>
@@ -60,20 +66,14 @@
 
             <div id="cosmic-promo-banner" class="card promo-banner" style="display:block;">
                 <h3 class="promo-title"><i class="fas fa-meteor"></i> Descubra Seus Números da Sorte Cósmicos! <i class="fas fa-hat-wizard"></i></h3>
-                <p class="promo-text">Use a sabedoria ancestral da numerologia e astrologia para gerar palpites únicos. Nossos algoritmos combinam esses conhecimentos para te ajudar a encontrar a sorte!</p>
-                <p class="promo-cta"><strong>Registre-se ou faça login</strong> para ter acesso exclusivo a esta ferramenta e desvendar os mistérios dos números!</p>
+                <p class="promo-text">Use a sabedoria ancestral da numerologia e astrologia para gerar palpites únicos...</p>
+                <p class="promo-cta"><strong>Registre-se ou faça login</strong> para ter acesso exclusivo...</p>
                 <div class="button-group" style="justify-content: center; margin-top:15px;">
                     <button class="action-btn primary-action" id="promo-register-btn">Quero Me Registrar!</button>
                     <button class="action-btn" id="promo-login-btn">Já Tenho Conta</button>
                 </div>
             </div>
             
-            <div class="ad-placeholder banner-top-dashboard carousel-ad" role="complementary" aria-label="Espaço para anúncio superior">
-                <img src="https://placehold.co/728x90/1a1a2e/47aeff?text=Anuncio+Dinâmico+1&fontsize=16" alt="Anúncio 1" class="carousel-item active">
-                <img src="https://placehold.co/728x90/162447/e0e0e0?text=Anuncio+Dinâmico+2&fontsize=16" alt="Anúncio 2" class="carousel-item">
-                <img src="https://placehold.co/728x90/1f4068/ffffff?text=Anuncio+Dinâmico+3&fontsize=16" alt="Anúncio 3" class="carousel-item">
-            </div>
-
             <div class="grid-container">
                 <div class="card large-card" id="quick-hunch-card" aria-labelledby="quick-hunch-title">
                     <h2 id="quick-hunch-title"><i class="fas fa-bolt" aria-hidden="true"></i> Palpite Aleatório Rápido</h2>
@@ -125,6 +125,7 @@
                         <div id="hot-hunch-check-result" class="check-result-display"></div>
                     </div>
                 </div>
+
                 <div class="card large-card" id="esoteric-hunch-card" style="display:none;" aria-labelledby="esoteric-title">
                     <h2 id="esoteric-title"><i class="fas fa-hat-wizard" aria-hidden="true"></i> Palpites Cósmicos & Numerológicos <span class="premium-tag">(Exclusivo Assinantes)</span></h2>
                     <label for="esoteric-lottery-type">Selecione a Loteria:</label>
@@ -157,7 +158,7 @@
                         <span id="results-lottery-name">Mega-Sena</span> 
                         <button id="fetch-results-btn" class="action-btn small-btn refresh-btn" title="Atualizar Resultados"><i class="fas fa-sync-alt"></i></button>
                     </div>
-                    <pre id="api-results" class="code-block" aria-live="polite">Selecione uma loteria no "Palpite Rápido" e clique em atualizar.</pre>
+                    <pre id="api-results" class="code-block" aria-live="polite">Selecione uma loteria e clique em atualizar.</pre>
                 </div>
                 
                 <div class="card" id="manual-game-probability-card" aria-labelledby="manual-game-prob-title">
@@ -171,7 +172,7 @@
                     </select>
                     <label for="manual-prob-user-numbers">Seus números (separados por vírgula):</label>
                     <textarea id="manual-prob-user-numbers" rows="3" placeholder="Ex: 01,02,03,04,05,06"></textarea>
-                    <p id="manual-prob-numbers-count-feedback" class="input-feedback">Números: 0 de 6.</p>
+                    <p id="manual-prob-numbers-count-feedback" class="input-feedback">Números: 0 de X.</p>
                     <button id="manual-calculate-prob-btn" class="action-btn primary-action"><i class="fas fa-percent"></i> Calcular Probabilidade</button>
                     <div id="manual-probability-result-display" class="result-display-box" style="margin-top:15px;">
                         Aguardando seu jogo...
@@ -207,10 +208,11 @@
                     <div id="city-prize-sum-list-container" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
                 </div>
             </div>
-            <div class="ad-placeholder banner-bottom-dashboard carousel-ad" role="complementary" aria-label="Espaço para anúncio inferior">
-                <img src="https://placehold.co/300x250/1a1a2e/be93f9?text=Palpites+Cósmicos+Te+Aguardam!&fontsize=14" alt="Anúncio Palpites Cósmicos 1" class="carousel-item active">
-                <img src="https://placehold.co/300x250/162447/ffd700?text=Numerologia+Exclusiva+para+Membros!+Registre-se+Já!&fontsize=12" alt="Anúncio Palpites Cósmicos 2" class="carousel-item">
+            
+            <div id="banner-bottom-dashboard" class="ad-placeholder banner-bottom-dashboard carousel-ad" role="complementary" aria-label="Espaço para anúncio inferior">
+                 <p>Carregando anúncio...</p> 
             </div>
+
         </section>
 
         <section id="my-games-section" class="main-section" aria-labelledby="my-games-title">

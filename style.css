@@ -1,4 +1,4 @@
-/* Estilos Globais e Reset Básico (Do seu arquivo da resposta #30) */
+/* Estilos Globais e Reset Básico */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
@@ -25,7 +25,7 @@ body {
 }
 .card-title-accessible i { margin-right: 8px; }
 
-/* --- Splash Screen (Do seu arquivo da resposta #30) --- */
+/* Splash Screen */
 #accessible-splash-screen {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: linear-gradient(145deg, #0d1226 0%, #111834 60%, #0a0d1f 100%);
@@ -49,7 +49,7 @@ body {
 @keyframes fillProgressBar { 0% { width: 0%; } 100% { width: 100%; } }
 @keyframes pulseGradient { 0% { filter: brightness(100%) saturate(100%); } 100% { filter: brightness(130%) saturate(120%); } }
 
-/* Cabeçalho (Do seu código original) */
+/* Cabeçalho */
 header { background: linear-gradient(90deg, #1f4068, #162447); color: #e0e0e0; padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); position: sticky; top: 0; z-index: 1000; }
 .logo-container { display: flex; align-items: center; }
 header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; letter-spacing: 1px; color: #ffffff; text-shadow: 0 0 5px #47aeff; }
@@ -64,8 +64,78 @@ header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; letter-spaci
 #logout-btn { border-color: #ff4765; padding: 0.5rem 0.8rem; }
 #logout-btn:hover { background-color: #ff4765; color: #1a1a2e; box-shadow: 0 0 10px #ff4765; }
 
-/* Conteúdo Principal e Seções (Do seu código original) */
-main { padding: 1.5rem; max-width: 1100px; margin: 20px auto; }
+/* === ESTILOS PARA O BANNER PRINCIPAL NO TOPO (ALTURA AJUSTADA E OBJECT-FIT: CONTAIN) === */
+.main-carousel-wrapper {
+    width: 100%;
+    padding: 0.5rem 0; /* Menor padding vertical */
+    margin-bottom: 1rem; 
+    background-color: #121220; /* Cor de fundo para a área do wrapper se necessário */
+}
+
+#banner-top-dashboard.carousel-ad {
+    max-width: 970px;  /* Largura comum para banners tipo billboard/leaderboard */
+    height: 250px;     /* ALTURA AJUSTADA para se assemelhar a um billboard (ex: 970x250) */
+                       /* Outra opção: 90px para um leaderboard (ex: 728x90 ou 970x90) */
+    margin: 0 auto;    
+    border-radius: 6px; 
+    background-color: #18192a; /* Cor de fundo para espaços vazios se a imagem usar 'contain' */
+    position: relative; 
+    overflow: hidden; 
+    border: 1px solid #303256; /* Borda sutil */
+}
+
+#banner-top-dashboard .carousel-item {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px; 
+    display: flex; /* Para centralizar a imagem quando 'contain' é usado */
+    align-items: center;
+    justify-content: center;
+}
+
+#banner-top-dashboard .carousel-item img {
+    display: block; 
+    max-width: 100%;  /* Garante que a imagem não ultrapasse a largura do item */
+    max-height: 100%; /* Garante que a imagem não ultrapasse a altura do item */
+    object-fit: contain; /* <<< IMAGEM IRÁ CABER DENTRO, MANTENDO PROPORÇÃO, PODENDO DEIXAR ESPAÇOS >>> */
+    object-position: center center; 
+    border-radius: 6px; /* Se a imagem em si precisar de borda arredondada */
+}
+
+/* Responsividade para o banner do topo */
+@media (max-width: 991px) { /* Ajuste para telas um pouco menores que 970px */
+    #banner-top-dashboard.carousel-ad {
+        max-width: 100%; /* Ocupar toda a largura */
+        height: 180px;   /* Altura proporcionalmente menor, ou um valor fixo que funcione bem */
+        border-radius: 0;
+    }
+    #banner-top-dashboard .carousel-item,
+    #banner-top-dashboard .carousel-item img {
+        border-radius: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-carousel-wrapper {
+        padding: 0.25rem 0;
+        margin-bottom: 0.5rem;
+    }
+    #banner-top-dashboard.carousel-ad {
+        height: 150px; 
+    }
+}
+
+@media (max-width: 480px) {
+    #banner-top-dashboard.carousel-ad {
+        height: 120px; 
+    }
+}
+/* === FIM DOS ESTILOS DO BANNER PRINCIPAL === */
+
+/* Conteúdo Principal e Seções */
+main { padding: 1.5rem; max-width: 1100px; margin: 0 auto 20px auto; }
+/* ... (restante dos seus estilos como na versão anterior) ... */
+
 .main-section { display: none; }
 .main-section.active-section { display: block; animation: fadeIn 0.5s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -80,23 +150,21 @@ h2 i, h3 i { margin-right: 8px; }
 h4 { font-family: 'Orbitron', sans-serif; color: #a2d2ff; margin-top: 1rem; margin-bottom: 0.5rem; }
 h4 i { margin-right: 5px; }
 
-/* Estilos para Selects, Inputs e Labels nos Cards (ATUALIZADOS/GENERALIZADOS) */
 .card label { 
     display: block; margin-top: 0.8rem; margin-bottom: 0.2rem; font-size: 0.9rem;
     color: #a2d2ff; font-weight: 500;
 }
 .card h2 + label, .card h3 + label { margin-top: 0; } 
-.card select, .card input[type="text"], .card textarea {
+.card select, .card input[type="text"], .card input[type="number"], .card textarea {
     width: 100%; padding: 0.7rem; margin-bottom: 1rem; border-radius: 6px;
     border: 1px solid #3b3b6e; background-color: #2a2a50; color: #e0e0e0;
     font-size: 0.95rem; font-family: 'Roboto', sans-serif; 
 }
-.card select:focus, .card input[type="text"]:focus, .card textarea:focus {
+.card select:focus, .card input[type="text"]:focus, .card input[type="number"]:focus, .card textarea:focus {
     outline: none; border-color: #47aeff; box-shadow: 0 0 6px rgba(71, 174, 255, 0.4);
 }
 .card textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 
-/* Botões (Do seu código original, com pequenos ajustes) */
 .action-btn { padding: 0.7rem 1rem; margin-right: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; font-size: 0.95rem; cursor: pointer; border: 1px solid #3b3b6e; background-color: #2a2a50; color: #e0e0e0; transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; font-family: 'Roboto', sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; }
 .action-btn.primary-action { background-color: #47aeff; color: #1a1a2e; font-weight: bold; }
 .action-btn.primary-action:hover { background-color: #3aa0f0; box-shadow: 0 0 10px rgba(71, 174, 255, 0.6); }
@@ -107,7 +175,6 @@ h4 i { margin-right: 5px; }
 .button-group { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1rem; }
 .button-group .action-btn { width: auto; margin-right: 0; }
 
-/* --- Resto do seu style.css original (Resultados, Game Card, Destaques, etc.) --- */
 .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
 #results-lottery-name { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: #a2d2ff; }
 .code-block { background-color: #121224; padding: 0.8rem; border-radius: 6px; white-space: pre-wrap; word-wrap: break-word; border: 1px solid #2a2a50; min-height: 50px; font-family: 'Courier New', Courier, monospace; color: #a2d2ff; font-size: 0.85rem; box-shadow: inset 0 0 8px rgba(0,0,0,0.2); max-height: 200px; overflow-y: auto; }
@@ -129,12 +196,84 @@ h4 i { margin-right: 5px; }
 .highlight-item i { font-size: 2.2rem; color: #47aeff; margin-bottom: 0.6rem; display: block; }
 .highlight-item span.stat-number { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; color: #ffffff; display: block; margin-bottom: 0.3rem; font-weight: 700; transition: all 0.5s ease-in-out; }
 .highlight-item p { font-size: 0.85rem; color: #c5c6c7; }
-.ad-placeholder { background-color: #2a2a50; border: 2px dashed #3b3b6e; color: #5c5c8a; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 8px; margin: 1.5rem auto; font-size: 0.9rem; position: relative; overflow: hidden; }
-.banner-top-dashboard { min-height: 90px; max-width: 728px; height: 90px; }
-.banner-bottom-dashboard { min-height: 250px; max-width: 300px; margin-top: 2rem; height: 250px; }
-.carousel-ad img.carousel-item { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; visibility: hidden; transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out; border-radius: 6px; }
-.carousel-ad img.carousel-item.active { opacity: 1; visibility: visible; z-index: 1; }
-.carousel-ad p { display: none; } .carousel-ad:not(:has(img.carousel-item.active)) p { display: block; }
+
+/* ESTILOS GERAIS PARA CAROUSEL-AD */
+.carousel-ad { 
+    position: relative; 
+    overflow: hidden;   
+    /* background-color e border removidos daqui para serem específicos por ID se necessário */
+    border-radius: 8px; /* Raio padrão para todos os carrosséis */
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+}
+.carousel-ad .carousel-item { 
+    display: block; 
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
+    border-radius: inherit; 
+    /* Para centralizar a imagem se o item for um div wrapper */
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+}
+.carousel-ad .carousel-item.active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 1; 
+}
+.carousel-ad .carousel-item img { 
+    display: block; 
+    max-width: 100%; /* Garante que a imagem não seja maior que seu contêiner (item) */
+    max-height: 100%;/* Garante que a imagem não seja maior que seu contêiner (item) */
+    /* object-fit é definido por ID específico agora (#banner-top-dashboard) */
+    border-radius: inherit; 
+}
+.carousel-ad a.carousel-item { 
+    cursor: pointer;
+}
+.carousel-ad:empty::before { 
+    content: "Espaço Publicitário"; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #8a9ac4; 
+    font-size: 1rem;
+    background-color: #2a2a50; /* Fundo para o placeholder */
+    border: 2px dashed #3b3b6e; /* Borda para o placeholder */
+    border-radius: inherit;
+}
+.carousel-ad > p { 
+    color: #8a9ac4;
+    font-size: 1rem;
+    text-align: center;
+}
+.carousel-ad:not(:empty) > p { 
+    display: none;
+}
+
+.ad-placeholder.banner-bottom-dashboard { 
+    min-height: 250px; 
+    max-width: 300px; 
+    height: 250px; 
+    margin: 1.5rem auto;
+    background-color: #2a2a50; /* Fundo se as imagens não cobrirem ou para o placeholder */
+    border: 2px dashed #3b3b6e; /* Borda do placeholder */
+}
+/* Garante que imagens no banner inferior também se ajustem bem */
+#banner-bottom-dashboard .carousel-item img {
+    object-fit: contain; /* Ou cover, dependendo do que você quer para este banner */
+}
+
+
 #winning-pools-preview ul, #top-winners-preview ol { list-style-type: none; padding-left: 0; max-height: 250px; overflow-y: auto; }
 #winning-pools-preview li, #top-winners-preview li { background-color: #2a2a50; padding: 0.8rem 1rem; margin-bottom: 0.5rem; border-radius: 6px; border-left: 4px solid #47aeff; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
 #top-winners-preview li .winner-prize { font-weight: bold; color: #2ecc71; }
@@ -172,8 +311,38 @@ h4 i { margin-right: 5px; }
 .modal-btn:hover { background-color: #3aa0f0; box-shadow: 0 0 12px rgba(71, 174, 255, 0.7); }
 .error-message { color: #ff4765; font-size: 0.9rem; margin-top: 10px; text-align: center; min-height: 1.2em; } 
 footer { text-align: center; padding: 2rem; background-color: #121224; color: #888; margin-top: 3rem; font-size: 0.9rem; }
-@media (max-width: 768px) { header { padding: 0.8rem 1rem; flex-direction: column; align-items: center; } .logo-container { margin-bottom: 0.8rem; } #main-nav { width: 100%; justify-content: space-around; margin-bottom: 0.8rem; } .nav-item .nav-text { display: none; } .nav-item i { font-size: 1.2rem; } #auth-section { width: 100%; display: flex; justify-content: center; gap: 0.5rem; } header h1 { font-size: 1.5rem; } main { padding: 1rem; } .card { padding: 1rem 1.2rem; } .grid-container, .grid-container-side { grid-template-columns: 1fr; } .card.large-card { grid-column: span 1; } .button-group { flex-direction: column; } .button-group .action-btn { width: 100%; margin-right: 0; } .modal-content { width: 95%; padding: 20px; } .highlights-grid { grid-template-columns: 1fr; } .splash-logo-tech { font-size: 2.8rem; margin-bottom: 20px; } .splash-main-title { font-size: 1.8rem; } .splash-subtitle-message { font-size: 0.9rem; margin-bottom: 25px; } .progress-bar-container { width: 200px; } .frequency-item, .pair-frequency-item, .city-stats-item, .city-prize-item { flex-wrap: wrap; } .frequency-item .freq-bar-bg, .pair-frequency-item .freq-bar-bg { margin: 5px 0; width: 100%; order: 3; } .frequency-item .freq-count, .pair-frequency-item .freq-count, .city-stats-item .city-prize-count, .city-prize-item .city-prize-amount { order: 2; margin-left: auto; padding-left: 5px;} .frequency-item .num, .pair-frequency-item .pair-nums, .city-stats-item .city-name, .city-prize-item .city-name { order: 1; margin-right: 5px; } .pair-frequency-item .pair-nums { margin-bottom: 5px; } }
-@media (max-width: 480px) { header h1 { font-size: 1.3rem; } h2 { font-size: 1.3rem; } h3 { font-size: 1.1rem; } .splash-logo-tech { font-size: 2.2rem; } .splash-main-title { font-size: 1.5rem; } .splash-subtitle-message { font-size: 0.8rem; } .progress-bar-container { width: 180px; } }
+@media (max-width: 768px) { 
+    header { padding: 0.8rem 1rem; flex-direction: column; align-items: center; } 
+    .logo-container { margin-bottom: 0.8rem; } 
+    #main-nav { width: 100%; justify-content: space-around; margin-bottom: 0.8rem; } 
+    .nav-item .nav-text { display: none; } .nav-item i { font-size: 1.2rem; } 
+    #auth-section { width: 100%; display: flex; justify-content: center; gap: 0.5rem; } 
+    header h1 { font-size: 1.5rem; } main { padding: 1rem; } 
+    .card { padding: 1rem 1.2rem; } 
+    .grid-container, .grid-container-side { grid-template-columns: 1fr; } 
+    .card.large-card { grid-column: span 1; } 
+    .button-group { flex-direction: column; } 
+    .button-group .action-btn { width: 100%; margin-right: 0; } 
+    .modal-content { width: 95%; padding: 20px; } 
+    .highlights-grid { grid-template-columns: 1fr; } 
+    .splash-logo-tech { font-size: 2.8rem; margin-bottom: 20px; } 
+    .splash-main-title { font-size: 1.8rem; } 
+    .splash-subtitle-message { font-size: 0.9rem; margin-bottom: 25px; } 
+    .progress-bar-container { width: 200px; } 
+    .frequency-item, .pair-frequency-item, .city-stats-item, .city-prize-item { flex-wrap: wrap; } 
+    .frequency-item .freq-bar-bg, .pair-frequency-item .freq-bar-bg { margin: 5px 0; width: 100%; order: 3; } 
+    .frequency-item .freq-count, .pair-frequency-item .freq-count, .city-stats-item .city-prize-count, .city-prize-item .city-prize-amount { order: 2; margin-left: auto; padding-left: 5px;} 
+    .frequency-item .num, .pair-frequency-item .pair-nums, .city-stats-item .city-name, .city-prize-item .city-name { order: 1; margin-right: 5px; } 
+    .pair-frequency-item .pair-nums { margin-bottom: 5px; } 
+}
+@media (max-width: 480px) { 
+    header h1 { font-size: 1.3rem; } 
+    h2 { font-size: 1.3rem; } h3 { font-size: 1.1rem; } 
+    .splash-logo-tech { font-size: 2.2rem; } 
+    .splash-main-title { font-size: 1.5rem; } 
+    .splash-subtitle-message { font-size: 0.8rem; } 
+    .progress-bar-container { width: 180px; } 
+}
 #global-error-msg { display: none; background-color: #ff4765; color: white; text-align: center; padding: 10px; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100000; font-size: 0.9rem; }
 .spinner.small-spinner { width: 25px; height: 25px; border-width: 3px; margin: 5px auto; border-top-color: #47aeff; border-radius: 50%; border-style: solid; border-color: rgba(173, 216, 230, 0.3); border-top-color: #47aeff; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -181,7 +350,6 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
 .confetti { position: absolute; top: -20px; width: 10px; height: 20px; background-color: #f00; opacity: 0.7; animation: fall linear forwards; }
 @keyframes fall { 0% { transform: translateY(0vh) rotateZ(0deg); } 100% { transform: translateY(105vh) rotateZ(720deg); } }
 
-/* === NOVOS ESTILOS para Banner Promocional e Cards Refatorados === */
 .promo-banner {
     background: linear-gradient(135deg, #2a2a50, #1f4068);
     border: 1px solid #47aeff; text-align: center; padding: 1.5rem;
@@ -210,7 +378,8 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     text-align: center; font-family: 'Orbitron', sans-serif; letter-spacing: 1px;
 }
 #quick-hunch-output.game-card, 
-#esoteric-hunch-output.game-card {
+#esoteric-hunch-output.game-card,
+#hot-numbers-hunch-output.game-card { 
     margin-top: 1.5rem;
     background-color: #1c1c36e0; 
     border-left: 4px solid #4dd0e1;
@@ -218,12 +387,17 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
 #esoteric-hunch-output.game-card {
     border-left-color: #be93f9;
 }
+#hot-numbers-hunch-output.game-card { 
+    border-left-color: #ff8c00; 
+}
 #quick-hunch-output h4 .fa-lightbulb, 
-#esoteric-hunch-output h4 .fa-wand-sparkles {
+#esoteric-hunch-output h4 .fa-wand-sparkles,
+#hot-numbers-hunch-output h4 .fa-temperature-high { 
     color: #4dd0e1;
 }
 #esoteric-hunch-output h4 .fa-wand-sparkles { color: #be93f9; }
+#hot-numbers-hunch-output h4 .fa-temperature-high { color: #ff8c00; } 
+
 #esoteric-hunch-history-check {
     border-top: 1px dashed #3b3b6e; padding-top: 0.8rem; margin-top: 1rem;
 }
-/* --- FIM DOS NOVOS ESTILOS --- */

@@ -1,6 +1,6 @@
-// script.js (Completo com Números Quentes e adaptações para salvar/conferir)
+// script.js (Completo e Atualizado)
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver com Números Quentes");
+    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver com Banners Dinâmicos no Topo e altura ajustada");
     const domContentLoadedTimestamp = Date.now();
 
     // --- Constantes de Tempo da Splash Screen ---
@@ -26,11 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (accessibleSplashScreen) {
         splashProgressBarFill = accessibleSplashScreen.querySelector('.progress-bar-fill');
         splashProgressContainer = accessibleSplashScreen.querySelector('.progress-bar-container');
-        console.log("SCRIPT.JS: Elementos da splash screen principais encontrados.");
-    } else {
-        console.warn("SCRIPT.JS: Elemento 'accessible-splash-screen' NÃO encontrado.");
     }
-
     const appContent = document.getElementById('app-content');
     const currentYearSpan = document.getElementById('current-year');
     const navDashboardBtn = document.getElementById('nav-dashboard-btn');
@@ -47,8 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const recentPoolsList = document.getElementById('recent-pools-list');
     const topWinnersList = document.getElementById('top-winners-list');
     const confettiCanvas = document.getElementById('confetti-canvas');
-
-    // Seletores Palpite Aleatório Rápido
     const quickHunchLotteryTypeSelect = document.getElementById('quick-hunch-lottery-type');
     const generateQuickHunchBtn = document.getElementById('generate-quick-hunch-btn');
     const quickHunchOutputDiv = document.getElementById('quick-hunch-output');
@@ -57,8 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveQuickHunchBtn = document.getElementById('save-quick-hunch-btn');
     const checkQuickHunchBtn = document.getElementById('check-quick-hunch-btn');
     const quickHunchCheckResultDiv = document.getElementById('quick-hunch-check-result');
-
-    // ++ NOVOS SELETORES PARA PALPITE NÚMEROS QUENTES ++
     const hotNumbersLotteryTypeSelect = document.getElementById('hot-numbers-lottery-type');
     const hotNumbersAnalyzeCountInput = document.getElementById('hot-numbers-analyze-count');
     const generateHotNumbersHunchBtn = document.getElementById('generate-hot-numbers-hunch-btn');
@@ -68,9 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveHotHunchBtn = document.getElementById('save-hot-hunch-btn');
     const checkHotHunchBtn = document.getElementById('check-hot-hunch-btn');
     const hotHunchCheckResultDiv = document.getElementById('hot-hunch-check-result');
-    // ++ FIM DOS NOVOS SELETORES ++
-
-    // Seletores Palpites Cósmicos
     const esotericLotteryTypeSelect = document.getElementById('esoteric-lottery-type');
     const birthDateInput = document.getElementById('birth-date-input');
     const generateEsotericHunchBtn = document.getElementById('generate-esoteric-hunch-btn');
@@ -81,18 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const esotericHunchHistoryCheckDiv = document.getElementById('esoteric-hunch-history-check');
     const saveEsotericHunchBtn = document.getElementById('save-esoteric-hunch-btn');
     const checkEsotericHunchBtn = document.getElementById('check-esoteric-hunch-btn');
-
-    // Seletores Banner Promocional
     const cosmicPromoBanner = document.getElementById('cosmic-promo-banner');
     const promoRegisterBtn = document.getElementById('promo-register-btn');
     const promoLoginBtn = document.getElementById('promo-login-btn');
-
-    // Seletores para Resultados e Estatísticas
     const mainDisplayLotterySelect = quickHunchLotteryTypeSelect;
     const apiResultsPre = document.getElementById('api-results');
     const resultsLotteryNameSpan = document.getElementById('results-lottery-name');
     const fetchResultsBtn = document.getElementById('fetch-results-btn');
-
     const savedGamesContainer = document.getElementById('saved-games-container');
     const noSavedGamesP = document.getElementById('no-saved-games');
     const filterLotteryMyGamesSelect = document.getElementById('filter-lottery-mygames');
@@ -115,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerSubmitBtn = document.getElementById('register-submit-btn');
     const registerErrorP = document.getElementById('register-error');
     const errorDiv = document.getElementById('global-error-msg');
-
     const freqStatsLotteryNameSpan = document.getElementById('freq-stats-lottery-name');
     const frequencyListContainer = document.getElementById('frequency-list-container');
     const pairFreqStatsLotteryNameSpan = document.getElementById('pair-freq-stats-lottery-name');
@@ -139,34 +122,42 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         BACKEND_URL_BASE = '';
     }
-
     let firebaseApp, firebaseAuth, firestoreDB, currentUser = null;
     let lastFetchedResults = {};
-    let lastGeneratedHunch = {
-        type: null, // 'quick', 'esoteric', 'hot'
-        lottery: null,
-        jogo: [],
-        estrategia_metodo: '',
-        outputDiv: null,
-        numbersDiv: null,
-        checkResultDiv: null,
-        saveButton: null,
-        checkButton: null
-    };
+    let lastGeneratedHunch = { type: null, lottery: null, jogo: [], estrategia_metodo: '', outputDiv: null, numbersDiv: null, checkResultDiv: null, saveButton: null, checkButton: null };
     let criticalSplashTimeout;
     let firebaseInitAttempts = 0;
     const maxFirebaseInitAttempts = 10;
-    const LOTTERY_CONFIG_JS = {
-        megasena: { count: 6, color: "#209869", name: "Mega-Sena" },
-        lotofacil: { count: 15, color: "#930089", name: "Lotofácil" },
-        quina: { count: 5, color: "#260085", name: "Quina" },
-        lotomania: { count_sorteadas: 20, count_apostadas: 50, color: "#f78100", name: "Lotomania" }
+    const LOTTERY_CONFIG_JS = { megasena: { count: 6, color: "#209869", name: "Mega-Sena" }, lotofacil: { count: 15, color: "#930089", name: "Lotofácil" }, quina: { count: 5, color: "#260085", name: "Quina" }, lotomania: { count_sorteadas: 20, count_apostadas: 50, color: "#f78100", name: "Lotomania" } };
+
+    const bannerConfigurations = {
+        'banner-top-dashboard': [
+            {
+                imageUrl: 'images/banner1.png', // **SUBSTITUA PELO CAMINHO CORRETO DA SUA IMAGEM**
+                altText: 'Tammy\'s Store - Comprar agora!',
+                linkUrl: 'https://www.instagram.com/tammysstore_/', // **SUBSTITUA PELO LINK REAL**
+                isExternal: true
+            },
+            {
+                imageUrl: 'images/teste.png',
+                altText: 'LotoGenius - A Sorte Inteligente',
+            },
+            {
+                imageUrl: 'images/teste1.png',
+                altText: 'Recursos Premium LotoGenius',
+                linkUrl: '#esoteric-hunch-card', 
+                isExternal: false
+            }
+        ],
+        'banner-bottom-dashboard': [
+            { imageUrl: 'images/dream.jpg', altText: 'Anúncio Parceiro 1', linkUrl: 'https://www.parceiro1.com', isExternal: true },
+            { imageUrl: 'https://placehold.co/300x250/162447/ffd700?text=Anúncio+Visual+Lateral&fontsize=12', altText: 'Anúncio Visual Lateral' }
+        ]
     };
 
     // ================================================================================================
-    // === INÍCIO DAS DEFINIÇÕES DE FUNÇÕES ===
+    // === DEFINIÇÕES DE FUNÇÕES ===
     // ================================================================================================
-
     function showGlobalError(message) { if (errorDiv) { errorDiv.textContent = message; errorDiv.style.display = 'block'; } else { console.error("SCRIPT.JS: Global error div não encontrado:", message); } }
     function disableFirebaseFeatures() { if (loginModalBtn) loginModalBtn.disabled = true; if (registerModalBtn) registerModalBtn.disabled = true; }
     function enableFirebaseFeatures() { if (loginModalBtn) loginModalBtn.disabled = false; if (registerModalBtn) registerModalBtn.disabled = false; if(document.getElementById('global-error-msg')) document.getElementById('global-error-msg').style.display = 'none';}
@@ -174,11 +165,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchData(endpoint, options = {}) {
         const url = `${BACKEND_URL_BASE}/${endpoint}`;
-        console.log(`SCRIPT.JS: Iniciando fetchData para ${options.method || 'GET'} ${url}`, options.body ? (typeof options.body === 'string' ? JSON.parse(options.body) : options.body) : 'sem body');
+        // console.log(`SCRIPT.JS: Iniciando fetchData para ${options.method || 'GET'} ${url}`, options.body ? (typeof options.body === 'string' ? JSON.parse(options.body) : options.body) : 'sem body');
         try {
             const response = await fetch(url, options);
             const responseText = await response.text();
-            console.log(`SCRIPT.JS: Resposta recebida de ${url} - Status: ${response.status}`);
+            // console.log(`SCRIPT.JS: Resposta recebida de ${url} - Status: ${response.status}`);
 
             if (!response.ok) {
                 let errorJson = {};
@@ -225,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchPlatformStats() {
-        console.log("SCRIPT.JS: fetchPlatformStats chamado");
+        // console.log("SCRIPT.JS: fetchPlatformStats chamado");
         if (!statsJogosGeradosSpan || !statsJogosPremiadosSpan || !statsValorPremiosSpan) {
             console.warn("SCRIPT.JS: Elementos de stats da plataforma não encontrados.");
             if(statsJogosGeradosSpan) statsJogosGeradosSpan.textContent = "N/A";
@@ -235,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         try {
             const stats = await fetchData('api/main/platform-stats');
-            console.log("SCRIPT.JS: Stats da plataforma recebidos:", stats);
+            // console.log("SCRIPT.JS: Stats da plataforma recebidos:", stats);
             if (stats && typeof stats.jogos_gerados_total === 'number') { animateCounter(statsJogosGeradosSpan, stats.jogos_gerados_total); }
             else { statsJogosGeradosSpan.textContent = "N/A"; }
             if (stats && typeof stats.jogos_premiados_estimativa === 'number') { animateCounter(statsJogosPremiadosSpan, stats.jogos_premiados_estimativa); }
@@ -249,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchRecentWinningPools() {
-        console.log("SCRIPT.JS: fetchRecentWinningPools chamado");
+        // console.log("SCRIPT.JS: fetchRecentWinningPools chamado");
         if (!recentPoolsList) { console.warn("SCRIPT.JS: recentPoolsList não encontrado."); return; }
         recentPoolsList.innerHTML = '<li><div class="spinner small-spinner"></div> Carregando...</li>';
         try {
@@ -261,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchTopWinners() {
-        console.log("SCRIPT.JS: fetchTopWinners chamado");
+        // console.log("SCRIPT.JS: fetchTopWinners chamado");
         if (!topWinnersList) { console.warn("SCRIPT.JS: topWinnersList não encontrado."); return; }
         topWinnersList.innerHTML = '<li><div class="spinner small-spinner"></div> Carregando...</li>';
         try {
@@ -273,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchAndDisplayStatsGeneric(lotteryName, statType, container, nameSpanInCard, endpointPrefix) {
-        console.log(`SCRIPT.JS: fetchAndDisplayStatsGeneric para ${statType} de ${lotteryName}`);
+        // console.log(`SCRIPT.JS: fetchAndDisplayStatsGeneric para ${statType} de ${lotteryName}`);
         if (!container || !nameSpanInCard || !mainDisplayLotterySelect) {
             console.warn(`SCRIPT.JS: Elementos faltando para fetchAndDisplayStatsGeneric (${statType}, ${lotteryName})`);
             if(container) container.innerHTML = '<p class="error-message">Erro interno (elementos DOM não encontrados).</p>';
@@ -337,144 +328,154 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(`SCRIPT.JS: Erro em fetchAndDisplayStatsGeneric para ${statType} de ${lotteryName}:`, error);
         }
     }
-    async function fetchAndDisplayFrequencyStats(lotteryName) { if(frequencyListContainer && freqStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Frequência", frequencyListContainer, freqStatsLotteryNameSpan, "frequencia"); else console.warn("Elementos de Frequência não encontrados");}
-    async function fetchAndDisplayPairFrequencyStats(lotteryName) { if(pairFrequencyListContainer && pairFreqStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Pares Frequentes", pairFrequencyListContainer, pairFreqStatsLotteryNameSpan, "pares-frequentes"); else console.warn("Elementos de Pares Frequentes não encontrados"); }
-    async function fetchAndDisplayCityStats(lotteryName) { if(cityListContainer && cityStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Cidades Premiadas", cityListContainer, cityStatsLotteryNameSpan, "cidades-premiadas"); else console.warn("Elementos de Cidades Premiadas não encontrados"); }
-    async function fetchAndDisplayCityPrizeSumStats(lotteryName) { if(cityPrizeSumListContainer && cityPrizeSumLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Prêmios por Cidade", cityPrizeSumListContainer, cityPrizeSumLotteryNameSpan, "maiores-premios-cidade"); else console.warn("Elementos de Prêmios por Cidade não encontrados");}
+    async function fetchAndDisplayFrequencyStats(lotteryName) { if(frequencyListContainer && freqStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Frequência", frequencyListContainer, freqStatsLotteryNameSpan, "frequencia"); }
+    async function fetchAndDisplayPairFrequencyStats(lotteryName) { if(pairFrequencyListContainer && pairFreqStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Pares Frequentes", pairFrequencyListContainer, pairFreqStatsLotteryNameSpan, "pares-frequentes"); }
+    async function fetchAndDisplayCityStats(lotteryName) { if(cityListContainer && cityStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Cidades Premiadas", cityListContainer, cityStatsLotteryNameSpan, "cidades-premiadas"); }
+    async function fetchAndDisplayCityPrizeSumStats(lotteryName) { if(cityPrizeSumListContainer && cityPrizeSumLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Prêmios por Cidade", cityPrizeSumListContainer, cityPrizeSumLotteryNameSpan, "maiores-premios-cidade");}
 
-    function initializeCarousels() { /* Sua implementação original */ }
     function openModal(modalElement) { if (modalElement) { modalElement.style.display = 'flex'; document.body.style.overflow = 'hidden'; } else {console.warn("openModal: modalElement não encontrado")} }
     function closeModal(modalElement) { if (modalElement) { modalElement.style.display = 'none'; document.body.style.overflow = ''; if (modalElement === loginModal && loginEmailInput && loginPasswordInput && loginErrorP) { loginEmailInput.value = ''; loginPasswordInput.value = ''; loginErrorP.textContent = ''; } else if (modalElement === registerModal && registerEmailInput && registerPasswordInput && registerConfirmPasswordInput && registerErrorP) { registerEmailInput.value = ''; registerPasswordInput.value = ''; registerConfirmPasswordInput.value = ''; registerErrorP.textContent = ''; } }  else {console.warn("closeModal: modalElement não encontrado")} }
 
+    function renderBanners() {
+        console.log("SCRIPT.JS: renderBanners chamado");
+        for (const containerId in bannerConfigurations) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = ''; 
+                const banners = bannerConfigurations[containerId];
+                banners.forEach((bannerData, index) => {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = bannerData.imageUrl;
+                    imgElement.alt = bannerData.altText;
+                    let bannerItemWrapper;
+                    if (bannerData.linkUrl) {
+                        const linkElement = document.createElement('a');
+                        linkElement.href = bannerData.linkUrl;
+                        if (bannerData.isExternal) {
+                            linkElement.target = '_blank';
+                            linkElement.rel = 'noopener noreferrer';
+                        }
+                        linkElement.appendChild(imgElement);
+                        bannerItemWrapper = linkElement;
+                    } else {
+                        const divWrapper = document.createElement('div');
+                        divWrapper.appendChild(imgElement);
+                        bannerItemWrapper = divWrapper;
+                    }
+                    bannerItemWrapper.classList.add('carousel-item');
+                    if (index === 0) { bannerItemWrapper.classList.add('active'); }
+                    container.appendChild(bannerItemWrapper);
+                });
+            } else {
+                console.warn(`SCRIPT.JS: Contêiner de banner não encontrado: #${containerId}`);
+            }
+        }
+    }
+
+    function initializeCarousels() {
+        console.log("SCRIPT.JS: initializeCarousels chamado");
+        const carousels = document.querySelectorAll('.carousel-ad');
+        carousels.forEach(carousel => {
+            const items = carousel.querySelectorAll('.carousel-item');
+            if (items.length <= 1) {
+                if (items.length === 1 && !items[0].classList.contains('active')) {
+                     items[0].classList.add('active');
+                }
+                const noBannerP = carousel.querySelector('p');
+                if(noBannerP && items.length > 0) noBannerP.style.display = 'none';
+                return; 
+            }
+            
+            let currentIndex = 0;
+            items.forEach((item, index) => {
+                if (index === currentIndex) item.classList.add('active');
+                else item.classList.remove('active');
+            });
+
+            const intervalTime = parseInt(carousel.dataset.interval, 10) || 7000; 
+
+            setInterval(() => {
+                if(items[currentIndex]) items[currentIndex].classList.remove('active');
+                currentIndex = (currentIndex + 1) % items.length;
+                if(items[currentIndex]) items[currentIndex].classList.add('active');
+            }, intervalTime);
+        });
+    }
+    
     function setupAuthEventListeners() {
         console.log("SCRIPT.JS: Setting up auth event listeners.");
-        if(loginSubmitBtn) {
+        if(loginSubmitBtn && loginEmailInput && loginPasswordInput && loginErrorP) {
             loginSubmitBtn.addEventListener('click', () => {
-                if (!firebaseAuth) {
-                    console.error("SCRIPT.JS: firebaseAuth não está pronto para login.");
-                    if(loginErrorP) loginErrorP.textContent = "Erro de inicialização. Tente novamente.";
-                    return;
-                }
-                if (!loginEmailInput || !loginPasswordInput || !loginErrorP) return;
+                if (!firebaseAuth) { console.error("SCRIPT.JS: firebaseAuth não está pronto para login."); if(loginErrorP) loginErrorP.textContent = "Erro de inicialização."; return; }
                 const email = loginEmailInput.value; const password = loginPasswordInput.value;
                 loginErrorP.textContent = ""; if (!email || !password) { loginErrorP.textContent = "Preencha email e senha."; return; }
-
                 console.log("SCRIPT.JS: Login button clicked, attempting signInWithEmailAndPassword...");
                 firebaseAuth.signInWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        console.log("SCRIPT.JS: Login successful for:", userCredential.user.email);
-                        if(typeof closeModal === "function") closeModal(loginModal);
-                    })
-                    .catch((error) => {
-                        console.error("SCRIPT.JS: Login error:", error);
-                        loginErrorP.textContent = `Erro: ${error.message}`;
-                    });
+                    .then((userCredential) => { console.log("SCRIPT.JS: Login successful for:", userCredential.user.email); if(typeof closeModal === "function") closeModal(loginModal); })
+                    .catch((error) => { console.error("SCRIPT.JS: Login error:", error); loginErrorP.textContent = `Erro: ${error.message}`; });
             });
-        } else {
-            console.warn("SCRIPT.JS: loginSubmitBtn não encontrado para adicionar listener.");
-        }
+        } else { console.warn("SCRIPT.JS: Elementos do modal de login não encontrados."); }
 
-        if(registerSubmitBtn) {
+        if(registerSubmitBtn && registerEmailInput && registerPasswordInput && registerConfirmPasswordInput && registerErrorP) {
             registerSubmitBtn.addEventListener('click', () => {
-                if (!firebaseAuth) {
-                    console.error("SCRIPT.JS: firebaseAuth não está pronto para registro.");
-                    if(registerErrorP) registerErrorP.textContent = "Erro de inicialização. Tente novamente.";
-                    return;
-                }
-                if (!registerEmailInput || !registerPasswordInput || !registerConfirmPasswordInput || !registerErrorP) return;
+                if (!firebaseAuth) { console.error("SCRIPT.JS: firebaseAuth não está pronto para registro."); if(registerErrorP) registerErrorP.textContent = "Erro de inicialização."; return; }
                 const email = registerEmailInput.value; const password = registerPasswordInput.value; const confirmPassword = registerConfirmPasswordInput.value;
                 registerErrorP.textContent = ""; if (!email || !password || !confirmPassword) { registerErrorP.textContent = "Preencha todos os campos."; return; }
                 if (password !== confirmPassword) { registerErrorP.textContent = "As senhas não coincidem."; return; }
                 if (password.length < 6) { registerErrorP.textContent = "A senha deve ter no mínimo 6 caracteres."; return; }
-
                 console.log("SCRIPT.JS: Register button clicked, attempting createUserWithEmailAndPassword...");
                 firebaseAuth.createUserWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        console.log("SCRIPT.JS: Registration successful for:", userCredential.user.email);
-                        alert("Usuário registrado! Você já está logado.");
-                        if(typeof closeModal === "function") closeModal(registerModal);
-                    })
-                    .catch((error) => {
-                        console.error("SCRIPT.JS: Registration error:", error);
-                        registerErrorP.textContent = `Erro: ${error.message}`;
-                    });
+                    .then((userCredential) => { console.log("SCRIPT.JS: Registration successful for:", userCredential.user.email); alert("Usuário registrado! Você já está logado."); if(typeof closeModal === "function") closeModal(registerModal); })
+                    .catch((error) => { console.error("SCRIPT.JS: Registration error:", error); registerErrorP.textContent = `Erro: ${error.message}`; });
             });
-        } else {
-            console.warn("SCRIPT.JS: registerSubmitBtn não encontrado para adicionar listener.");
-        }
+        } else { console.warn("SCRIPT.JS: Elementos do modal de registro não encontrados."); }
 
         if(logoutBtn) {
             logoutBtn.addEventListener('click', () => {
                 if (firebaseAuth && currentUser) {
                     console.log("SCRIPT.JS: Logout button clicked, attempting signOut for user:", currentUser.email);
                     firebaseAuth.signOut()
-                        .then(() => {
-                            console.log("SCRIPT.JS: Firebase signOut successful. User logged out.");
-                        })
-                        .catch((error) => {
-                            console.error("SCRIPT.JS: Firebase signOut error:", error);
-                            alert(`Erro no logout: ${error.message}`);
-                        });
-                } else {
-                    console.warn("SCRIPT.JS: Logout button clicked, but firebaseAuth not ready or no user logged in.");
-                }
+                        .then(() => { console.log("SCRIPT.JS: Firebase signOut successful. User logged out."); })
+                        .catch((error) => { console.error("SCRIPT.JS: Firebase signOut error:", error); alert(`Erro no logout: ${error.message}`); });
+                } else { console.warn("SCRIPT.JS: Logout button clicked, but firebaseAuth not ready or no user logged in."); }
             });
-        } else {
-            console.warn("SCRIPT.JS: logoutBtn não encontrado para adicionar listener.");
-        }
+        } else { console.warn("SCRIPT.JS: logoutBtn não encontrado."); }
     }
 
     function initializeFirebase() {
         console.log("SCRIPT.JS: initializeFirebase chamada");
         if (typeof firebase !== 'undefined' && typeof firebaseConfig !== 'undefined') {
             try {
-                if (firebase.apps.length === 0) { firebaseApp = firebase.initializeApp(firebaseConfig); }
-                else { firebaseApp = firebase.app(); }
-                firebaseAuth = firebase.auth(firebaseApp);
-                firestoreDB = firebase.firestore(firebaseApp);
+                if (firebase.apps.length === 0) { firebaseApp = firebase.initializeApp(firebaseConfig); } else { firebaseApp = firebase.app(); }
+                firebaseAuth = firebase.auth(firebaseApp); firestoreDB = firebase.firestore(firebaseApp);
                 console.log("SCRIPT.JS: Firebase App, Auth, Firestore inicializados.");
-
-                if (typeof setupAuthEventListeners === "function") {
-                    setupAuthEventListeners();
-                } else {
-                    console.error("SCRIPT.JS: Função setupAuthEventListeners não definida!");
-                }
-
+                if (typeof setupAuthEventListeners === "function") { setupAuthEventListeners(); }
+                else { console.error("SCRIPT.JS: Função setupAuthEventListeners não definida!"); }
                 firebaseAuth.onAuthStateChanged(user => {
                     console.log("SCRIPT.JS: onAuthStateChanged - Novo estado de autenticação:", user ? user.email : "Nenhum usuário");
                     currentUser = user;
                     if (typeof updateLoginUI === "function") updateLoginUI(user);
                     else console.error("SCRIPT.JS: Função updateLoginUI não definida em onAuthStateChanged!");
-
                     if (criticalSplashTimeout) { clearTimeout(criticalSplashTimeout); criticalSplashTimeout = null; console.log("SCRIPT.JS: Timeout crítico da splash cancelado."); }
-
                     const timeSinceDOMLoad = Date.now() - domContentLoadedTimestamp;
                     let delayToHideSplash = 0;
                     if (splashHiddenTimestamp === 0) {
-                        if (timeSinceDOMLoad < SPLASH_MINIMUM_VISIBLE_TIME) {
-                            delayToHideSplash = SPLASH_MINIMUM_VISIBLE_TIME - timeSinceDOMLoad;
-                        }
+                        if (timeSinceDOMLoad < SPLASH_MINIMUM_VISIBLE_TIME) { delayToHideSplash = SPLASH_MINIMUM_VISIBLE_TIME - timeSinceDOMLoad; }
                         console.log(`SCRIPT.JS: Agendando showAppContentNow com delay de ${delayToHideSplash}ms.`);
                         setTimeout(showAppContentNow, delayToHideSplash);
-                    } else {
-                        console.log("SCRIPT.JS: Chamando showAppContentNow diretamente (splash já foi escondida).");
-                        showAppContentNow();
-                    }
+                    } else { console.log("SCRIPT.JS: Chamando showAppContentNow diretamente (splash já foi escondida)."); showAppContentNow(); }
                 });
                 if (typeof enableFirebaseFeatures === "function") enableFirebaseFeatures();
                 return true;
             } catch (error) {
                 console.error("SCRIPT.JS: CRITICAL Firebase init error:", error);
-                if (typeof showGlobalError === "function") showGlobalError(`Erro ao inicializar serviços: ${error.message}. Funcionalidades de login podem estar desabilitadas.`);
+                if (typeof showGlobalError === "function") showGlobalError(`Erro Firebase: ${error.message}`);
                 if (typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
                 return false;
             }
         } else {
-            console.error("SCRIPT.JS: Firebase SDK ou firebaseConfig não definidos GLOBALMENTE.");
-            if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") {
-                console.log("SCRIPT.JS: Firebase não carregado, mostrando conteúdo da app.");
-                setTimeout(showAppContentNow, SPLASH_MINIMUM_VISIBLE_TIME > (Date.now() - domContentLoadedTimestamp) ? SPLASH_MINIMUM_VISIBLE_TIME - (Date.now() - domContentLoadedTimestamp) : 0);
-            }
+            console.error("SCRIPT.JS: Firebase SDK ou firebaseConfig não definidos.");
+            if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") { setTimeout(showAppContentNow, SPLASH_MINIMUM_VISIBLE_TIME > (Date.now() - domContentLoadedTimestamp) ? SPLASH_MINIMUM_VISIBLE_TIME - (Date.now() - domContentLoadedTimestamp) : 0); }
             if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
             return false;
         }
@@ -492,24 +493,22 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 console.error("SCRIPT.JS: Falha ao inicializar Firebase após múltiplas tentativas.");
                 if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") { showAppContentNow(); }
-                if(typeof showGlobalError === "function") showGlobalError("Não foi possível carregar os serviços de usuário. Algumas funcionalidades podem estar indisponíveis. Por favor, recarregue.");
+                if(typeof showGlobalError === "function") showGlobalError("Não foi possível carregar os serviços de usuário. Tente recarregar.");
                 if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
             }
         }
     }
 
     async function fetchAndDisplayResults(lottery) {
-        console.log(`SCRIPT.JS: fetchAndDisplayResults para ${lottery}`);
-        if (!apiResultsPre || !resultsLotteryNameSpan || !mainDisplayLotterySelect) {
-             console.warn("SCRIPT.JS: Elementos para fetchAndDisplayResults não encontrados."); return;
-        }
+        // console.log(`SCRIPT.JS: fetchAndDisplayResults para ${lottery}`);
+        if (!apiResultsPre || !resultsLotteryNameSpan || !mainDisplayLotterySelect) { console.warn("SCRIPT.JS: Elementos para fetchAndDisplayResults não encontrados."); return; }
         const selectedOption = Array.from(mainDisplayLotterySelect.options).find(opt => opt.value === lottery);
         const lotteryFriendlyName = selectedOption ? selectedOption.text : (LOTTERY_CONFIG_JS[lottery] ? LOTTERY_CONFIG_JS[lottery].name : lottery.toUpperCase());
         resultsLotteryNameSpan.textContent = lotteryFriendlyName;
         apiResultsPre.textContent = 'Buscando...';
         try {
             const data = await fetchData(`api/main/resultados/${lottery}`);
-            console.log(`SCRIPT.JS: Dados de resultados/${lottery} recebidos:`, data);
+            // console.log(`SCRIPT.JS: Dados de resultados/${lottery} recebidos:`, data);
             let displayText = "";
             if (data.erro) { displayText = `Erro da API: ${data.erro}`; }
             else if (data.aviso) { displayText = `Aviso: ${data.aviso}\nConcurso: ${data.ultimo_concurso || 'N/A'}\nData: ${data.data || 'N/A'}\nNúmeros: ${data.numeros ? data.numeros.join(', ') : 'N/A'}`; }
@@ -529,13 +528,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderGameNumbers(container, numbersArray, highlightedNumbers = [], almostNumbers = [], currentLotteryForColor = null) {
         if (!container) { console.warn("renderGameNumbers: container não encontrado"); return; }
         container.innerHTML = '';
-        if (!numbersArray || !Array.isArray(numbersArray) || numbersArray.length === 0) {
-            container.textContent = "N/A"; return;
-        }
+        if (!numbersArray || !Array.isArray(numbersArray) || numbersArray.length === 0) { container.textContent = "N/A"; return; }
         const highlightedStrings = highlightedNumbers.map(String);
         const almostStrings = almostNumbers.map(String);
         let activeLottery = currentLotteryForColor || (mainDisplayLotterySelect ? mainDisplayLotterySelect.value : 'megasena');
-
         numbersArray.forEach((numInput, index) => {
             const numStr = String(numInput).trim(); const num = parseInt(numStr, 10);
             if (isNaN(num)) { console.warn(`renderGameNumbers: Valor inválido '${numInput}' encontrado.`); return; }
@@ -547,46 +543,97 @@ document.addEventListener('DOMContentLoaded', () => {
             numDiv.textContent = String(num).padStart(2, '0');
             if (LOTTERY_CONFIG_JS[activeLottery] && LOTTERY_CONFIG_JS[activeLottery].color) {
                 if (!numDiv.classList.contains('hit') && !numDiv.classList.contains('almost')) {
-                    numDiv.style.backgroundColor = LOTTERY_CONFIG_JS[activeLottery].color;
-                    numDiv.style.color = '#fff';
+                    numDiv.style.backgroundColor = LOTTERY_CONFIG_JS[activeLottery].color; numDiv.style.color = '#fff';
                 }
             }
             container.appendChild(numDiv);
             requestAnimationFrame(() => { setTimeout(() => { numDiv.style.opacity = '1'; numDiv.style.transform = 'scale(1) translateY(0)'; }, 20); });
         });
     }
-    function triggerConfetti() { /* Sua implementação original */ }
-    function checkGame(userGameNumbers, officialResults) { /* Sua implementação original */ }
-    async function loadUserGames(filterLottery = "todos") { /* Sua implementação original */ }
-    function createGameCardElement(docId, gameData) { /* Sua implementação original */ }
-    function updateManualProbNumbersFeedback() { /* Sua implementação original */ }
+
+    function triggerConfetti() { /* Adicione sua lógica de confetes aqui se desejar */ }
+
+    function checkGame(userGameNumbers, officialResults) {
+        if (!userGameNumbers || !officialResults || !officialResults.numeros || !Array.isArray(officialResults.numeros)) {
+            return { hits: 0, hitNumbers: [], almostNumbers: [], message: "Dados insuficientes para conferir." };
+        }
+        const drawnNumbers = officialResults.numeros.map(n => String(n).trim());
+        const userNumbersStr = userGameNumbers.map(n => String(n).trim());
+        let hits = 0; let hitNumbers = [];
+        userNumbersStr.forEach(num => { if (drawnNumbers.includes(num)) { hits++; hitNumbers.push(parseInt(num, 10)); } });
+        let message = `Você acertou ${hits} número(s).`;
+        if (hits > 0) message += ` Acertos: ${hitNumbers.join(', ')}.`;
+        return { hits: hits, hitNumbers: hitNumbers, almostNumbers: [], message: message }; // almostNumbers não está implementado aqui
+    }
+
+    async function loadUserGames(filterLottery = "todos") {
+        if (!currentUser || !firestoreDB || !savedGamesContainer || !noSavedGamesP) return;
+        savedGamesContainer.innerHTML = '<div class="spinner small-spinner"></div> Carregando seus jogos...';
+        noSavedGamesP.style.display = 'none';
+        try {
+            let query = firestoreDB.collection('userGames').where('userId', '==', currentUser.uid).orderBy('savedAt', 'desc');
+            if (filterLottery !== "todos") { query = query.where('lottery', '==', filterLottery); }
+            const snapshot = await query.get();
+            savedGamesContainer.innerHTML = '';
+            if (snapshot.empty) { noSavedGamesP.style.display = 'block'; return; }
+            snapshot.forEach(doc => { const gameCard = createGameCardElement(doc.id, doc.data()); if(gameCard) savedGamesContainer.appendChild(gameCard); });
+        } catch (error) { console.error("Erro ao carregar jogos salvos:", error); savedGamesContainer.innerHTML = '<p class="error-message">Erro ao carregar jogos.</p>'; }
+    }
+
+    function createGameCardElement(docId, gameData) {
+        const card = document.createElement('div'); card.classList.add('card', 'game-card'); card.dataset.id = docId;
+        const lotteryName = LOTTERY_CONFIG_JS[gameData.lottery]?.name || gameData.lottery.toUpperCase();
+        const gameNumbersDiv = document.createElement('div'); gameNumbersDiv.classList.add('game-numbers');
+        renderGameNumbers(gameNumbersDiv, gameData.game, [], [], gameData.lottery);
+        const strategyP = document.createElement('p'); strategyP.classList.add('strategy-text'); strategyP.textContent = `Estratégia: ${gameData.strategy || 'N/A'}`;
+        const dateP = document.createElement('p'); dateP.classList.add('game-card-info'); dateP.textContent = `Salvo em: ${gameData.savedAt ? new Date(gameData.savedAt.toDate()).toLocaleDateString() : 'Data N/A'}`;
+        const actionsDiv = document.createElement('div'); actionsDiv.classList.add('game-card-actions');
+        const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'small-btn'); deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Excluir';
+        deleteBtn.addEventListener('click', async () => { if (confirm("Tem certeza que quer excluir este jogo?")) { try { await firestoreDB.collection('userGames').doc(docId).delete(); card.remove(); if (savedGamesContainer.children.length === 0) noSavedGamesP.style.display = 'block'; } catch (e) { alert("Erro ao excluir.");}}});
+        actionsDiv.appendChild(deleteBtn);
+        card.innerHTML = `<h4>${lotteryName}</h4>`;
+        card.appendChild(gameNumbersDiv); card.appendChild(strategyP); card.appendChild(dateP); card.appendChild(actionsDiv);
+        return card;
+    }
+
+    function updateManualProbNumbersFeedback() {
+        if (!manualProbLotteryTypeSelect || !manualProbUserNumbersInput || !manualProbNumbersCountFeedback) return;
+        const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
+        const expectedCount = selectedOption ? parseInt(selectedOption.dataset.count, 10) : 0;
+        const numbersStr = manualProbUserNumbersInput.value;
+        const userNumbersRaw = numbersStr.split(/[ ,;/\t\n]+/);
+        const userNumbersCount = userNumbersRaw.filter(n => n.trim() !== "" && !isNaN(n)).length;
+        manualProbNumbersCountFeedback.textContent = `Números: ${userNumbersCount} de ${expectedCount}.`;
+    }
 
     function showAppContentNow() {
-        console.log("SCRIPT.JS: showAppContentNow INICIADA.");
+        // console.log("SCRIPT.JS: showAppContentNow INICIADA.");
         if (accessibleSplashScreen && !accessibleSplashScreen.classList.contains('hidden')) {
             accessibleSplashScreen.classList.add('hidden');
             splashHiddenTimestamp = Date.now();
             if(splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', '100');
-            console.log("SCRIPT.JS: Splash screen foi escondida agora.");
         } else if (splashHiddenTimestamp > 0 && appContent && appContent.style.display !== 'none') {
-            console.log("SCRIPT.JS: Conteúdo já visível e splash já foi escondida. Retornando de showAppContentNow.");
-            return;
+            // console.log("SCRIPT.JS: Conteúdo já visível e splash já foi escondida. Retornando de showAppContentNow.");
+            return; 
         }
 
         if (appContent) {
             if (appContent.style.display === 'none') {
                 appContent.style.display = 'block';
-                console.log("SCRIPT.JS: Conteúdo principal (app-content) tornado visível.");
+                // console.log("SCRIPT.JS: Conteúdo principal (app-content) tornado visível.");
                 if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
-
-                console.log("SCRIPT.JS: Chamando fetches iniciais para o dashboard.");
+                
+                // console.log("SCRIPT.JS: Chamando fetches iniciais para o dashboard.");
                 if (typeof fetchPlatformStats === "function") fetchPlatformStats();
                 if (typeof fetchRecentWinningPools === "function") fetchRecentWinningPools();
                 if (typeof fetchTopWinners === "function") fetchTopWinners();
 
+                if (typeof renderBanners === "function") renderBanners();
+                if (typeof initializeCarousels === "function") initializeCarousels();
+
                 if (mainDisplayLotterySelect) {
                     const initialLottery = mainDisplayLotterySelect.value;
-                    console.log(`SCRIPT.JS: Carregando dados e estatísticas iniciais para loteria: ${initialLottery}`);
+                    // console.log(`SCRIPT.JS: Carregando dados e estatísticas iniciais para loteria: ${initialLottery}`);
                     if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(initialLottery);
                     if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(initialLottery);
                     if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(initialLottery);
@@ -594,16 +641,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(initialLottery);
                      setTimeout(() => {
                          if (mainDisplayLotterySelect.dispatchEvent) {
-                            console.log("SCRIPT.JS: Disparando evento 'change' no select de loteria principal para estatísticas.");
+                            // console.log("SCRIPT.JS: Disparando evento 'change' no select de loteria principal para estatísticas.");
                             mainDisplayLotterySelect.dispatchEvent(new Event('change'));
                          }
                      }, 300);
                 } else {
                     console.warn("SCRIPT.JS: Select de loteria principal (mainDisplayLotterySelect) não encontrado para carregar dados iniciais.");
                 }
-                if(typeof initializeCarousels === "function") initializeCarousels();
             } else {
-                 console.log("SCRIPT.JS: appContent já estava visível, mas showAppContentNow foi chamada (talvez pelo Firebase Auth).");
+                 // console.log("SCRIPT.JS: appContent já estava visível.");
             }
         } else {
             console.error("SCRIPT.JS: Elemento CRÍTICO #app-content NÃO encontrado no DOM!");
@@ -621,9 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (logoutBtn) logoutBtn.style.display = 'inline-block';
             if (mainNav) mainNav.style.display = 'flex';
             if (navItems && typeof setActiveSection === "function") navItems.forEach(item => item.style.display = 'flex');
-
             if (typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
-
             if (esotericHunchCard) esotericHunchCard.style.display = 'block';
             if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'none';
         } else {
@@ -636,441 +680,197 @@ document.addEventListener('DOMContentLoaded', () => {
             if (navItems) navItems.forEach(item => item.style.display = 'none');
             if (savedGamesContainer) savedGamesContainer.innerHTML = '';
             if (noSavedGamesP) noSavedGamesP.style.display = 'block';
-
             if (esotericHunchCard) esotericHunchCard.style.display = 'none';
             if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'block';
         }
         if (typeof updateSaveButtonVisibility === "function") {
             updateSaveButtonVisibility('quick');
             updateSaveButtonVisibility('esoteric');
-            updateSaveButtonVisibility('hot'); // ++ Adicionado para novo tipo
+            updateSaveButtonVisibility('hot');
         }
     }
 
-    // === GERADOR PALPITE ALEATÓRIO RÁPIDO ===
     async function generateAndDisplayQuickHunch() {
-        console.log("SCRIPT.JS: generateAndDisplayQuickHunch chamado");
-        if (!quickHunchLotteryTypeSelect || !generateQuickHunchBtn || !quickHunchOutputDiv || !quickHunchNumbersDiv || !quickHunchStrategyP) {
-            console.error("SCRIPT.JS: Elementos DOM para Palpite Rápido não encontrados."); return;
-        }
+        // console.log("SCRIPT.JS: generateAndDisplayQuickHunch chamado");
+        if (!quickHunchLotteryTypeSelect || !generateQuickHunchBtn || !quickHunchOutputDiv || !quickHunchNumbersDiv || !quickHunchStrategyP) { console.error("SCRIPT.JS: Elementos DOM para Palpite Rápido não encontrados."); return; }
         const lottery = quickHunchLotteryTypeSelect.value;
-        generateQuickHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
-        generateQuickHunchBtn.disabled = true;
-        quickHunchOutputDiv.style.display = 'block';
-        quickHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>';
-        quickHunchStrategyP.textContent = 'Gerando um palpite aleatório...';
-        if(saveQuickHunchBtn) saveQuickHunchBtn.style.display = 'none';
-        if(checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'none';
-        if(quickHunchCheckResultDiv) quickHunchCheckResultDiv.innerHTML = '';
+        generateQuickHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...'; generateQuickHunchBtn.disabled = true;
+        quickHunchOutputDiv.style.display = 'block'; quickHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>'; quickHunchStrategyP.textContent = 'Gerando palpite...';
+        if(saveQuickHunchBtn) saveQuickHunchBtn.style.display = 'none'; if(checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'none'; if(quickHunchCheckResultDiv) quickHunchCheckResultDiv.innerHTML = '';
         try {
             const data = await fetchData(`api/main/gerar_jogo/${lottery}`);
-            console.log("SCRIPT.JS: Palpite Rápido - Dados recebidos:", data);
             if (data.erro) { throw new Error(data.detalhes || data.erro);  }
-            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) { throw new Error("Palpite inválido retornado.");}
+            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) { throw new Error("Palpite inválido.");}
             if (typeof renderGameNumbers === "function") renderGameNumbers(quickHunchNumbersDiv, data.jogo, [], [], lottery);
-            else console.error("SCRIPT.JS: Função renderGameNumbers não definida!");
-            quickHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Aleatório Rápido'}`;
-            lastGeneratedHunch = { type: 'quick', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Aleatório Rápido', outputDiv: quickHunchOutputDiv, numbersDiv: quickHunchNumbersDiv, checkResultDiv: quickHunchCheckResultDiv, saveButton: saveQuickHunchBtn, checkButton: checkQuickHunchBtn };
+            quickHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Aleatório'}`;
+            lastGeneratedHunch = { type: 'quick', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Aleatório', outputDiv: quickHunchOutputDiv, numbersDiv: quickHunchNumbersDiv, checkResultDiv: quickHunchCheckResultDiv, saveButton: saveQuickHunchBtn, checkButton: checkQuickHunchBtn };
             if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('quick');
             if (checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'inline-block';
-        } catch (error) {
-            console.error("SCRIPT.JS: Erro ao gerar palpite rápido:", error);
-            quickHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha ao gerar palpite.'}</p>`;
-            quickHunchStrategyP.textContent = 'Erro ao gerar.';
-            lastGeneratedHunch = { type: null };
-        } finally {
-            generateQuickHunchBtn.innerHTML = '<i class="fas fa-random"></i> Gerar Palpite Rápido';
-            generateQuickHunchBtn.disabled = false;
-        }
+        } catch (error) { console.error("SCRIPT.JS: Erro palpite rápido:", error); quickHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha.'}</p>`; quickHunchStrategyP.textContent = 'Erro.'; lastGeneratedHunch = { type: null };
+        } finally { generateQuickHunchBtn.innerHTML = '<i class="fas fa-random"></i> Gerar Palpite Rápido'; generateQuickHunchBtn.disabled = false; }
     }
 
-    // ++ NOVA FUNÇÃO PARA GERAR E EXIBIR PALPITE NÚMEROS QUENTES ++
     async function generateAndDisplayHotNumbersHunch() {
-        console.log("SCRIPT.JS: generateAndDisplayHotNumbersHunch chamado");
-        if (!hotNumbersLotteryTypeSelect || !generateHotNumbersHunchBtn || !hotNumbersAnalyzeCountInput ||
-            !hotNumbersHunchOutputDiv || !hotNumbersHunchNumbersDiv || !hotNumbersHunchStrategyP) {
-            console.error("SCRIPT.JS: Elementos DOM para Palpite Números Quentes não encontrados.");
-            return;
-        }
-
-        const lottery = hotNumbersLotteryTypeSelect.value;
-        let analyzeCount = parseInt(hotNumbersAnalyzeCountInput.value, 10);
-
-        if (isNaN(analyzeCount) || analyzeCount <= 0) {
-            alert("Por favor, insira um número válido de concursos para analisar (mín. 1).");
-            hotNumbersAnalyzeCountInput.focus();
-            analyzeCount = 20; 
-            hotNumbersAnalyzeCountInput.value = analyzeCount;
-        }
-        // Limitar o analyzeCount para não ser maior que o total de resultados (o backend também faz isso, mas é bom ter no frontend)
-        // Esta informação (total de resultados) não está prontamente disponível aqui sem uma chamada extra.
-        // O backend já tem uma lógica para lidar com isso (usar min(20, len(all_results))).
-
-        generateHotNumbersHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando Análise...';
-        generateHotNumbersHunchBtn.disabled = true;
-        hotNumbersHunchOutputDiv.style.display = 'block';
-        hotNumbersHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>';
-        hotNumbersHunchStrategyP.textContent = 'Analisando os números mais frequentes...';
-        
-        if(saveHotHunchBtn) saveHotHunchBtn.style.display = 'none';
-        if(checkHotHunchBtn) checkHotHunchBtn.style.display = 'none';
-        if(hotHunchCheckResultDiv) hotHunchCheckResultDiv.innerHTML = '';
-
+        // console.log("SCRIPT.JS: generateAndDisplayHotNumbersHunch chamado");
+        if (!hotNumbersLotteryTypeSelect || !generateHotNumbersHunchBtn || !hotNumbersAnalyzeCountInput || !hotNumbersHunchOutputDiv || !hotNumbersHunchNumbersDiv || !hotNumbersHunchStrategyP) { console.error("SCRIPT.JS: Elementos DOM para Palpite Números Quentes não encontrados."); return; }
+        const lottery = hotNumbersLotteryTypeSelect.value; let analyzeCount = parseInt(hotNumbersAnalyzeCountInput.value, 10);
+        if (isNaN(analyzeCount) || analyzeCount <= 0) { alert("Insira um número válido de concursos para analisar (mín. 1)."); hotNumbersAnalyzeCountInput.focus(); analyzeCount = 20; hotNumbersAnalyzeCountInput.value = analyzeCount; }
+        generateHotNumbersHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...'; generateHotNumbersHunchBtn.disabled = true;
+        hotNumbersHunchOutputDiv.style.display = 'block'; hotNumbersHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>'; hotNumbersHunchStrategyP.textContent = 'Analisando...';
+        if(saveHotHunchBtn) saveHotHunchBtn.style.display = 'none'; if(checkHotHunchBtn) checkHotHunchBtn.style.display = 'none'; if(hotHunchCheckResultDiv) hotHunchCheckResultDiv.innerHTML = '';
         try {
             const data = await fetchData(`api/main/gerar_jogo/numeros_quentes/${lottery}?num_concursos_analisar=${analyzeCount}`);
-            console.log("SCRIPT.JS: Palpite Números Quentes - Dados recebidos:", data);
-
-            if (data.erro) { throw new Error(data.detalhes || data.erro); }
-            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) {
-                throw new Error("Palpite inválido retornado pela estratégia de números quentes.");
-            }
-
-            if (typeof renderGameNumbers === "function") {
-                renderGameNumbers(hotNumbersHunchNumbersDiv, data.jogo, [], [], lottery);
-            } else {
-                console.error("SCRIPT.JS: Função renderGameNumbers não definida!");
-            }
-            hotNumbersHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Números Quentes'}`;
-            if (data.aviso) { // Exibe o aviso do backend se houver (ex: fallback)
-                hotNumbersHunchStrategyP.textContent += ` (${data.aviso})`;
-            }
-
-            lastGeneratedHunch = {
-                type: 'hot',
-                lottery: lottery,
-                jogo: data.jogo,
-                estrategia_metodo: data.estrategia_usada || 'Números Quentes',
-                outputDiv: hotNumbersHunchOutputDiv,
-                numbersDiv: hotNumbersHunchNumbersDiv,
-                checkResultDiv: hotHunchCheckResultDiv,
-                saveButton: saveHotHunchBtn,
-                checkButton: checkHotHunchBtn
-            };
-
-            if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('hot');
-            if (checkHotHunchBtn) checkHotHunchBtn.style.display = 'inline-block';
-
-        } catch (error) {
-            console.error("SCRIPT.JS: Erro ao gerar palpite de números quentes:", error);
-            hotNumbersHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha ao gerar palpite.'}</p>`;
-            hotNumbersHunchStrategyP.textContent = 'Erro ao gerar.';
-            lastGeneratedHunch = { type: null };
-        } finally {
-            generateHotNumbersHunchBtn.innerHTML = '<i class="fas fa-chart-line"></i> Gerar Palpite Quente';
-            generateHotNumbersHunchBtn.disabled = false;
-        }
+            if (data.erro) { throw new Error(data.detalhes || data.erro); } if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) { throw new Error("Palpite inválido (quentes)."); }
+            if (typeof renderGameNumbers === "function") renderGameNumbers(hotNumbersHunchNumbersDiv, data.jogo, [], [], lottery);
+            hotNumbersHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Números Quentes'}`; if (data.aviso) { hotNumbersHunchStrategyP.textContent += ` (${data.aviso})`; }
+            lastGeneratedHunch = { type: 'hot', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Números Quentes', outputDiv: hotNumbersHunchOutputDiv, numbersDiv: hotNumbersHunchNumbersDiv, checkResultDiv: hotHunchCheckResultDiv, saveButton: saveHotHunchBtn, checkButton: checkHotHunchBtn };
+            if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('hot'); if (checkHotHunchBtn) checkHotHunchBtn.style.display = 'inline-block';
+        } catch (error) { console.error("SCRIPT.JS: Erro palpite números quentes:", error); hotNumbersHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha.'}</p>`; hotNumbersHunchStrategyP.textContent = 'Erro.'; lastGeneratedHunch = { type: null };
+        } finally { generateHotNumbersHunchBtn.innerHTML = '<i class="fas fa-chart-line"></i> Gerar Palpite Quente'; generateHotNumbersHunchBtn.disabled = false; }
     }
-    // ++ FIM DA NOVA FUNÇÃO ++
 
-    // === GERADOR PALPITE ESOTÉRICO ===
     async function generateAndDisplayEsotericHunch() {
-        console.log("SCRIPT.JS: generateAndDisplayEsotericHunch chamado");
-        if (!esotericLotteryTypeSelect || !birthDateInput || !generateEsotericHunchBtn || !esotericHunchOutputDiv || !esotericHunchNumbersDiv || !esotericHunchMethodP || !esotericHunchHistoryCheckDiv) {
-            console.error("SCRIPT.JS: Elementos DOM para Palpite Cósmico não encontrados."); return;
-        }
-        const lotteryName = esotericLotteryTypeSelect.value;
-        const birthDateRaw = birthDateInput.value.trim();
-        const birthDate = birthDateRaw.replace(/\D/g, '');
-        if (!birthDate) { alert("Por favor, insira sua data de nascimento."); birthDateInput.focus(); return; }
-        if (birthDate.length !== 8) { alert("Formato da data de nascimento inválido. Use DDMMAAAA."); birthDateInput.focus(); return; }
-        generateEsotericHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando Magia...';
-        generateEsotericHunchBtn.disabled = true;
-        esotericHunchOutputDiv.style.display = 'block';
-        esotericHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>';
-        esotericHunchMethodP.textContent = 'Consultando os astros...';
-        esotericHunchHistoryCheckDiv.innerHTML = '';
-        if(saveEsotericHunchBtn) saveEsotericHunchBtn.style.display = 'none';
-        if(checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'none';
+        // console.log("SCRIPT.JS: generateAndDisplayEsotericHunch chamado");
+        if (!esotericLotteryTypeSelect || !birthDateInput || !generateEsotericHunchBtn || !esotericHunchOutputDiv || !esotericHunchNumbersDiv || !esotericHunchMethodP || !esotericHunchHistoryCheckDiv) { console.error("SCRIPT.JS: Elementos DOM para Palpite Cósmico não encontrados."); return; }
+        const lotteryName = esotericLotteryTypeSelect.value; const birthDateRaw = birthDateInput.value.trim(); const birthDate = birthDateRaw.replace(/\D/g, '');
+        if (!birthDate) { alert("Insira sua data de nascimento."); birthDateInput.focus(); return; } if (birthDate.length !== 8) { alert("Formato da data inválido. Use DDMMAAAA."); birthDateInput.focus(); return; }
+        generateEsotericHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...'; generateEsotericHunchBtn.disabled = true;
+        esotericHunchOutputDiv.style.display = 'block'; esotericHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>'; esotericHunchMethodP.textContent = 'Consultando...'; esotericHunchHistoryCheckDiv.innerHTML = '';
+        if(saveEsotericHunchBtn) saveEsotericHunchBtn.style.display = 'none'; if(checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'none';
         try {
-            const requestBody = { data_nascimento: birthDate };
-            const data = await fetchData(`api/main/palpite-esoterico/${lotteryName}`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody)
-            });
-            console.log("SCRIPT.JS: Palpite Cósmico - Dados recebidos:", data);
-            if (data.erro) { throw new Error(data.erro); }
-            if (!data.palpite_gerado) { throw new Error("API não retornou palpite."); }
+            const requestBody = { data_nascimento: birthDate }; const data = await fetchData(`api/main/palpite-esoterico/${lotteryName}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
+            if (data.erro) { throw new Error(data.erro); } if (!data.palpite_gerado) { throw new Error("API não retornou palpite."); }
             if (typeof renderGameNumbers === "function") renderGameNumbers(esotericHunchNumbersDiv, data.palpite_gerado, [], [], lotteryName);
-            else console.error("SCRIPT.JS: Função renderGameNumbers não definida!");
-            esotericHunchMethodP.textContent = `Método: ${data.metodo_geracao || 'Indefinido'}`;
-            let historyHtml = `<strong>Histórico desta combinação:</strong><br>`;
-            if (data.historico_desta_combinacao) {
-                const hist = data.historico_desta_combinacao;
-                historyHtml += `Premiada (principal)? <span style="color: ${hist.ja_foi_premiada_faixa_principal ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${hist.ja_foi_premiada_faixa_principal ? 'Sim' : 'Não'}</span><br>`;
-                historyHtml += `Vezes: ${hist.vezes_premiada_faixa_principal}<br>`;
-                historyHtml += `Valor total (aprox.): ${hist.valor_total_ganho_faixa_principal_formatado}`;
-            } else { historyHtml += "Não foi possível verificar histórico."; }
+            esotericHunchMethodP.textContent = `Método: ${data.metodo_geracao || 'N/A'}`;
+            let historyHtml = `<strong>Histórico:</strong><br>`;
+            if (data.historico_desta_combinacao) { const hist = data.historico_desta_combinacao; historyHtml += `Premiada? <span style="color: ${hist.ja_foi_premiada_faixa_principal ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${hist.ja_foi_premiada_faixa_principal ? 'Sim' : 'Não'}</span> (${hist.vezes_premiada_faixa_principal}x) - Valor: ${hist.valor_total_ganho_faixa_principal_formatado}`; } else { historyHtml += "Não verificado."; }
             esotericHunchHistoryCheckDiv.innerHTML = historyHtml;
-            lastGeneratedHunch = { type: 'esoteric', lottery: lotteryName, jogo: data.palpite_gerado, estrategia_metodo: data.metodo_geracao || 'Indefinido', outputDiv: esotericHunchOutputDiv, numbersDiv: esotericHunchNumbersDiv, checkResultDiv: esotericHunchHistoryCheckDiv, saveButton: saveEsotericHunchBtn, checkButton: checkEsotericHunchBtn };
-            if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('esoteric');
-            if (checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'inline-block';
-        } catch (error) {
-            console.error("SCRIPT.JS: Erro ao gerar palpite esotérico:", error);
-            esotericHunchNumbersDiv.innerHTML = ''; esotericHunchMethodP.textContent = '';
-            esotericHunchHistoryCheckDiv.innerHTML = `<p class="error-message">Falha: ${error.message || 'Erro desconhecido.'}</p>`;
-            lastGeneratedHunch = { type: null };
-        } finally {
-            generateEsotericHunchBtn.innerHTML = '<i class="fas fa-meteor"></i> Gerar Palpite Cósmico';
-            generateEsotericHunchBtn.disabled = false;
-        }
+            lastGeneratedHunch = { type: 'esoteric', lottery: lotteryName, jogo: data.palpite_gerado, estrategia_metodo: data.metodo_geracao || 'N/A', outputDiv: esotericHunchOutputDiv, numbersDiv: esotericHunchNumbersDiv, checkResultDiv: esotericHunchHistoryCheckDiv, saveButton: saveEsotericHunchBtn, checkButton: checkEsotericHunchBtn };
+            if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('esoteric'); if (checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'inline-block';
+        } catch (error) { console.error("SCRIPT.JS: Erro palpite esotérico:", error); esotericHunchNumbersDiv.innerHTML = ''; esotericHunchMethodP.textContent = ''; esotericHunchHistoryCheckDiv.innerHTML = `<p class="error-message">Falha: ${error.message || 'Erro.'}</p>`; lastGeneratedHunch = { type: null };
+        } finally { generateEsotericHunchBtn.innerHTML = '<i class="fas fa-meteor"></i> Gerar Palpite Cósmico'; generateEsotericHunchBtn.disabled = false; }
     }
 
-    // === FUNÇÕES DE UTILIDADE PARA BOTÕES DE SALVAR/CONFERIR (ADAPTADAS) ===
-    function updateSaveButtonVisibility(hunchType) { // hunchType pode ser 'quick', 'esoteric', 'hot'
-        const currentHunch = lastGeneratedHunch;
-        if (!currentHunch || !currentHunch.saveButton || !currentHunch.outputDiv) {
-            // Se o botão específico do tipo não foi encontrado (ex: saveHotHunchBtn para type 'hot'), não faz nada.
-            // Isso pode acontecer se a lastGeneratedHunch for de um tipo diferente do que está sendo verificado.
-            return;
-        }
-        // Só mostra o botão de salvar se o tipo do palpite atual corresponde ao tipo que está sendo verificado
-        currentHunch.saveButton.style.display = currentUser && currentHunch.type === hunchType && currentHunch.outputDiv.style.display !== 'none' ? 'inline-block' : 'none';
+    function updateSaveButtonVisibility(hunchType) {
+        const currentHunch = lastGeneratedHunch; let targetSaveButton = null;
+        if (hunchType === 'quick') targetSaveButton = saveQuickHunchBtn;
+        else if (hunchType === 'esoteric') targetSaveButton = saveEsotericHunchBtn;
+        else if (hunchType === 'hot') targetSaveButton = saveHotHunchBtn;
+        if (targetSaveButton) { targetSaveButton.style.display = currentUser && currentHunch.type === hunchType && currentHunch.outputDiv && currentHunch.outputDiv.style.display !== 'none' ? 'inline-block' : 'none'; }
+        else if (currentHunch.type === hunchType && !targetSaveButton) { console.warn(`SCRIPT.JS: Botão Salvar para '${hunchType}' não encontrado.`); }
     }
 
     function setupSaveHunchButtonListeners() {
         if (saveQuickHunchBtn) saveQuickHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('quick'));
         if (saveEsotericHunchBtn) saveEsotericHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('esoteric'));
-        if (saveHotHunchBtn) saveHotHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('hot')); // ++ Adicionado
+        if (saveHotHunchBtn) saveHotHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('hot'));
     }
 
     function saveLastGeneratedHunch(expectedHunchType) {
-        console.log(`SCRIPT.JS: saveLastGeneratedHunch chamado para tipo: ${expectedHunchType}`);
-        // Validação se o palpite atual é do tipo esperado
-        if (!firestoreDB || !currentUser || !lastGeneratedHunch.jogo || !Array.isArray(lastGeneratedHunch.jogo) || 
-            lastGeneratedHunch.jogo.length === 0 || lastGeneratedHunch.type !== expectedHunchType) {
-            alert("Logue-se e gere um palpite válido deste tipo específico para salvar.");
-            console.warn("SCRIPT.JS: Condições para salvar não atendidas ou tipo de palpite não corresponde:", { firestoreDB, currentUser, lastGeneratedHunch, expectedHunchType });
-            return;
+        // console.log(`SCRIPT.JS: saveLastGeneratedHunch para tipo: ${expectedHunchType}`);
+        if (!firestoreDB || !currentUser || !lastGeneratedHunch.jogo || !Array.isArray(lastGeneratedHunch.jogo) || lastGeneratedHunch.jogo.length === 0 || lastGeneratedHunch.type !== expectedHunchType) {
+            alert("Logue-se e gere um palpite válido deste tipo para salvar."); return;
         }
         const { lottery, jogo, estrategia_metodo } = lastGeneratedHunch;
-        firestoreDB.collection('userGames').add({
-            userId: currentUser.uid, userEmail: currentUser.email,
-            lottery: lottery, game: jogo, strategy: estrategia_metodo,
-            savedAt: firebase.firestore.FieldValue.serverTimestamp(),
-            checkedResult: null
-        }).then(() => {
-            alert("Palpite salvo com sucesso!");
-            if (myGamesSection && myGamesSection.classList.contains('active-section') && typeof loadUserGames === "function") {
-                loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
-            }
-        }).catch((error) => { alert(`Erro ao salvar palpite: ${error.message}`); console.error("SCRIPT.JS: Erro ao salvar palpite:", error); });
+        firestoreDB.collection('userGames').add({ userId: currentUser.uid, userEmail: currentUser.email, lottery: lottery, game: jogo, strategy: estrategia_metodo, savedAt: firebase.firestore.FieldValue.serverTimestamp(), checkedResult: null })
+            .then(() => { alert("Palpite salvo!"); if (myGamesSection && myGamesSection.classList.contains('active-section') && typeof loadUserGames === "function") { loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); } })
+            .catch((error) => { alert(`Erro ao salvar: ${error.message}`); console.error("SCRIPT.JS: Erro ao salvar:", error); });
     }
 
     function setupCheckHunchButtonListeners() {
         if (checkQuickHunchBtn && quickHunchLotteryTypeSelect) checkQuickHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('quick', quickHunchLotteryTypeSelect));
         if (checkEsotericHunchBtn && esotericLotteryTypeSelect) checkEsotericHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('esoteric', esotericLotteryTypeSelect));
-        if (checkHotHunchBtn && hotNumbersLotteryTypeSelect) checkHotHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('hot', hotNumbersLotteryTypeSelect)); // ++ Adicionado
+        if (checkHotHunchBtn && hotNumbersLotteryTypeSelect) checkHotHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('hot', hotNumbersLotteryTypeSelect));
     }
 
     async function checkLastGeneratedHunch(expectedHunchType, lotterySelectElement) {
-        console.log(`SCRIPT.JS: checkLastGeneratedHunch chamado para tipo: ${expectedHunchType}`);
-        const currentLottery = lotterySelectElement.value;
-        const currentHunch = lastGeneratedHunch;
+        // console.log(`SCRIPT.JS: checkLastGeneratedHunch para tipo: ${expectedHunchType}`);
+        const currentLottery = lotterySelectElement.value; const currentHunch = lastGeneratedHunch;
+        let targetCheckResultDiv = null; let targetNumbersDiv = null;
+        if (expectedHunchType === 'quick') { targetCheckResultDiv = quickHunchCheckResultDiv; targetNumbersDiv = quickHunchNumbersDiv; }
+        else if (expectedHunchType === 'esoteric') { targetCheckResultDiv = esotericHunchHistoryCheckDiv; targetNumbersDiv = esotericHunchNumbersDiv; }
+        else if (expectedHunchType === 'hot') { targetCheckResultDiv = hotHunchCheckResultDiv; targetNumbersDiv = hotNumbersHunchNumbersDiv; }
 
-        // Validação se o palpite atual é do tipo esperado e para a loteria correta
-        if (!currentHunch.jogo || !Array.isArray(currentHunch.jogo) || currentHunch.jogo.length === 0 ||
-            currentHunch.lottery !== currentLottery || currentHunch.type !== expectedHunchType ||
-            !currentHunch.checkResultDiv || !currentHunch.numbersDiv) {
-            
-            // Tenta encontrar a div de resultado correta se currentHunch.checkResultDiv for nula mas o tipo for conhecido
-            let targetCheckResultDiv = currentHunch.checkResultDiv;
-            if (!targetCheckResultDiv) {
-                if (expectedHunchType === 'quick' && quickHunchCheckResultDiv) targetCheckResultDiv = quickHunchCheckResultDiv;
-                else if (expectedHunchType === 'esoteric' && esotericHunchHistoryCheckDiv) targetCheckResultDiv = esotericHunchHistoryCheckDiv; // Esotérico tem div diferente
-                else if (expectedHunchType === 'hot' && hotHunchCheckResultDiv) targetCheckResultDiv = hotHunchCheckResultDiv;
-            }
-
-            if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = '<span class="misses">Gere um palpite deste tipo para esta loteria primeiro.</span>';
-            else console.warn("SCRIPT.JS: Div de resultado de conferência não encontrada para o tipo:", expectedHunchType);
-            
-            console.warn("SCRIPT.JS: Condições para conferir não atendidas ou tipo/loteria não corresponde:", {currentHunch, currentLottery, expectedHunchType});
-            return;
+        if (!currentHunch.jogo || !Array.isArray(currentHunch.jogo) || currentHunch.jogo.length === 0 || currentHunch.lottery !== currentLottery || currentHunch.type !== expectedHunchType || !targetCheckResultDiv || !targetNumbersDiv ) {
+            if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = '<span class="misses">Gere um palpite deste tipo para esta loteria primeiro.</span>'; return;
         }
         let resultsToUse = lastFetchedResults[currentLottery];
         if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) {
-            currentHunch.checkResultDiv.innerHTML = `<div class="spinner small-spinner"></div> Buscando últimos resultados...`;
-            try {
-                resultsToUse = await fetchData(`api/main/resultados/${currentLottery}`);
-                if(resultsToUse) resultsToUse.loteria_tipo = currentLottery;
-                lastFetchedResults[currentLottery] = resultsToUse;
-            } catch (e) { currentHunch.checkResultDiv.innerHTML = `<span class="misses">Falha ao buscar resultados.</span>`; return; }
+            targetCheckResultDiv.innerHTML = `<div class="spinner small-spinner"></div> Buscando resultados...`;
+            try { resultsToUse = await fetchData(`api/main/resultados/${currentLottery}`); if(resultsToUse) resultsToUse.loteria_tipo = currentLottery; lastFetchedResults[currentLottery] = resultsToUse; }
+            catch (e) { targetCheckResultDiv.innerHTML = `<span class="misses">Falha ao buscar resultados.</span>`; return; }
         }
-        if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) {
-            currentHunch.checkResultDiv.innerHTML = `<span class="misses">Resultados oficiais indisponíveis.</span>`; return;
-        }
-        if(typeof checkGame !== "function" || typeof renderGameNumbers !== "function") {
-            console.error("SCRIPT.JS: Funções checkGame ou renderGameNumbers não definidas!"); currentHunch.checkResultDiv.innerHTML = "Erro interno."; return;
-        }
+        if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) { targetCheckResultDiv.innerHTML = `<span class="misses">Resultados oficiais indisponíveis.</span>`; return; }
+        if(typeof checkGame !== "function" || typeof renderGameNumbers !== "function") { targetCheckResultDiv.innerHTML = "Erro interno."; return; }
         const result = checkGame(currentHunch.jogo, resultsToUse);
-        // Esotérico tem uma div de histórico, não de resultado de acertos diretos, então tratar diferente
-        if (expectedHunchType === 'esoteric' && currentHunch.checkResultDiv === esotericHunchHistoryCheckDiv) {
-             // A lógica de exibição do histórico já está em generateAndDisplayEsotericHunch.
-             // Poderíamos adicionar uma pequena nota sobre a conferência se desejado, mas não sobrescrever o histórico.
-             console.log("SCRIPT.JS: Conferência para palpite esotérico. Resultado:", result.message);
-             // Poderia adicionar `result.message` em algum lugar se houvesse um espaço dedicado.
-        } else {
-            currentHunch.checkResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`;
-        }
-        renderGameNumbers(currentHunch.numbersDiv, currentHunch.jogo, result.hitNumbers, result.almostNumbers, currentLottery);
+        if (expectedHunchType === 'esoteric') { console.log("Conferência p/ esotérico:", result.message); }
+        else { targetCheckResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`; }
+        renderGameNumbers(targetNumbersDiv, currentHunch.jogo, result.hitNumbers, result.almostNumbers, currentLottery);
     }
-    // === FIM DAS FUNÇÕES DE SALVAR E CONFERIR ===
 
-    // --- EVENT LISTENERS ---
-    console.log("SCRIPT.JS: Configurando lógica da splash screen e inicialização...");
+    // --- EVENT LISTENERS (final do script) ---
     if (splashProgressBarFill && splashProgressContainer && accessibleSplashScreen && !accessibleSplashScreen.classList.contains('hidden')) {
-        console.log("SCRIPT.JS: Iniciando animação da barra de progresso da splash screen.");
-        let progress = 0;
-        const totalVisualBarTime = SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION;
-        const intervalTime = Math.max(10, totalVisualBarTime / 100);
-        const progressInterval = setInterval(() => {
-            progress++;
-            if (splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', progress);
-            if (progress >= 100) {
-                clearInterval(progressInterval);
-                console.log("SCRIPT.JS: Animação da barra de progresso da splash screen concluída.");
-            }
-        }, intervalTime);
-    } else {
-        console.warn("SCRIPT.JS: Elementos da splash screen não encontrados ou já escondida na configuração inicial.");
+        let progress = 0; const totalVisualBarTime = SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION; const intervalTime = Math.max(10, totalVisualBarTime / 100);
+        const progressInterval = setInterval(() => { progress++; if (splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', progress); if (progress >= 100) { clearInterval(progressInterval); } }, intervalTime);
     }
+    criticalSplashTimeout = setTimeout(() => { if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") { showAppContentNow(); } if (!firebaseApp && typeof showGlobalError === "function") { showGlobalError("Falha crítica na inicialização."); if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();} criticalSplashTimeout = null; }, SPLASH_MINIMUM_VISIBLE_TIME + 2500);
+    if (typeof attemptFirebaseInit === "function") { setTimeout(attemptFirebaseInit, 100); } else { if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") showAppContentNow(); if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); }
 
-    criticalSplashTimeout = setTimeout(() => {
-        console.log("SCRIPT.JS: Timeout crítico da splash screen atingido.");
-        if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") {
-            console.log("SCRIPT.JS: Forçando exibição do conteúdo da app via timeout crítico.");
-            showAppContentNow();
-        }
-        if (!firebaseApp) {
-            if(typeof showGlobalError === "function") showGlobalError("Falha crítica na inicialização dos serviços. Tente recarregar a página.");
-            if (typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
-        }
-        criticalSplashTimeout = null;
-    }, SPLASH_MINIMUM_VISIBLE_TIME + 2500);
-
-    if (typeof attemptFirebaseInit === "function") {
-        console.log("SCRIPT.JS: Agendando attemptFirebaseInit.");
-        setTimeout(attemptFirebaseInit, 100);
-    } else {
-        console.error("SCRIPT.JS: Função attemptFirebaseInit não definida! Firebase não será inicializado.");
-        if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") {
-            console.log("SCRIPT.JS: Firebase não inicializado, mostrando conteúdo da app.");
-            showAppContentNow();
-        }
-        if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
-    }
-
-    // Listeners de Modais e Navegação
-    if(loginModalBtn && typeof openModal === "function") loginModalBtn.addEventListener('click', () => openModal(loginModal));
-    if(registerModalBtn && typeof openModal === "function") registerModalBtn.addEventListener('click', () => openModal(registerModal));
-    if(closeLoginModalBtn && typeof closeModal === "function") closeLoginModalBtn.addEventListener('click', () => closeModal(loginModal));
-    if(closeRegisterModalBtn && typeof closeModal === "function") closeRegisterModalBtn.addEventListener('click', () => closeModal(registerModal));
-    window.addEventListener('click', (event) => {
-        if (typeof closeModal === "function") {
-            if (event.target === loginModal) closeModal(loginModal);
-            if (event.target === registerModal) closeModal(registerModal);
-        }
-    });
-    if (navDashboardBtn && typeof setActiveSection === "function") navDashboardBtn.addEventListener('click', () => setActiveSection('dashboard-section'));
-    if (navMyGamesBtn && typeof setActiveSection === "function") navMyGamesBtn.addEventListener('click', () => { setActiveSection('my-games-section'); if (currentUser && typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); });
-    if (navPoolsBtn && typeof setActiveSection === "function") navPoolsBtn.addEventListener('click', () => setActiveSection('pools-section'));
-
-    // Listener para o select de loteria principal
-    if (mainDisplayLotterySelect) {
-        mainDisplayLotterySelect.addEventListener('change', (e) => {
-            const selectedLottery = e.target.value;
-            const selectedOption = e.target.options[e.target.selectedIndex];
-            const lotteryFriendlyName = selectedOption ? selectedOption.text : (LOTTERY_CONFIG_JS[selectedLottery] ? LOTTERY_CONFIG_JS[selectedLottery].name : selectedLottery.toUpperCase());
-
-            console.log(`SCRIPT.JS: Loteria principal para display (stats/results) mudou para: ${selectedLottery} (${lotteryFriendlyName})`);
-
-            if (resultsLotteryNameSpan) resultsLotteryNameSpan.textContent = lotteryFriendlyName;
-            if(freqStatsLotteryNameSpan) freqStatsLotteryNameSpan.textContent = lotteryFriendlyName;
-            if(pairFreqStatsLotteryNameSpan) pairFreqStatsLotteryNameSpan.textContent = lotteryFriendlyName;
-            if(cityStatsLotteryNameSpan) cityStatsLotteryNameSpan.textContent = lotteryFriendlyName;
-            if(cityPrizeSumLotteryNameSpan) cityPrizeSumLotteryNameSpan.textContent = lotteryFriendlyName;
-
-            if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery);
-            if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery);
-            if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery);
-            if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery);
-            if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(selectedLottery);
-        });
-    }
-    if (fetchResultsBtn && mainDisplayLotterySelect) {
-         fetchResultsBtn.addEventListener('click', () => {
-             const selectedLottery = mainDisplayLotterySelect.value;
-             console.log(`SCRIPT.JS: Botão fetchResultsBtn (refresh de stats/results) clicado para ${selectedLottery}`);
-             if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery);
-             if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery);
-             if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery);
-             if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery);
-             if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(selectedLottery);
-         });
-     }
-
-    // === LISTENERS PARA OS GERADORES ===
+    if(loginModalBtn) loginModalBtn.addEventListener('click', () => openModal(loginModal));
+    if(registerModalBtn) registerModalBtn.addEventListener('click', () => openModal(registerModal));
+    if(closeLoginModalBtn) closeLoginModalBtn.addEventListener('click', () => closeModal(loginModal));
+    if(closeRegisterModalBtn) closeRegisterModalBtn.addEventListener('click', () => closeModal(registerModal));
+    window.addEventListener('click', (event) => { if (event.target === loginModal) closeModal(loginModal); if (event.target === registerModal) closeModal(registerModal); });
+    if (navDashboardBtn) navDashboardBtn.addEventListener('click', () => setActiveSection('dashboard-section'));
+    if (navMyGamesBtn) navMyGamesBtn.addEventListener('click', () => { setActiveSection('my-games-section'); if (currentUser && typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); });
+    if (navPoolsBtn) navPoolsBtn.addEventListener('click', () => setActiveSection('pools-section'));
+    if (mainDisplayLotterySelect) { mainDisplayLotterySelect.addEventListener('change', (e) => { 
+        const selectedLottery = e.target.value; const selectedOption = e.target.options[e.target.selectedIndex]; const lotteryFriendlyName = selectedOption ? selectedOption.text : (LOTTERY_CONFIG_JS[selectedLottery] ? LOTTERY_CONFIG_JS[selectedLottery].name : selectedLottery.toUpperCase());
+        if (resultsLotteryNameSpan) resultsLotteryNameSpan.textContent = lotteryFriendlyName; if(freqStatsLotteryNameSpan) freqStatsLotteryNameSpan.textContent = lotteryFriendlyName; if(pairFreqStatsLotteryNameSpan) pairFreqStatsLotteryNameSpan.textContent = lotteryFriendlyName; if(cityStatsLotteryNameSpan) cityStatsLotteryNameSpan.textContent = lotteryFriendlyName; if(cityPrizeSumLotteryNameSpan) cityPrizeSumLotteryNameSpan.textContent = lotteryFriendlyName;
+        if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery); if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery); if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery); if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery); if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(selectedLottery);
+    }); }
+    if (fetchResultsBtn && mainDisplayLotterySelect) { fetchResultsBtn.addEventListener('click', () => { 
+        const selectedLottery = mainDisplayLotterySelect.value;
+        if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery); if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery); if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery); if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery); if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(selectedLottery);
+    }); }
     if (generateQuickHunchBtn) generateQuickHunchBtn.addEventListener('click', generateAndDisplayQuickHunch);
     if (generateEsotericHunchBtn) generateEsotericHunchBtn.addEventListener('click', generateAndDisplayEsotericHunch);
-    if (generateHotNumbersHunchBtn) generateHotNumbersHunchBtn.addEventListener('click', generateAndDisplayHotNumbersHunch); // ++ Adicionado
-
+    if (generateHotNumbersHunchBtn) generateHotNumbersHunchBtn.addEventListener('click', generateAndDisplayHotNumbersHunch);
     if (typeof setupSaveHunchButtonListeners === "function") setupSaveHunchButtonListeners();
     if (typeof setupCheckHunchButtonListeners === "function") setupCheckHunchButtonListeners();
-
-    // Listeners para os botões no banner promocional
-    if (promoRegisterBtn && registerModalBtn && typeof openModal === "function") promoRegisterBtn.addEventListener('click', () => openModal(registerModal));
-    if (promoLoginBtn && loginModalBtn && typeof openModal === "function") promoLoginBtn.addEventListener('click', () => openModal(loginModal));
-
-    // Listener para filtro de jogos salvos
-    if (filterLotteryMyGamesSelect) {
-        filterLotteryMyGamesSelect.addEventListener('change', (e) => {
-            if (currentUser && typeof loadUserGames === "function") loadUserGames(e.target.value);
-        });
-    }
-
-    // Listeners para Probabilidade Manual
-    if (manualProbUserNumbersInput && manualProbLotteryTypeSelect) {
+    if (promoRegisterBtn) promoRegisterBtn.addEventListener('click', () => openModal(registerModal));
+    if (promoLoginBtn) promoLoginBtn.addEventListener('click', () => openModal(loginModal));
+    if (filterLotteryMyGamesSelect) { filterLotteryMyGamesSelect.addEventListener('change', (e) => { if (currentUser && typeof loadUserGames === "function") loadUserGames(e.target.value); });}
+    if (manualProbUserNumbersInput && manualProbLotteryTypeSelect) { 
         manualProbUserNumbersInput.addEventListener('input', updateManualProbNumbersFeedback);
-        manualProbLotteryTypeSelect.addEventListener('change', () => {
-            const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
-            if (!selectedOption || !selectedOption.dataset.count || !selectedOption.dataset.min || !selectedOption.dataset.max) return;
-            manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${selectedOption.dataset.count} de ${selectedOption.dataset.min}-${selectedOption.dataset.max})`;
-            manualProbUserNumbersInput.value = '';
-            if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback();
-            if(manualProbabilityResultDisplay) manualProbabilityResultDisplay.textContent = "Aguardando seu jogo...";
+        manualProbLotteryTypeSelect.addEventListener('change', () => { 
+            const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex]; if (!selectedOption || !selectedOption.dataset.count || !selectedOption.dataset.min || !selectedOption.dataset.max) return;
+            manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${selectedOption.dataset.count} de ${selectedOption.dataset.min}-${selectedOption.dataset.max})`; manualProbUserNumbersInput.value = ''; 
+            if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback(); if(manualProbabilityResultDisplay) manualProbabilityResultDisplay.textContent = "Aguardando...";
         });
         const initialSelectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
-         if (initialSelectedOption && initialSelectedOption.dataset.count && initialSelectedOption.dataset.min && initialSelectedOption.dataset.max){
-            manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${initialSelectedOption.dataset.count} de ${initialSelectedOption.dataset.min}-${initialSelectedOption.dataset.max})`;
-         }
-        if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback();
+         if (initialSelectedOption && initialSelectedOption.dataset.count && initialSelectedOption.dataset.min && initialSelectedOption.dataset.max){ manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${initialSelectedOption.dataset.count} de ${initialSelectedOption.dataset.min}-${initialSelectedOption.dataset.max})`; }
+        if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback(); 
     }
-    if (manualCalculateProbBtn && manualProbLotteryTypeSelect && manualProbUserNumbersInput && manualProbabilityResultDisplay) {
-        manualCalculateProbBtn.addEventListener('click', async () => {
-            const lotteryType = manualProbLotteryTypeSelect.value;
-            const numbersStr = manualProbUserNumbersInput.value;
-            const userNumbersRaw = numbersStr.split(/[ ,;/\t\n]+/);
-            const userNumbers = userNumbersRaw.map(n => n.trim()).filter(n => n !== "" && !isNaN(n)).map(n => parseInt(n,10));
-            const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
-            const expectedCount = parseInt(selectedOption.dataset.count, 10);
-            if (userNumbers.length === 0) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Por favor, insira os números do seu jogo.</p>`; return; }
-            if (userNumbers.length !== expectedCount) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Para ${selectedOption.text.split('(')[0].trim()}, você deve fornecer ${expectedCount} números.</p>`; return; }
-            if (new Set(userNumbers).size !== userNumbers.length) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Seu jogo contém números repetidos.</p>`; return; }
+    if (manualCalculateProbBtn && manualProbLotteryTypeSelect && manualProbUserNumbersInput && manualProbabilityResultDisplay) { 
+        manualCalculateProbBtn.addEventListener('click', async () => { 
+            const lotteryType = manualProbLotteryTypeSelect.value; const numbersStr = manualProbUserNumbersInput.value; const userNumbersRaw = numbersStr.split(/[ ,;/\t\n]+/); const userNumbers = userNumbersRaw.map(n => n.trim()).filter(n => n !== "" && !isNaN(n)).map(n => parseInt(n,10));
+            const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex]; const expectedCount = parseInt(selectedOption.dataset.count, 10);
+            if (userNumbers.length === 0) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Insira os números.</p>`; return; }
+            if (userNumbers.length !== expectedCount) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Forneça ${expectedCount} números.</p>`; return; }
+            if (new Set(userNumbers).size !== userNumbers.length) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Números repetidos.</p>`; return; }
             const minNum = parseInt(selectedOption.dataset.min, 10); const maxNum = parseInt(selectedOption.dataset.max, 10);
-            for (const num of userNumbers) { if (num < minNum || num > maxNum) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">O número ${num} está fora do range (${minNum}-${maxNum}).</p>`; return; } }
+            for (const num of userNumbers) { if (num < minNum || num > maxNum) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Número ${num} fora do range.</p>`; return; } }
             manualProbabilityResultDisplay.innerHTML = '<div class="spinner small-spinner"></div> Calculando...';
             try {
-                const resultData = await fetchData(`api/main/jogo-manual/probabilidade`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ lottery_type: lotteryType, numeros_usuario: userNumbers })
-                });
+                const resultData = await fetchData(`api/main/jogo-manual/probabilidade`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lottery_type: lotteryType, numeros_usuario: userNumbers }) });
                 if (resultData.erro) { throw new Error(resultData.erro); }
-                let displayText = `Loteria: <span class="highlight">${resultData.loteria}</span>\n`;
-                displayText += `Seu Jogo: <span class="highlight">${resultData.jogo_usuario.join(', ')}</span>\n`;
-                displayText += `Probabilidade (Prêmio Máximo): <span class="highlight">${resultData.probabilidade_texto}</span>\n`;
-                if (resultData.probabilidade_decimal > 0) { displayText += `(Decimal Aprox.: ${resultData.probabilidade_decimal.toExponential(4)})\n`; }
+                let displayText = `Loteria: <span class="highlight">${resultData.loteria}</span>\nSeu Jogo: <span class="highlight">${resultData.jogo_usuario.join(', ')}</span>\nProbabilidade: <span class="highlight">${resultData.probabilidade_texto}</span>`;
+                if (resultData.probabilidade_decimal > 0) { displayText += ` (Decimal: ${resultData.probabilidade_decimal.toExponential(4)})`; }
                 if(resultData.descricao) displayText += `\n<small>${resultData.descricao}</small>`;
                 manualProbabilityResultDisplay.innerHTML = displayText.replace(/\n/g, '<br>');
             } catch (error) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Erro: ${error.message}</p>`; }
-        });
+        }); 
     }
 
     console.log("SCRIPT.JS: Final do script atingido, todos os listeners configurados.");
