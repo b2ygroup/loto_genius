@@ -1,6 +1,6 @@
-// script.js (SEU CÓDIGO da Resposta #47 + Minhas Integrações FINAIS v10.10 - CORRIGIDO)
+// script.js (SEU CÓDIGO da Resposta #47 + Minhas Integrações FINAIS v10.10 - CORRIGIDO LOGIN/REG/LOGOUT)
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver 10.10 (Integração Final Completa - CORRIGIDO)");
+    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver 10.10 (Integração Final Completa - CORRIGIDO LOGIN/REG/LOGOUT)");
     const domContentLoadedTimestamp = Date.now();
 
     // --- Constantes de Tempo da Splash Screen ---
@@ -335,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function openModal(modalElement) { if (modalElement) { modalElement.style.display = 'flex'; document.body.style.overflow = 'hidden'; } else {console.warn("openModal: modalElement não encontrado")} }
     function closeModal(modalElement) { if (modalElement) { modalElement.style.display = 'none'; document.body.style.overflow = ''; if (modalElement === loginModal && loginEmailInput && loginPasswordInput && loginErrorP) { loginEmailInput.value = ''; loginPasswordInput.value = ''; loginErrorP.textContent = ''; } else if (modalElement === registerModal && registerEmailInput && registerPasswordInput && registerConfirmPasswordInput && registerErrorP) { registerEmailInput.value = ''; registerPasswordInput.value = ''; registerConfirmPasswordInput.value = ''; registerErrorP.textContent = ''; } }  else {console.warn("closeModal: modalElement não encontrado")} }
 
-    // ++ NOVA FUNÇÃO PARA CONFIGURAR LISTENERS DE AUTENTICAÇÃO ++
+    // ++ FUNÇÃO PARA CONFIGURAR LISTENERS DE AUTENTICAÇÃO ++
     function setupAuthEventListeners() {
         console.log("SCRIPT.JS: Setting up auth event listeners.");
         if(loginSubmitBtn) {
@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(loginErrorP) loginErrorP.textContent = "Erro de inicialização. Tente novamente.";
                     return;
                 }
-                if (!loginEmailInput || !loginPasswordInput || !loginErrorP) return;
+                if (!loginEmailInput || !loginPasswordInput || !loginErrorP) return; // Adicionado para consistência
                 const email = loginEmailInput.value; const password = loginPasswordInput.value;
                 loginErrorP.textContent = ""; if (!email || !password) { loginErrorP.textContent = "Preencha email e senha."; return; }
 
@@ -371,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(registerErrorP) registerErrorP.textContent = "Erro de inicialização. Tente novamente.";
                     return;
                 }
-                if (!registerEmailInput || !registerPasswordInput || !registerConfirmPasswordInput || !registerErrorP) return;
+                if (!registerEmailInput || !registerPasswordInput || !registerConfirmPasswordInput || !registerErrorP) return; // Adicionado para consistência
                 const email = registerEmailInput.value; const password = registerPasswordInput.value; const confirmPassword = registerConfirmPasswordInput.value;
                 registerErrorP.textContent = ""; if (!email || !password || !confirmPassword) { registerErrorP.textContent = "Preencha todos os campos."; return; }
                 if (password !== confirmPassword) { registerErrorP.textContent = "As senhas não coincidem."; return; }
@@ -392,8 +392,30 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             console.warn("SCRIPT.JS: registerSubmitBtn não encontrado para adicionar listener.");
         }
+
+        // MOVER O LISTENER DO LOGOUTBTN PARA CÁ
+        if(logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if (firebaseAuth && currentUser) { // Garante que firebaseAuth e um usuário logado existem
+                    console.log("SCRIPT.JS: Logout button clicked, attempting signOut for user:", currentUser.email);
+                    firebaseAuth.signOut()
+                        .then(() => {
+                            console.log("SCRIPT.JS: Firebase signOut successful. User logged out.");
+                            // A UI será atualizada pelo onAuthStateChanged que detectará o usuário como null.
+                        })
+                        .catch((error) => {
+                            console.error("SCRIPT.JS: Firebase signOut error:", error);
+                            alert(`Erro no logout: ${error.message}`);
+                        });
+                } else {
+                    console.warn("SCRIPT.JS: Logout button clicked, but firebaseAuth not ready or no user logged in.");
+                }
+            });
+        } else {
+            console.warn("SCRIPT.JS: logoutBtn não encontrado para adicionar listener.");
+        }
     }
-    // ++ FIM DA NOVA FUNÇÃO ++
+    // ++ FIM DA FUNÇÃO ++
 
     function initializeFirebase() {
         console.log("SCRIPT.JS: initializeFirebase chamada");
@@ -405,13 +427,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 firestoreDB = firebase.firestore(firebaseApp);
                 console.log("SCRIPT.JS: Firebase App, Auth, Firestore inicializados.");
 
-                // ++ CHAMAR A FUNÇÃO DE CONFIGURAÇÃO DOS LISTENERS DE AUTENTICAÇÃO AQUI ++
+                // CHAMAR A FUNÇÃO DE CONFIGURAÇÃO DOS LISTENERS DE AUTENTICAÇÃO AQUI
                 if (typeof setupAuthEventListeners === "function") {
                     setupAuthEventListeners();
                 } else {
                     console.error("SCRIPT.JS: Função setupAuthEventListeners não definida!");
                 }
-                // ++ FIM DA CHAMADA ++
 
                 firebaseAuth.onAuthStateChanged(user => {
                     console.log("SCRIPT.JS: onAuthStateChanged - Novo estado de autenticação:", user ? user.email : "Nenhum usuário");
@@ -885,18 +906,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (promoRegisterBtn && registerModalBtn && typeof openModal === "function") promoRegisterBtn.addEventListener('click', () => openModal(registerModal));
     if (promoLoginBtn && loginModalBtn && typeof openModal === "function") promoLoginBtn.addEventListener('click', () => openModal(loginModal));
     // === FIM DOS NOVOS EVENT LISTENERS ===
-
-    // Listeners de Autenticação (REMOVIDOS DAQUI E MOVIDOS PARA setupAuthEventListeners)
-
-    if(logoutBtn && typeof firebaseAuth !== 'undefined') { // firebaseAuth pode ainda não estar pronto aqui, mas o listener do onAuthStateChanged cuidará da visibilidade
-        logoutBtn.addEventListener('click', () => {
-            if (firebaseAuth) { // Verifique se firebaseAuth está pronto antes de usar
-                firebaseAuth.signOut().catch((error) => { alert(`Erro no logout: ${error.message}`); });
-            } else {
-                console.warn("SCRIPT.JS: Logout button clicked, but firebaseAuth not ready.");
-            }
-        });
-    }
 
     // Listener para filtro de jogos salvos
     if (filterLotteryMyGamesSelect) {
