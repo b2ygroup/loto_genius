@@ -1,15 +1,15 @@
-// script.js (SEU CÓDIGO da Resposta #47 + Minhas Integrações FINAIS v10.10)
+// script.js (SEU CÓDIGO da Resposta #47 + Minhas Integrações FINAIS v10.10 - CORRIGIDO)
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver 10.10 (Integração Final Completa)");
-    const domContentLoadedTimestamp = Date.now(); 
+    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver 10.10 (Integração Final Completa - CORRIGIDO)");
+    const domContentLoadedTimestamp = Date.now();
 
     // --- Constantes de Tempo da Splash Screen ---
-    const SPLASH_LOGO_ANIM_MAX_DELAY = 1300; 
-    const SPLASH_LOGO_ANIM_DURATION = 600;  
-    const SPLASH_TEXT_ANIM_DELAY = 2200; 
-    const SPLASH_TEXT_ANIM_DURATION = 1000; 
-    const SPLASH_PROGRESS_BAR_START_DELAY = 2500; 
-    const SPLASH_PROGRESS_BAR_FILL_DURATION = 3000; 
+    const SPLASH_LOGO_ANIM_MAX_DELAY = 1300;
+    const SPLASH_LOGO_ANIM_DURATION = 600;
+    const SPLASH_TEXT_ANIM_DELAY = 2200;
+    const SPLASH_TEXT_ANIM_DURATION = 1000;
+    const SPLASH_PROGRESS_BAR_START_DELAY = 2500;
+    const SPLASH_PROGRESS_BAR_FILL_DURATION = 3000;
     const APPROX_TOTAL_CSS_ANIM_DURATION = Math.max(
         SPLASH_LOGO_ANIM_MAX_DELAY + SPLASH_LOGO_ANIM_DURATION,
         SPLASH_TEXT_ANIM_DELAY + SPLASH_TEXT_ANIM_DURATION,
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.warn("SCRIPT.JS: Elemento 'accessible-splash-screen' NÃO encontrado.");
     }
-    
+
     const appContent = document.getElementById('app-content');
     const currentYearSpan = document.getElementById('current-year');
     const navDashboardBtn = document.getElementById('nav-dashboard-btn');
@@ -47,18 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const recentPoolsList = document.getElementById('recent-pools-list');
     const topWinnersList = document.getElementById('top-winners-list');
     const confettiCanvas = document.getElementById('confetti-canvas');
-    
-    // Seletores do Gerador Inteligente ANTIGO - Serão substituídos pelos novos
-    // const lotteryTypeSelect = document.getElementById('lottery-type'); 
-    // const iaStrategySelect = document.getElementById('ia-strategy-select'); 
-    // const simulatePremiumCheckbox = document.getElementById('simulate-premium-checkbox');
-    // const generateGameBtn = document.getElementById('generate-game-btn');
-    // const gameGenerationOutputDiv = document.getElementById('game-generation-output');
-    // const generatedGameNumbersDiv = document.getElementById('generated-game-numbers');
-    // const generatedGameStrategyP = document.getElementById('generated-game-strategy');
-    // const saveGameBtn = document.getElementById('save-game-btn');
-    // const checkGeneratedGameBtn = document.getElementById('check-generated-game-btn');
-    // const generatedGameCheckResultDiv = document.getElementById('generated-game-check-result');
 
     // NOVOS Seletores para Palpite Aleatório Rápido
     const quickHunchLotteryTypeSelect = document.getElementById('quick-hunch-lottery-type');
@@ -69,19 +57,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveQuickHunchBtn = document.getElementById('save-quick-hunch-btn');
     const checkQuickHunchBtn = document.getElementById('check-quick-hunch-btn');
     const quickHunchCheckResultDiv = document.getElementById('quick-hunch-check-result');
-    
+
     // NOVOS Seletores para Palpites Cósmicos
     const esotericLotteryTypeSelect = document.getElementById('esoteric-lottery-type');
     const birthDateInput = document.getElementById('birth-date-input');
     const generateEsotericHunchBtn = document.getElementById('generate-esoteric-hunch-btn');
-    const esotericHunchCard = document.getElementById('esoteric-hunch-card'); 
+    const esotericHunchCard = document.getElementById('esoteric-hunch-card');
     const esotericHunchOutputDiv = document.getElementById('esoteric-hunch-output');
     const esotericHunchNumbersDiv = document.getElementById('esoteric-hunch-numbers');
     const esotericHunchMethodP = document.getElementById('esoteric-hunch-method');
     const esotericHunchHistoryCheckDiv = document.getElementById('esoteric-hunch-history-check');
     const saveEsotericHunchBtn = document.getElementById('save-esoteric-hunch-btn');
     const checkEsotericHunchBtn = document.getElementById('check-esoteric-hunch-btn');
-    
+
     // NOVOS Seletores para Banner Promocional
     const cosmicPromoBanner = document.getElementById('cosmic-promo-banner');
     const promoRegisterBtn = document.getElementById('promo-register-btn');
@@ -91,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainDisplayLotterySelect = quickHunchLotteryTypeSelect; // Este controlará os displays de stats/results
     const apiResultsPre = document.getElementById('api-results');
     const resultsLotteryNameSpan = document.getElementById('results-lottery-name');
-    const fetchResultsBtn = document.getElementById('fetch-results-btn'); 
+    const fetchResultsBtn = document.getElementById('fetch-results-btn');
 
     const savedGamesContainer = document.getElementById('saved-games-container');
     const noSavedGamesP = document.getElementById('no-saved-games');
@@ -114,8 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerConfirmPasswordInput = document.getElementById('register-confirm-password');
     const registerSubmitBtn = document.getElementById('register-submit-btn');
     const registerErrorP = document.getElementById('register-error');
-    const errorDiv = document.getElementById('global-error-msg'); 
-    
+    const errorDiv = document.getElementById('global-error-msg');
+
     const freqStatsLotteryNameSpan = document.getElementById('freq-stats-lottery-name');
     const frequencyListContainer = document.getElementById('frequency-list-container');
     const pairFreqStatsLotteryNameSpan = document.getElementById('pair-freq-stats-lottery-name');
@@ -129,38 +117,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const manualCalculateProbBtn = document.getElementById('manual-calculate-prob-btn');
     const manualProbabilityResultDisplay = document.getElementById('manual-probability-result-display');
     const manualProbNumbersCountFeedback = document.getElementById('manual-prob-numbers-count-feedback');
-    
+
     // --- Variáveis Globais ---
-    let splashHiddenTimestamp = 0; 
+    let splashHiddenTimestamp = 0;
     if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
     let BACKEND_URL_BASE;
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:") { 
-        BACKEND_URL_BASE = 'http://127.0.0.1:5000'; 
-    } else { 
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:") {
+        BACKEND_URL_BASE = 'http://127.0.0.1:5000';
+    } else {
         BACKEND_URL_BASE = ''; // Para Vercel, usa caminhos relativos para /api/...
     }
-    
+
     let firebaseApp, firebaseAuth, firestoreDB, currentUser = null;
-    let lastFetchedResults = {}; 
+    let lastFetchedResults = {};
     // Variável para armazenar o último palpite gerado (seja rápido ou esotérico) e seus elementos associados
-    let lastGeneratedHunch = { 
+    let lastGeneratedHunch = {
         type: null, // 'quick' ou 'esoteric'
         lottery: null,
         jogo: [],
-        estrategia_metodo: '', 
-        outputDiv: null, 
+        estrategia_metodo: '',
+        outputDiv: null,
         numbersDiv: null,
         checkResultDiv: null,
         saveButton: null,
         checkButton: null
-    };  
-    let criticalSplashTimeout; 
-    let firebaseInitAttempts = 0; 
-    const maxFirebaseInitAttempts = 10; 
-    const LOTTERY_CONFIG_JS = { 
-        megasena: { count: 6, color: "#209869", name: "Mega-Sena" }, 
+    };
+    let criticalSplashTimeout;
+    let firebaseInitAttempts = 0;
+    const maxFirebaseInitAttempts = 10;
+    const LOTTERY_CONFIG_JS = {
+        megasena: { count: 6, color: "#209869", name: "Mega-Sena" },
         lotofacil: { count: 15, color: "#930089", name: "Lotofácil" },
-        quina: { count: 5, color: "#260085", name: "Quina" }, 
+        quina: { count: 5, color: "#260085", name: "Quina" },
         lotomania: { count_sorteadas: 20, count_apostadas: 50, color: "#f78100", name: "Lotomania" }
     };
 
@@ -172,15 +160,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function disableFirebaseFeatures() { if (loginModalBtn) loginModalBtn.disabled = true; if (registerModalBtn) registerModalBtn.disabled = true; }
     function enableFirebaseFeatures() { if (loginModalBtn) loginModalBtn.disabled = false; if (registerModalBtn) registerModalBtn.disabled = false; if(document.getElementById('global-error-msg')) document.getElementById('global-error-msg').style.display = 'none';}
     function setActiveSection(sectionId) { if (!mainSections || mainSections.length === 0) { console.warn("SCRIPT.JS: setActiveSection - mainSections não encontrado."); return; } mainSections.forEach(section => { section.classList.remove('active-section'); if (section.id === sectionId) section.classList.add('active-section'); }); if (mainNav) { const navButtons = mainNav.querySelectorAll('.nav-item'); navButtons.forEach(btn => { btn.classList.remove('active'); if (btn.id === `nav-${sectionId.replace('-section', '')}-btn`) btn.classList.add('active'); }); } }
-    
+
     async function fetchData(endpoint, options = {}) {
-        const url = `${BACKEND_URL_BASE}/${endpoint}`; // Removido /api/main/ daqui, pois os endpoints da API Flask agora são completos
+        const url = `${BACKEND_URL_BASE}/${endpoint}`;
         console.log(`SCRIPT.JS: Iniciando fetchData para ${options.method || 'GET'} ${url}`, options.body ? (typeof options.body === 'string' ? JSON.parse(options.body) : options.body) : 'sem body');
         try {
             const response = await fetch(url, options);
-            const responseText = await response.text(); 
+            const responseText = await response.text();
             console.log(`SCRIPT.JS: Resposta recebida de ${url} - Status: ${response.status}`);
-            
+
             if (!response.ok) {
                 let errorJson = {};
                 try { errorJson = JSON.parse(responseText); } catch(e) { console.warn("SCRIPT.JS: Resposta de erro não era JSON válido:", responseText); }
@@ -194,10 +182,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             if (error.status && error.message) { throw error; }
             console.error(`SCRIPT.JS: Erro geral em fetchData para ${url}:`, error);
-            throw { status: error.status || 503, message: error.message || "Erro de comunicação com o servidor.", data: {} }; 
+            throw { status: error.status || 503, message: error.message || "Erro de comunicação com o servidor.", data: {} };
         }
     }
-        
+
     function animateCounter(element, finalValueInput) {
         if (!element) { console.warn("animateCounter: element not found for ID:", element ? element.id : "undefined"); return; }
         const numericFinalValue = parseInt(finalValueInput, 10);
@@ -215,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function animationStep(timestamp) {
             if (!startTime) startTime = timestamp;
             const progress = Math.min((timestamp - startTime) / duration, 1);
-            let currentValue = (startValue > numericFinalValue) ? 
+            let currentValue = (startValue > numericFinalValue) ?
                 Math.max(numericFinalValue, Math.floor(startValue - progress * (startValue - numericFinalValue))) :
                 Math.min(numericFinalValue, Math.floor(startValue + progress * (numericFinalValue - startValue)));
             element.textContent = currentValue.toLocaleString('pt-BR');
@@ -227,35 +215,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchPlatformStats() {
         console.log("SCRIPT.JS: fetchPlatformStats chamado");
-        if (!statsJogosGeradosSpan || !statsJogosPremiadosSpan || !statsValorPremiosSpan) { 
+        if (!statsJogosGeradosSpan || !statsJogosPremiadosSpan || !statsValorPremiosSpan) {
             console.warn("SCRIPT.JS: Elementos de stats da plataforma não encontrados.");
             if(statsJogosGeradosSpan) statsJogosGeradosSpan.textContent = "N/A";
             if(statsJogosPremiadosSpan) statsJogosPremiadosSpan.textContent = "N/A";
             if(statsValorPremiosSpan) statsValorPremiosSpan.textContent = "R$ N/A";
-            return; 
+            return;
         }
         try {
             const stats = await fetchData('api/main/platform-stats');
             console.log("SCRIPT.JS: Stats da plataforma recebidos:", stats);
-            if (stats && typeof stats.jogos_gerados_total === 'number') { animateCounter(statsJogosGeradosSpan, stats.jogos_gerados_total); } 
+            if (stats && typeof stats.jogos_gerados_total === 'number') { animateCounter(statsJogosGeradosSpan, stats.jogos_gerados_total); }
             else { statsJogosGeradosSpan.textContent = "N/A"; }
-            if (stats && typeof stats.jogos_premiados_estimativa === 'number') { animateCounter(statsJogosPremiadosSpan, stats.jogos_premiados_estimativa); } 
+            if (stats && typeof stats.jogos_premiados_estimativa === 'number') { animateCounter(statsJogosPremiadosSpan, stats.jogos_premiados_estimativa); }
             else { statsJogosPremiadosSpan.textContent = "N/A"; }
-            if (stats && typeof stats.valor_premios_estimativa_formatado === 'string') { statsValorPremiosSpan.textContent = stats.valor_premios_estimativa_formatado; } 
+            if (stats && typeof stats.valor_premios_estimativa_formatado === 'string') { statsValorPremiosSpan.textContent = stats.valor_premios_estimativa_formatado; }
             else { statsValorPremiosSpan.textContent = "R$ N/A"; }
         } catch (error) {
             statsJogosGeradosSpan.textContent = "N/A"; statsJogosPremiadosSpan.textContent = "N/A"; statsValorPremiosSpan.textContent = "R$ N/A";
             console.error("SCRIPT.JS: Erro em fetchPlatformStats:", error);
         }
     }
-    
+
     async function fetchRecentWinningPools() {
         console.log("SCRIPT.JS: fetchRecentWinningPools chamado");
         if (!recentPoolsList) { console.warn("SCRIPT.JS: recentPoolsList não encontrado."); return; }
         recentPoolsList.innerHTML = '<li><div class="spinner small-spinner"></div> Carregando...</li>';
         try {
             const pools = await fetchData('api/main/recent-winning-pools');
-            recentPoolsList.innerHTML = ''; 
+            recentPoolsList.innerHTML = '';
             if (pools && pools.length > 0) { pools.forEach(pool => { const li = document.createElement('li'); li.innerHTML = `<span><i class="fas fa-trophy pool-icon"></i> ${pool.name} (${pool.lottery})</span> <span class="pool-prize">${pool.prize}</span> <small>${pool.date}</small>`; recentPoolsList.appendChild(li); }); }
             else { recentPoolsList.innerHTML = '<li>Nenhum bolão premiado recentemente.</li>'; }
         } catch (error) { recentPoolsList.innerHTML = '<li>Erro ao carregar bolões.</li>'; console.error("SCRIPT.JS: Erro em fetchRecentWinningPools:", error); }
@@ -267,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
         topWinnersList.innerHTML = '<li><div class="spinner small-spinner"></div> Carregando...</li>';
         try {
             const winners = await fetchData('api/main/top-winners');
-            topWinnersList.innerHTML = ''; 
+            topWinnersList.innerHTML = '';
             if (winners && winners.length > 0) { winners.forEach((winner, index) => { const li = document.createElement('li'); li.innerHTML = `<span>${index + 1}. <i class="fas fa-user-astronaut winner-icon"></i> ${winner.nick}</span> <span class="winner-prize">${winner.prize_total}</span>`; topWinnersList.appendChild(li); }); }
             else { topWinnersList.innerHTML = '<li>Ranking de ganhadores indisponível.</li>'; }
         } catch (error) { topWinnersList.innerHTML = '<li>Erro ao carregar ranking.</li>'; console.error("SCRIPT.JS: Erro em fetchTopWinners:", error); }
@@ -275,12 +263,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchAndDisplayStatsGeneric(lotteryName, statType, container, nameSpanInCard, endpointPrefix) {
         console.log(`SCRIPT.JS: fetchAndDisplayStatsGeneric para ${statType} de ${lotteryName}`);
-        if (!container || !nameSpanInCard || !mainDisplayLotterySelect) { 
+        if (!container || !nameSpanInCard || !mainDisplayLotterySelect) {
             console.warn(`SCRIPT.JS: Elementos faltando para fetchAndDisplayStatsGeneric (${statType}, ${lotteryName})`);
             if(container) container.innerHTML = '<p class="error-message">Erro interno (elementos DOM não encontrados).</p>';
-            return; 
+            return;
         }
-        // A loteria já é pega do mainDisplayLotterySelect no event listener, aqui usamos o lotteryName passado
         const lotteryConfigEntry = Object.values(LOTTERY_CONFIG_JS).find(config => mainDisplayLotterySelect.options[mainDisplayLotterySelect.selectedIndex]?.text.includes(config.name));
         const lotteryFriendlyName = lotteryConfigEntry ? lotteryConfigEntry.name : lotteryName.toUpperCase();
 
@@ -347,7 +334,67 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeCarousels() { /* Sua implementação original */ }
     function openModal(modalElement) { if (modalElement) { modalElement.style.display = 'flex'; document.body.style.overflow = 'hidden'; } else {console.warn("openModal: modalElement não encontrado")} }
     function closeModal(modalElement) { if (modalElement) { modalElement.style.display = 'none'; document.body.style.overflow = ''; if (modalElement === loginModal && loginEmailInput && loginPasswordInput && loginErrorP) { loginEmailInput.value = ''; loginPasswordInput.value = ''; loginErrorP.textContent = ''; } else if (modalElement === registerModal && registerEmailInput && registerPasswordInput && registerConfirmPasswordInput && registerErrorP) { registerEmailInput.value = ''; registerPasswordInput.value = ''; registerConfirmPasswordInput.value = ''; registerErrorP.textContent = ''; } }  else {console.warn("closeModal: modalElement não encontrado")} }
-    
+
+    // ++ NOVA FUNÇÃO PARA CONFIGURAR LISTENERS DE AUTENTICAÇÃO ++
+    function setupAuthEventListeners() {
+        console.log("SCRIPT.JS: Setting up auth event listeners.");
+        if(loginSubmitBtn) {
+            loginSubmitBtn.addEventListener('click', () => {
+                if (!firebaseAuth) {
+                    console.error("SCRIPT.JS: firebaseAuth não está pronto para login.");
+                    if(loginErrorP) loginErrorP.textContent = "Erro de inicialização. Tente novamente.";
+                    return;
+                }
+                if (!loginEmailInput || !loginPasswordInput || !loginErrorP) return;
+                const email = loginEmailInput.value; const password = loginPasswordInput.value;
+                loginErrorP.textContent = ""; if (!email || !password) { loginErrorP.textContent = "Preencha email e senha."; return; }
+
+                console.log("SCRIPT.JS: Login button clicked, attempting signInWithEmailAndPassword...");
+                firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        console.log("SCRIPT.JS: Login successful for:", userCredential.user.email);
+                        if(typeof closeModal === "function") closeModal(loginModal);
+                    })
+                    .catch((error) => {
+                        console.error("SCRIPT.JS: Login error:", error);
+                        loginErrorP.textContent = `Erro: ${error.message}`;
+                    });
+            });
+        } else {
+            console.warn("SCRIPT.JS: loginSubmitBtn não encontrado para adicionar listener.");
+        }
+
+        if(registerSubmitBtn) {
+            registerSubmitBtn.addEventListener('click', () => {
+                if (!firebaseAuth) {
+                    console.error("SCRIPT.JS: firebaseAuth não está pronto para registro.");
+                    if(registerErrorP) registerErrorP.textContent = "Erro de inicialização. Tente novamente.";
+                    return;
+                }
+                if (!registerEmailInput || !registerPasswordInput || !registerConfirmPasswordInput || !registerErrorP) return;
+                const email = registerEmailInput.value; const password = registerPasswordInput.value; const confirmPassword = registerConfirmPasswordInput.value;
+                registerErrorP.textContent = ""; if (!email || !password || !confirmPassword) { registerErrorP.textContent = "Preencha todos os campos."; return; }
+                if (password !== confirmPassword) { registerErrorP.textContent = "As senhas não coincidem."; return; }
+                if (password.length < 6) { registerErrorP.textContent = "A senha deve ter no mínimo 6 caracteres."; return; }
+
+                console.log("SCRIPT.JS: Register button clicked, attempting createUserWithEmailAndPassword...");
+                firebaseAuth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        console.log("SCRIPT.JS: Registration successful for:", userCredential.user.email);
+                        alert("Usuário registrado! Você já está logado.");
+                        if(typeof closeModal === "function") closeModal(registerModal);
+                    })
+                    .catch((error) => {
+                        console.error("SCRIPT.JS: Registration error:", error);
+                        registerErrorP.textContent = `Erro: ${error.message}`;
+                    });
+            });
+        } else {
+            console.warn("SCRIPT.JS: registerSubmitBtn não encontrado para adicionar listener.");
+        }
+    }
+    // ++ FIM DA NOVA FUNÇÃO ++
+
     function initializeFirebase() {
         console.log("SCRIPT.JS: initializeFirebase chamada");
         if (typeof firebase !== 'undefined' && typeof firebaseConfig !== 'undefined') {
@@ -357,69 +404,77 @@ document.addEventListener('DOMContentLoaded', () => {
                 firebaseAuth = firebase.auth(firebaseApp);
                 firestoreDB = firebase.firestore(firebaseApp);
                 console.log("SCRIPT.JS: Firebase App, Auth, Firestore inicializados.");
-                
+
+                // ++ CHAMAR A FUNÇÃO DE CONFIGURAÇÃO DOS LISTENERS DE AUTENTICAÇÃO AQUI ++
+                if (typeof setupAuthEventListeners === "function") {
+                    setupAuthEventListeners();
+                } else {
+                    console.error("SCRIPT.JS: Função setupAuthEventListeners não definida!");
+                }
+                // ++ FIM DA CHAMADA ++
+
                 firebaseAuth.onAuthStateChanged(user => {
                     console.log("SCRIPT.JS: onAuthStateChanged - Novo estado de autenticação:", user ? user.email : "Nenhum usuário");
-                    currentUser = user; 
+                    currentUser = user;
                     if (typeof updateLoginUI === "function") updateLoginUI(user);
                     else console.error("SCRIPT.JS: Função updateLoginUI não definida em onAuthStateChanged!");
 
                     if (criticalSplashTimeout) { clearTimeout(criticalSplashTimeout); criticalSplashTimeout = null; console.log("SCRIPT.JS: Timeout crítico da splash cancelado."); }
-                    
+
                     const timeSinceDOMLoad = Date.now() - domContentLoadedTimestamp;
                     let delayToHideSplash = 0;
-                    if (splashHiddenTimestamp === 0) { 
+                    if (splashHiddenTimestamp === 0) {
                         if (timeSinceDOMLoad < SPLASH_MINIMUM_VISIBLE_TIME) {
                             delayToHideSplash = SPLASH_MINIMUM_VISIBLE_TIME - timeSinceDOMLoad;
                         }
                         console.log(`SCRIPT.JS: Agendando showAppContentNow com delay de ${delayToHideSplash}ms.`);
                         setTimeout(showAppContentNow, delayToHideSplash);
-                    } else { 
+                    } else {
                         console.log("SCRIPT.JS: Chamando showAppContentNow diretamente (splash já foi escondida).");
-                        showAppContentNow();  
+                        showAppContentNow();
                     }
                 });
                 if (typeof enableFirebaseFeatures === "function") enableFirebaseFeatures();
                 return true;
-            } catch (error) { 
+            } catch (error) {
                 console.error("SCRIPT.JS: CRITICAL Firebase init error:", error);
                 if (typeof showGlobalError === "function") showGlobalError(`Erro ao inicializar serviços: ${error.message}. Funcionalidades de login podem estar desabilitadas.`);
-                if (typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); 
-                return false; 
+                if (typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
+                return false;
             }
-        } else { 
-            console.error("SCRIPT.JS: Firebase SDK ou firebaseConfig não definidos GLOBALMENTE."); 
+        } else {
+            console.error("SCRIPT.JS: Firebase SDK ou firebaseConfig não definidos GLOBALMENTE.");
             if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") {
                 console.log("SCRIPT.JS: Firebase não carregado, mostrando conteúdo da app.");
                 setTimeout(showAppContentNow, SPLASH_MINIMUM_VISIBLE_TIME > (Date.now() - domContentLoadedTimestamp) ? SPLASH_MINIMUM_VISIBLE_TIME - (Date.now() - domContentLoadedTimestamp) : 0);
             }
             if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
-            return false; 
+            return false;
         }
     }
 
     function attemptFirebaseInit() {
         console.log("SCRIPT.JS: attemptFirebaseInit chamada, tentativa:", firebaseInitAttempts + 1);
-        if (initializeFirebase()) { 
+        if (initializeFirebase()) {
             console.log("SCRIPT.JS: Firebase inicializado com sucesso.");
-        } else { 
+        } else {
             firebaseInitAttempts++;
             if (firebaseInitAttempts < maxFirebaseInitAttempts) {
                 console.log(`SCRIPT.JS: Tentativa ${firebaseInitAttempts} de inicializar Firebase falhou. Tentando novamente em 500ms.`);
                 setTimeout(attemptFirebaseInit, 500);
-            } else { 
+            } else {
                 console.error("SCRIPT.JS: Falha ao inicializar Firebase após múltiplas tentativas.");
-                if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") { showAppContentNow(); } 
+                if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") { showAppContentNow(); }
                 if(typeof showGlobalError === "function") showGlobalError("Não foi possível carregar os serviços de usuário. Algumas funcionalidades podem estar indisponíveis. Por favor, recarregue.");
                 if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
             }
         }
     }
 
-    async function fetchAndDisplayResults(lottery) { 
+    async function fetchAndDisplayResults(lottery) {
         console.log(`SCRIPT.JS: fetchAndDisplayResults para ${lottery}`);
-        if (!apiResultsPre || !resultsLotteryNameSpan || !mainDisplayLotterySelect) { 
-             console.warn("SCRIPT.JS: Elementos para fetchAndDisplayResults não encontrados."); return; 
+        if (!apiResultsPre || !resultsLotteryNameSpan || !mainDisplayLotterySelect) {
+             console.warn("SCRIPT.JS: Elementos para fetchAndDisplayResults não encontrados."); return;
         }
         const selectedOption = Array.from(mainDisplayLotterySelect.options).find(opt => opt.value === lottery);
         const lotteryFriendlyName = selectedOption ? selectedOption.text : (LOTTERY_CONFIG_JS[lottery] ? LOTTERY_CONFIG_JS[lottery].name : lottery.toUpperCase());
@@ -433,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (data.aviso) { displayText = `Aviso: ${data.aviso}\nConcurso: ${data.ultimo_concurso || 'N/A'}\nData: ${data.data || 'N/A'}\nNúmeros: ${data.numeros ? data.numeros.join(', ') : 'N/A'}`; }
             else { displayText = `Concurso: ${data.ultimo_concurso || 'N/A'}\nData: ${data.data || 'N/A'}\nNúmeros Sorteados: ${data.numeros ? data.numeros.join(', ') : 'N/A'}`; }
             apiResultsPre.textContent = displayText;
-            lastFetchedResults[lottery] = data; 
+            lastFetchedResults[lottery] = data;
             if(lastFetchedResults[lottery] && !lastFetchedResults[lottery].erro && !lastFetchedResults[lottery].aviso) {
                  lastFetchedResults[lottery].loteria_tipo = lottery;
             }
@@ -446,7 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderGameNumbers(container, numbersArray, highlightedNumbers = [], almostNumbers = [], currentLotteryForColor = null) {
         if (!container) { console.warn("renderGameNumbers: container não encontrado"); return; }
-        container.innerHTML = ''; 
+        container.innerHTML = '';
         if (!numbersArray || !Array.isArray(numbersArray) || numbersArray.length === 0) {
             container.textContent = "N/A"; return;
         }
@@ -455,7 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let activeLottery = currentLotteryForColor || (mainDisplayLotterySelect ? mainDisplayLotterySelect.value : 'megasena');
 
         numbersArray.forEach((numInput, index) => {
-            const numStr = String(numInput).trim(); const num = parseInt(numStr, 10); 
+            const numStr = String(numInput).trim(); const num = parseInt(numStr, 10);
             if (isNaN(num)) { console.warn(`renderGameNumbers: Valor inválido '${numInput}' encontrado.`); return; }
             const numDiv = document.createElement('div'); numDiv.classList.add('game-number');
             numDiv.style.opacity = '0'; numDiv.style.transform = 'scale(0.5) translateY(10px)';
@@ -466,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (LOTTERY_CONFIG_JS[activeLottery] && LOTTERY_CONFIG_JS[activeLottery].color) {
                 if (!numDiv.classList.contains('hit') && !numDiv.classList.contains('almost')) {
                     numDiv.style.backgroundColor = LOTTERY_CONFIG_JS[activeLottery].color;
-                    numDiv.style.color = '#fff'; 
+                    numDiv.style.color = '#fff';
                 }
             }
             container.appendChild(numDiv);
@@ -476,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function triggerConfetti() { /* Sua implementação original */ }
     function checkGame(userGameNumbers, officialResults) { /* Sua implementação original */ }
     async function loadUserGames(filterLottery = "todos") { /* Sua implementação original */ }
-    function createGameCardElement(docId, gameData) { /* Sua implementação original, lembre-se que os IDs dos botões internos podem precisar ser únicos se você tem múltiplos cards de jogo */ }
+    function createGameCardElement(docId, gameData) { /* Sua implementação original */ }
     function updateManualProbNumbersFeedback() { /* Sua implementação original */ }
 
     // === FUNÇÃO showAppContentNow (MODIFICADA) ===
@@ -489,29 +544,29 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("SCRIPT.JS: Splash screen foi escondida agora.");
         } else if (splashHiddenTimestamp > 0 && appContent && appContent.style.display !== 'none') {
             console.log("SCRIPT.JS: Conteúdo já visível e splash já foi escondida. Retornando de showAppContentNow.");
-            return; 
+            return;
         }
-        
+
         if (appContent) {
             if (appContent.style.display === 'none') {
                 appContent.style.display = 'block';
                 console.log("SCRIPT.JS: Conteúdo principal (app-content) tornado visível.");
                 if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
-                
+
                 console.log("SCRIPT.JS: Chamando fetches iniciais para o dashboard.");
-                if (typeof fetchPlatformStats === "function") fetchPlatformStats(); 
+                if (typeof fetchPlatformStats === "function") fetchPlatformStats();
                 if (typeof fetchRecentWinningPools === "function") fetchRecentWinningPools();
                 if (typeof fetchTopWinners === "function") fetchTopWinners();
-                
-                if (mainDisplayLotterySelect) { 
+
+                if (mainDisplayLotterySelect) {
                     const initialLottery = mainDisplayLotterySelect.value;
                     console.log(`SCRIPT.JS: Carregando dados e estatísticas iniciais para loteria: ${initialLottery}`);
                     if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(initialLottery);
-                    if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(initialLottery); 
+                    if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(initialLottery);
                     if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(initialLottery);
                     if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(initialLottery);
-                    if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(initialLottery); 
-                     setTimeout(() => { 
+                    if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(initialLottery);
+                     setTimeout(() => {
                          if (mainDisplayLotterySelect.dispatchEvent) {
                             console.log("SCRIPT.JS: Disparando evento 'change' no select de loteria principal para estatísticas.");
                             mainDisplayLotterySelect.dispatchEvent(new Event('change'));
@@ -533,31 +588,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // === FUNÇÃO updateLoginUI (MODIFICADA para Palpites Cósmicos e Banner) ===
     function updateLoginUI(user) {
         console.log("SCRIPT.JS: updateLoginUI chamada, usuário:", user ? user.email : "Nenhum");
-        const navItems = document.querySelectorAll('#main-nav .nav-item'); 
-        if (user) { 
-            if (loginModalBtn) loginModalBtn.style.display = 'none'; 
-            if (registerModalBtn) registerModalBtn.style.display = 'none'; 
-            if (userInfoDiv) userInfoDiv.style.display = 'flex'; 
-            if (userEmailSpan) userEmailSpan.textContent = user.email.split('@')[0]; 
-            if (logoutBtn) logoutBtn.style.display = 'inline-block'; 
-            if (mainNav) mainNav.style.display = 'flex'; 
+        const navItems = document.querySelectorAll('#main-nav .nav-item');
+        if (user) {
+            if (loginModalBtn) loginModalBtn.style.display = 'none';
+            if (registerModalBtn) registerModalBtn.style.display = 'none';
+            if (userInfoDiv) userInfoDiv.style.display = 'flex';
+            if (userEmailSpan) userEmailSpan.textContent = user.email.split('@')[0];
+            if (logoutBtn) logoutBtn.style.display = 'inline-block';
+            if (mainNav) mainNav.style.display = 'flex';
             if (navItems && typeof setActiveSection === "function") navItems.forEach(item => item.style.display = 'flex');
-            
-            if (typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); 
-            
-            if (esotericHunchCard) esotericHunchCard.style.display = 'block'; 
-            if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'none'; 
-        } else { 
-            if (loginModalBtn) loginModalBtn.style.display = 'inline-block'; 
-            if (registerModalBtn) registerModalBtn.style.display = 'inline-block'; 
-            if (userInfoDiv) userInfoDiv.style.display = 'none'; 
-            if (userEmailSpan) userEmailSpan.textContent = ''; 
-            if (logoutBtn) logoutBtn.style.display = 'none'; 
-            if (mainNav) mainNav.style.display = 'none'; 
-            if (navItems) navItems.forEach(item => item.style.display = 'none'); 
-            if (savedGamesContainer) savedGamesContainer.innerHTML = ''; 
-            if (noSavedGamesP) noSavedGamesP.style.display = 'block'; 
-            
+
+            if (typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
+
+            if (esotericHunchCard) esotericHunchCard.style.display = 'block';
+            if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'none';
+        } else {
+            if (loginModalBtn) loginModalBtn.style.display = 'inline-block';
+            if (registerModalBtn) registerModalBtn.style.display = 'inline-block';
+            if (userInfoDiv) userInfoDiv.style.display = 'none';
+            if (userEmailSpan) userEmailSpan.textContent = '';
+            if (logoutBtn) logoutBtn.style.display = 'none';
+            if (mainNav) mainNav.style.display = 'none';
+            if (navItems) navItems.forEach(item => item.style.display = 'none');
+            if (savedGamesContainer) savedGamesContainer.innerHTML = '';
+            if (noSavedGamesP) noSavedGamesP.style.display = 'block';
+
             if (esotericHunchCard) esotericHunchCard.style.display = 'none';
             if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'block';
         }
@@ -565,12 +620,9 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSaveButtonVisibility('quick');
             updateSaveButtonVisibility('esoteric');
         }
-        // if (appContent && appContent.style.display !== 'none' && !document.querySelector('.main-section.active-section')) {
-        //     if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
-        // } // Removido para evitar conflito de setActiveSection na inicialização
     }
     // === FIM DA MODIFICAÇÃO updateLoginUI ===
-    
+
     // === FUNÇÃO PARA GERADOR RÁPIDO (NOVO/REFEITO) ===
     async function generateAndDisplayQuickHunch() {
         console.log("SCRIPT.JS: generateAndDisplayQuickHunch chamado");
@@ -675,7 +727,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function saveLastGeneratedHunch(expectedHunchType) {
         console.log(`SCRIPT.JS: saveLastGeneratedHunch chamado para tipo: ${expectedHunchType}`);
         if (!firestoreDB || !currentUser || !lastGeneratedHunch.jogo || !Array.isArray(lastGeneratedHunch.jogo) || lastGeneratedHunch.jogo.length === 0 || lastGeneratedHunch.type !== expectedHunchType) {
-            alert("Logue-se e gere um palpite válido deste tipo para salvar."); 
+            alert("Logue-se e gere um palpite válido deste tipo para salvar.");
             console.warn("SCRIPT.JS: Condições para salvar não atendidas:", { firestoreDB, currentUser, lastGeneratedHunch, expectedHunchType });
             return;
         }
@@ -684,7 +736,7 @@ document.addEventListener('DOMContentLoaded', () => {
             userId: currentUser.uid, userEmail: currentUser.email,
             lottery: lottery, game: jogo, strategy: estrategia_metodo,
             savedAt: firebase.firestore.FieldValue.serverTimestamp(),
-            checkedResult: null 
+            checkedResult: null
         }).then(() => {
             alert("Palpite salvo com sucesso!");
             if (myGamesSection && myGamesSection.classList.contains('active-section') && typeof loadUserGames === "function") {
@@ -701,10 +753,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentLottery = lotterySelectElement.value;
         const currentHunch = lastGeneratedHunch;
 
-        if (!currentHunch.jogo || !Array.isArray(currentHunch.jogo) || currentHunch.jogo.length === 0 || 
-            currentHunch.lottery !== currentLottery || currentHunch.type !== expectedHunchType || 
+        if (!currentHunch.jogo || !Array.isArray(currentHunch.jogo) || currentHunch.jogo.length === 0 ||
+            currentHunch.lottery !== currentLottery || currentHunch.type !== expectedHunchType ||
             !currentHunch.checkResultDiv || !currentHunch.numbersDiv) {
-            if(currentHunch.checkResultDiv) currentHunch.checkResultDiv.innerHTML = '<span class="misses">Gere um palpite deste tipo para esta loteria primeiro.</span>'; 
+            if(currentHunch.checkResultDiv) currentHunch.checkResultDiv.innerHTML = '<span class="misses">Gere um palpite deste tipo para esta loteria primeiro.</span>';
             console.warn("SCRIPT.JS: Condições para conferir não atendidas:", {currentHunch, currentLottery, expectedHunchType});
             return;
         }
@@ -712,8 +764,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) {
             currentHunch.checkResultDiv.innerHTML = `<div class="spinner small-spinner"></div> Buscando últimos resultados...`;
             try {
-                resultsToUse = await fetchData(`api/main/resultados/${currentLottery}`); // URL COMPLETA RELATIVA
-                if(resultsToUse) resultsToUse.loteria_tipo = currentLottery; // Importante para checkGame
+                resultsToUse = await fetchData(`api/main/resultados/${currentLottery}`);
+                if(resultsToUse) resultsToUse.loteria_tipo = currentLottery;
                 lastFetchedResults[currentLottery] = resultsToUse;
             } catch (e) { currentHunch.checkResultDiv.innerHTML = `<span class="misses">Falha ao buscar resultados.</span>`; return; }
         }
@@ -726,45 +778,44 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = checkGame(currentHunch.jogo, resultsToUse);
         currentHunch.checkResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`;
         renderGameNumbers(currentHunch.numbersDiv, currentHunch.jogo, result.hitNumbers, result.almostNumbers, currentLottery);
-        // Não precisa atualizar lastGeneratedHunch.checkResult aqui, pois não é usado para salvar.
     }
     // === FIM DAS FUNÇÕES DE SALVAR E CONFERIR ===
 
-    // --- EVENT LISTENERS (Seu código original da resposta #40 + Novos) ---
+    // --- EVENT LISTENERS ---
     console.log("SCRIPT.JS: Configurando lógica da splash screen e inicialização...");
     if (splashProgressBarFill && splashProgressContainer && accessibleSplashScreen && !accessibleSplashScreen.classList.contains('hidden')) {
         console.log("SCRIPT.JS: Iniciando animação da barra de progresso da splash screen.");
-        let progress = 0; 
-        const totalVisualBarTime = SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION; 
-        const intervalTime = Math.max(10, totalVisualBarTime / 100); 
-        const progressInterval = setInterval(() => { 
-            progress++; 
-            if (splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', progress); 
-            if (progress >= 100) { 
-                clearInterval(progressInterval); 
+        let progress = 0;
+        const totalVisualBarTime = SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION;
+        const intervalTime = Math.max(10, totalVisualBarTime / 100);
+        const progressInterval = setInterval(() => {
+            progress++;
+            if (splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', progress);
+            if (progress >= 100) {
+                clearInterval(progressInterval);
                 console.log("SCRIPT.JS: Animação da barra de progresso da splash screen concluída.");
-            } 
-        }, intervalTime); 
+            }
+        }, intervalTime);
     } else {
         console.warn("SCRIPT.JS: Elementos da splash screen não encontrados ou já escondida na configuração inicial.");
     }
 
-    criticalSplashTimeout = setTimeout(() => { 
+    criticalSplashTimeout = setTimeout(() => {
         console.log("SCRIPT.JS: Timeout crítico da splash screen atingido.");
-        if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") { 
+        if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") {
             console.log("SCRIPT.JS: Forçando exibição do conteúdo da app via timeout crítico.");
-            showAppContentNow(); 
-        } 
-        if (!firebaseApp) { 
-            if(typeof showGlobalError === "function") showGlobalError("Falha crítica na inicialização dos serviços. Tente recarregar a página."); 
-            if (typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); 
-        } 
-        criticalSplashTimeout = null; 
-    }, SPLASH_MINIMUM_VISIBLE_TIME + 2500); 
-    
+            showAppContentNow();
+        }
+        if (!firebaseApp) {
+            if(typeof showGlobalError === "function") showGlobalError("Falha crítica na inicialização dos serviços. Tente recarregar a página.");
+            if (typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
+        }
+        criticalSplashTimeout = null;
+    }, SPLASH_MINIMUM_VISIBLE_TIME + 2500);
+
     if (typeof attemptFirebaseInit === "function") {
         console.log("SCRIPT.JS: Agendando attemptFirebaseInit.");
-        setTimeout(attemptFirebaseInit, 100); 
+        setTimeout(attemptFirebaseInit, 100);
     } else {
         console.error("SCRIPT.JS: Função attemptFirebaseInit não definida! Firebase não será inicializado.");
         if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") {
@@ -774,28 +825,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
     }
 
-    // Listeners de Modais e Navegação (Do seu script da Resposta #40)
+    // Listeners de Modais e Navegação
     if(loginModalBtn && typeof openModal === "function") loginModalBtn.addEventListener('click', () => openModal(loginModal));
     if(registerModalBtn && typeof openModal === "function") registerModalBtn.addEventListener('click', () => openModal(registerModal));
     if(closeLoginModalBtn && typeof closeModal === "function") closeLoginModalBtn.addEventListener('click', () => closeModal(loginModal));
     if(closeRegisterModalBtn && typeof closeModal === "function") closeRegisterModalBtn.addEventListener('click', () => closeModal(registerModal));
-    window.addEventListener('click', (event) => { 
+    window.addEventListener('click', (event) => {
         if (typeof closeModal === "function") {
-            if (event.target === loginModal) closeModal(loginModal); 
-            if (event.target === registerModal) closeModal(registerModal); 
+            if (event.target === loginModal) closeModal(loginModal);
+            if (event.target === registerModal) closeModal(registerModal);
         }
     });
     if (navDashboardBtn && typeof setActiveSection === "function") navDashboardBtn.addEventListener('click', () => setActiveSection('dashboard-section'));
     if (navMyGamesBtn && typeof setActiveSection === "function") navMyGamesBtn.addEventListener('click', () => { setActiveSection('my-games-section'); if (currentUser && typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); });
     if (navPoolsBtn && typeof setActiveSection === "function") navPoolsBtn.addEventListener('click', () => setActiveSection('pools-section'));
-    
-    // Listener para o select de loteria principal (mainDisplayLotterySelect foi definido como quickHunchLotteryTypeSelect)
+
+    // Listener para o select de loteria principal
     if (mainDisplayLotterySelect) {
         mainDisplayLotterySelect.addEventListener('change', (e) => {
             const selectedLottery = e.target.value;
             const selectedOption = e.target.options[e.target.selectedIndex];
             const lotteryFriendlyName = selectedOption ? selectedOption.text : (LOTTERY_CONFIG_JS[selectedLottery] ? LOTTERY_CONFIG_JS[selectedLottery].name : selectedLottery.toUpperCase());
-            
+
             console.log(`SCRIPT.JS: Loteria principal para display (stats/results) mudou para: ${selectedLottery} (${lotteryFriendlyName})`);
 
             if (resultsLotteryNameSpan) resultsLotteryNameSpan.textContent = lotteryFriendlyName;
@@ -804,20 +855,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if(cityStatsLotteryNameSpan) cityStatsLotteryNameSpan.textContent = lotteryFriendlyName;
             if(cityPrizeSumLotteryNameSpan) cityPrizeSumLotteryNameSpan.textContent = lotteryFriendlyName;
 
-            if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery); 
-            if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery); 
-            if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery); 
+            if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery);
+            if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery);
+            if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery);
             if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery);
             if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(selectedLottery);
         });
     }
-    if (fetchResultsBtn && mainDisplayLotterySelect) { 
+    if (fetchResultsBtn && mainDisplayLotterySelect) {
          fetchResultsBtn.addEventListener('click', () => {
              const selectedLottery = mainDisplayLotterySelect.value;
              console.log(`SCRIPT.JS: Botão fetchResultsBtn (refresh de stats/results) clicado para ${selectedLottery}`);
-             if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery); 
-             if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery); 
-             if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery); 
+             if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery);
+             if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery);
+             if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery);
              if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery);
              if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(selectedLottery);
          });
@@ -826,70 +877,53 @@ document.addEventListener('DOMContentLoaded', () => {
     // === NOVOS LISTENERS PARA OS NOVOS GERADORES ===
     if (generateQuickHunchBtn) generateQuickHunchBtn.addEventListener('click', generateAndDisplayQuickHunch);
     if (generateEsotericHunchBtn) generateEsotericHunchBtn.addEventListener('click', generateAndDisplayEsotericHunch);
-    
-    if (typeof setupSaveHunchButtonListeners === "function") setupSaveHunchButtonListeners(); 
+
+    if (typeof setupSaveHunchButtonListeners === "function") setupSaveHunchButtonListeners();
     if (typeof setupCheckHunchButtonListeners === "function") setupCheckHunchButtonListeners();
-    
+
     // Listeners para os botões no banner promocional
     if (promoRegisterBtn && registerModalBtn && typeof openModal === "function") promoRegisterBtn.addEventListener('click', () => openModal(registerModal));
     if (promoLoginBtn && loginModalBtn && typeof openModal === "function") promoLoginBtn.addEventListener('click', () => openModal(loginModal));
     // === FIM DOS NOVOS EVENT LISTENERS ===
-    
-    // Listeners de Autenticação (Do seu script original da resposta #40)
-    if(loginSubmitBtn && typeof firebaseAuth !== 'undefined' && firebaseAuth) {
-        loginSubmitBtn.addEventListener('click', () => {
-            if (!loginEmailInput || !loginPasswordInput || !loginErrorP) return;
-            const email = loginEmailInput.value; const password = loginPasswordInput.value;
-            loginErrorP.textContent = ""; if (!email || !password) { loginErrorP.textContent = "Preencha email e senha."; return; }
-            firebaseAuth.signInWithEmailAndPassword(email, password)
-                .then(() => { if(typeof closeModal === "function") closeModal(loginModal); })
-                .catch((error) => { loginErrorP.textContent = `Erro: ${error.message}`; });
-        });
-    }
-    if(registerSubmitBtn && typeof firebaseAuth !== 'undefined' && firebaseAuth) {
-        registerSubmitBtn.addEventListener('click', () => {
-            if (!registerEmailInput || !registerPasswordInput || !registerConfirmPasswordInput || !registerErrorP) return;
-            const email = registerEmailInput.value; const password = registerPasswordInput.value; const confirmPassword = registerConfirmPasswordInput.value;
-            registerErrorP.textContent = ""; if (!email || !password || !confirmPassword) { registerErrorP.textContent = "Preencha todos os campos."; return; }
-            if (password !== confirmPassword) { registerErrorP.textContent = "As senhas não coincidem."; return; }
-            if (password.length < 6) { registerErrorP.textContent = "A senha deve ter no mínimo 6 caracteres."; return; }
-            firebaseAuth.createUserWithEmailAndPassword(email, password)
-                .then(() => { alert("Usuário registrado! Você já está logado."); if(typeof closeModal === "function") closeModal(registerModal); })
-                .catch((error) => { registerErrorP.textContent = `Erro: ${error.message}`; });
-        });
-    }
-    if(logoutBtn && typeof firebaseAuth !== 'undefined' && firebaseAuth) {
+
+    // Listeners de Autenticação (REMOVIDOS DAQUI E MOVIDOS PARA setupAuthEventListeners)
+
+    if(logoutBtn && typeof firebaseAuth !== 'undefined') { // firebaseAuth pode ainda não estar pronto aqui, mas o listener do onAuthStateChanged cuidará da visibilidade
         logoutBtn.addEventListener('click', () => {
-            firebaseAuth.signOut().catch((error) => { alert(`Erro no logout: ${error.message}`); });
+            if (firebaseAuth) { // Verifique se firebaseAuth está pronto antes de usar
+                firebaseAuth.signOut().catch((error) => { alert(`Erro no logout: ${error.message}`); });
+            } else {
+                console.warn("SCRIPT.JS: Logout button clicked, but firebaseAuth not ready.");
+            }
         });
     }
-    
-    // Listener para filtro de jogos salvos (Do seu script original da resposta #40)
+
+    // Listener para filtro de jogos salvos
     if (filterLotteryMyGamesSelect) {
-        filterLotteryMyGamesSelect.addEventListener('change', (e) => { 
-            if (currentUser && typeof loadUserGames === "function") loadUserGames(e.target.value); 
+        filterLotteryMyGamesSelect.addEventListener('change', (e) => {
+            if (currentUser && typeof loadUserGames === "function") loadUserGames(e.target.value);
         });
     }
-    
-    // Listeners para Probabilidade Manual (Do seu script original da resposta #40)
-    if (manualProbUserNumbersInput && manualProbLotteryTypeSelect) { 
+
+    // Listeners para Probabilidade Manual
+    if (manualProbUserNumbersInput && manualProbLotteryTypeSelect) {
         manualProbUserNumbersInput.addEventListener('input', updateManualProbNumbersFeedback);
-        manualProbLotteryTypeSelect.addEventListener('change', () => { 
+        manualProbLotteryTypeSelect.addEventListener('change', () => {
             const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
             if (!selectedOption || !selectedOption.dataset.count || !selectedOption.dataset.min || !selectedOption.dataset.max) return;
             manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${selectedOption.dataset.count} de ${selectedOption.dataset.min}-${selectedOption.dataset.max})`;
-            manualProbUserNumbersInput.value = ''; 
-            if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback(); 
+            manualProbUserNumbersInput.value = '';
+            if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback();
             if(manualProbabilityResultDisplay) manualProbabilityResultDisplay.textContent = "Aguardando seu jogo...";
         });
         const initialSelectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
          if (initialSelectedOption && initialSelectedOption.dataset.count && initialSelectedOption.dataset.min && initialSelectedOption.dataset.max){
             manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${initialSelectedOption.dataset.count} de ${initialSelectedOption.dataset.min}-${initialSelectedOption.dataset.max})`;
          }
-        if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback(); 
+        if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback();
     }
-    if (manualCalculateProbBtn && manualProbLotteryTypeSelect && manualProbUserNumbersInput && manualProbabilityResultDisplay) { 
-        manualCalculateProbBtn.addEventListener('click', async () => { 
+    if (manualCalculateProbBtn && manualProbLotteryTypeSelect && manualProbUserNumbersInput && manualProbabilityResultDisplay) {
+        manualCalculateProbBtn.addEventListener('click', async () => {
             const lotteryType = manualProbLotteryTypeSelect.value;
             const numbersStr = manualProbUserNumbersInput.value;
             const userNumbersRaw = numbersStr.split(/[ ,;/\t\n]+/);
@@ -903,7 +937,7 @@ document.addEventListener('DOMContentLoaded', () => {
             for (const num of userNumbers) { if (num < minNum || num > maxNum) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">O número ${num} está fora do range (${minNum}-${maxNum}).</p>`; return; } }
             manualProbabilityResultDisplay.innerHTML = '<div class="spinner small-spinner"></div> Calculando...';
             try {
-                const resultData = await fetchData(`api/main/jogo-manual/probabilidade`, { // URL COMPLETA RELATIVA
+                const resultData = await fetchData(`api/main/jogo-manual/probabilidade`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ lottery_type: lotteryType, numeros_usuario: userNumbers })
                 });
@@ -915,8 +949,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(resultData.descricao) displayText += `\n<small>${resultData.descricao}</small>`;
                 manualProbabilityResultDisplay.innerHTML = displayText.replace(/\n/g, '<br>');
             } catch (error) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Erro: ${error.message}</p>`; }
-        }); 
+        });
     }
-    
+
     console.log("SCRIPT.JS: Final do script atingido, todos os listeners configurados.");
 });
