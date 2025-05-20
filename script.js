@@ -1,43 +1,35 @@
-// script.js (Seu código de 601 linhas + minhas atualizações integradas)
+// script.js (Seu código da resposta #40 + Minhas Refatorações da Resposta #43, revisado)
 document.addEventListener('DOMContentLoaded', () => {
     console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver 10.4 (Refatoração UI + Cósmicos)");
     const domContentLoadedTimestamp = Date.now(); 
 
-    // --- Constantes de Tempo da Splash Screen --- (DO SEU CÓDIGO)
+    // --- Constantes de Tempo da Splash Screen (DO SEU CÓDIGO) ---
     const SPLASH_LOGO_ANIM_MAX_DELAY = 1300; 
     const SPLASH_LOGO_ANIM_DURATION = 600;  
-    const SPLASH_TEXT_ANIM_DELAY = 2200; 
-    const SPLASH_TEXT_ANIM_DURATION = 1000; 
-    const SPLASH_PROGRESS_BAR_START_DELAY = 2500; 
-    const SPLASH_PROGRESS_BAR_FILL_DURATION = 3000; 
-    const APPROX_TOTAL_CSS_ANIM_DURATION = Math.max(
+    // ... (resto das suas constantes de splash)
+    const SPLASH_MINIMUM_VISIBLE_TIME = Math.max(
         SPLASH_LOGO_ANIM_MAX_DELAY + SPLASH_LOGO_ANIM_DURATION,
-        SPLASH_TEXT_ANIM_DELAY + SPLASH_TEXT_ANIM_DURATION,
-        SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION
-    );
-    const SPLASH_MINIMUM_VISIBLE_TIME = APPROX_TOTAL_CSS_ANIM_DURATION + 1000;
+        2200 + 1000, // SPLASH_TEXT_ANIM_DELAY + SPLASH_TEXT_ANIM_DURATION
+        2500 + 3000  // SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION
+    ) + 1000;
 
-    // --- Seletores de Elementos (DO SEU CÓDIGO + NOVOS) ---
+
+    // --- Seletores de Elementos (DO SEU CÓDIGO + NOVOS para refatoração) ---
     const accessibleSplashScreen = document.getElementById('accessible-splash-screen');
-    const splashProgressBarFill = accessibleSplashScreen ? accessibleSplashScreen.querySelector('.progress-bar-fill') : null;
-    const splashProgressContainer = accessibleSplashScreen ? accessibleSplashScreen.querySelector('.progress-bar-container') : null;
-    const appContent = document.getElementById('app-content');
-    const currentYearSpan = document.getElementById('current-year');
-    const navDashboardBtn = document.getElementById('nav-dashboard-btn');
-    const navMyGamesBtn = document.getElementById('nav-my-games-btn');
-    const navPoolsBtn = document.getElementById('nav-pools-btn');
-    const mainNav = document.getElementById('main-nav');
-    const dashboardSection = document.getElementById('dashboard-section');
-    const myGamesSection = document.getElementById('my-games-section');
-    const poolsSection = document.getElementById('pools-section');
-    const mainSections = document.querySelectorAll('.main-section');
-    const statsJogosGeradosSpan = document.getElementById('stats-jogos-gerados');
-    const statsJogosPremiadosSpan = document.getElementById('stats-jogos-premiados');
-    const statsValorPremiosSpan = document.getElementById('stats-valor-premios');
-    const recentPoolsList = document.getElementById('recent-pools-list');
-    const topWinnersList = document.getElementById('top-winners-list');
-    const confettiCanvas = document.getElementById('confetti-canvas');
-    // Seletores do Gerador Rápido (Antigo Gerador Inteligente)
+    // ... (todos os seus seletores existentes da resposta #40) ...
+    const lotteryTypeSelect = document.getElementById('lottery-type'); // Este era o seletor do Gerador Inteligente
+    const iaStrategySelect = document.getElementById('ia-strategy-select'); // Do Gerador Inteligente
+    const generateGameBtn = document.getElementById('generate-game-btn'); // Do Gerador Inteligente
+    const gameGenerationOutputDiv = document.getElementById('game-generation-output');
+    const generatedGameNumbersDiv = document.getElementById('generated-game-numbers');
+    const generatedGameStrategyP = document.getElementById('generated-game-strategy');
+    const saveGameBtn = document.getElementById('save-game-btn'); // Do Gerador Inteligente
+    const checkGeneratedGameBtn = document.getElementById('check-generated-game-btn'); // Do Gerador Inteligente
+    const generatedGameCheckResultDiv = document.getElementById('generated-game-check-result');
+    const simulatePremiumCheckbox = document.getElementById('simulate-premium-checkbox');
+
+
+    // NOVOS Seletores para a refatoração
     const quickHunchLotteryTypeSelect = document.getElementById('quick-hunch-lottery-type');
     const generateQuickHunchBtn = document.getElementById('generate-quick-hunch-btn');
     const quickHunchOutputDiv = document.getElementById('quick-hunch-output');
@@ -47,51 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkQuickHunchBtn = document.getElementById('check-quick-hunch-btn');
     const quickHunchCheckResultDiv = document.getElementById('quick-hunch-check-result');
     
-    const apiResultsPre = document.getElementById('api-results');
-    const resultsLotteryNameSpan = document.getElementById('results-lottery-name');
-    const fetchResultsBtn = document.getElementById('fetch-results-btn'); // Certifique-se que este ID existe no HTML para o card de resultados
-
-    const savedGamesContainer = document.getElementById('saved-games-container');
-    const noSavedGamesP = document.getElementById('no-saved-games');
-    const filterLotteryMyGamesSelect = document.getElementById('filter-lottery-mygames');
-    const loginModalBtn = document.getElementById('login-modal-btn');
-    const registerModalBtn = document.getElementById('register-modal-btn');
-    const logoutBtn = document.getElementById('logout-btn');
-    const userInfoDiv = document.getElementById('user-info');
-    const userEmailSpan = document.getElementById('user-email');
-    const loginModal = document.getElementById('login-modal');
-    const registerModal = document.getElementById('register-modal');
-    const closeLoginModalBtn = document.getElementById('close-login-modal');
-    const closeRegisterModalBtn = document.getElementById('close-register-modal');
-    const loginEmailInput = document.getElementById('login-email');
-    const loginPasswordInput = document.getElementById('login-password');
-    const loginSubmitBtn = document.getElementById('login-submit-btn');
-    const loginErrorP = document.getElementById('login-error');
-    const registerEmailInput = document.getElementById('register-email');
-    const registerPasswordInput = document.getElementById('register-password');
-    const registerConfirmPasswordInput = document.getElementById('register-confirm-password');
-    const registerSubmitBtn = document.getElementById('register-submit-btn');
-    const registerErrorP = document.getElementById('register-error');
-    const errorDiv = document.getElementById('global-error-msg'); 
-    const freqStatsLotteryNameSpan = document.getElementById('freq-stats-lottery-name');
-    const frequencyListContainer = document.getElementById('frequency-list-container');
-    const pairFreqStatsLotteryNameSpan = document.getElementById('pair-freq-stats-lottery-name');
-    const pairFrequencyListContainer = document.getElementById('pair-frequency-list-container');
-    const cityStatsLotteryNameSpan = document.getElementById('city-stats-lottery-name');
-    const cityListContainer = document.getElementById('city-list-container');
-    const cityPrizeSumLotteryNameSpan = document.getElementById('city-prize-sum-lottery-name');
-    const cityPrizeSumListContainer = document.getElementById('city-prize-sum-list-container');
-    const manualProbLotteryTypeSelect = document.getElementById('manual-prob-lottery-type');
-    const manualProbUserNumbersInput = document.getElementById('manual-prob-user-numbers');
-    const manualCalculateProbBtn = document.getElementById('manual-calculate-prob-btn');
-    const manualProbabilityResultDisplay = document.getElementById('manual-probability-result-display');
-    const manualProbNumbersCountFeedback = document.getElementById('manual-prob-numbers-count-feedback');
-
-    // === NOVOS Seletores para Palpites Esotéricos e Banner Promocional (ADICIONADOS) ===
     const esotericLotteryTypeSelect = document.getElementById('esoteric-lottery-type');
     const birthDateInput = document.getElementById('birth-date-input');
     const generateEsotericHunchBtn = document.getElementById('generate-esoteric-hunch-btn');
-    const esotericHunchCard = document.getElementById('esoteric-hunch-card'); // Para mostrar/esconder
+    const esotericHunchCard = document.getElementById('esoteric-hunch-card'); 
     const esotericHunchOutputDiv = document.getElementById('esoteric-hunch-output');
     const esotericHunchNumbersDiv = document.getElementById('esoteric-hunch-numbers');
     const esotericHunchMethodP = document.getElementById('esoteric-hunch-method');
@@ -102,11 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const cosmicPromoBanner = document.getElementById('cosmic-promo-banner');
     const promoRegisterBtn = document.getElementById('promo-register-btn');
     const promoLoginBtn = document.getElementById('promo-login-btn');
-    // === FIM DOS NOVOS Seletores ===
+    // (O antigo `esotericRegisterPromptDiv` foi removido pois o banner e o card esotérico (apenas para logados) cuidam disso)
     
-    let splashHiddenTimestamp = 0; 
+    // Certifique-se que TODOS os outros seletores do seu script original estão aqui.
+    // ... (statsJogosGeradosSpan, recentPoolsList, etc. etc.)
 
-    if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+    let splashHiddenTimestamp = 0; 
+    if (document.getElementById('current-year')) document.getElementById('current-year').textContent = new Date().getFullYear();
     let BACKEND_URL_BASE;
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:") { 
         BACKEND_URL_BASE = 'http://127.0.0.1:5000'; 
@@ -116,12 +69,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let firebaseApp, firebaseAuth, firestoreDB, currentUser = null;
     let lastFetchedResults = {}; 
-    let lastGeneratedGame = { // Alterado para um único objeto para o último jogo gerado (rápido ou esotérico)
+    let lastGeneratedHunch = { // Armazena o último palpite gerado (rápido OU esotérico)
         type: null, // 'quick' ou 'esoteric'
         lottery: null,
         jogo: [],
-        estrategia: '',
-        checkResult: ''
+        estrategia_metodo: '', // Nome da estratégia ou método
+        outputDiv: null, // Referência ao DIV de saída do palpite
+        numbersDiv: null, // Referência ao DIV dos números
+        checkResultDiv: null, // Referência ao DIV do resultado da conferência
+        saveButton: null, // Referência ao botão de salvar
+        checkButton: null // Referência ao botão de conferir
     };  
     let criticalSplashTimeout; 
     let firebaseInitAttempts = 0; 
@@ -132,114 +89,165 @@ document.addEventListener('DOMContentLoaded', () => {
         quina: { count: 5, color: "#260085" }, 
         lotomania: { count_sorteadas: 20, count_apostadas: 50, color: "#f78100" }
     };
-    
-    // --- Funções Utilitárias (showGlobalError, disableFirebaseFeatures, etc.) ---
-    // (COLE SUAS FUNÇÕES showGlobalError, disableFirebaseFeatures, enableFirebaseFeatures, setActiveSection AQUI)
-    function showGlobalError(message) { /* ... */ }
-    function disableFirebaseFeatures() { /* ... */ }
-    function enableFirebaseFeatures() { /* ... */ }
-    function setActiveSection(sectionId) { /* ... */ }
 
+    // --- Funções Utilitárias (COPIE AS SUAS AQUI) ---
+    function showGlobalError(message) { /* ... (sua implementação) ... */ }
+    function disableFirebaseFeatures() { /* ... (sua implementação) ... */ }
+    function enableFirebaseFeatures() { /* ... (sua implementação) ... */ }
+    function setActiveSection(sectionId) { /* ... (sua implementação) ... */ }
 
     // --- FUNÇÃO fetchData (MODIFICADA para aceitar 'options') ---
     async function fetchData(endpoint, options = {}) {
-        const url = `${BACKEND_URL_BASE}/api/main/${endpoint}`; // Seu prefixo de API
+        const url = `${BACKEND_URL_BASE}/api/main/${endpoint}`;
+        console.log(`SCRIPT.JS: Fetching ${url} com options:`, options.method || 'GET');
         try {
             const response = await fetch(url, options);
+            const responseText = await response.text(); // Ler como texto primeiro
             if (!response.ok) {
-                const errorText = await response.text();
                 let errorJson = {};
-                try { errorJson = JSON.parse(errorText); } catch(e) { /* ignora */ }
-                const messageDetail = errorJson.message || (errorJson.data ? errorJson.data.detalhes || errorJson.data.erro : null) || errorJson.erro || `Erro HTTP ${response.status}: ${errorText.substring(0,100)}`;
+                try { errorJson = JSON.parse(responseText); } catch(e) { /* ignora */ }
+                const messageDetail = errorJson.message || (errorJson.data ? errorJson.data.detalhes || errorJson.data.erro : null) || errorJson.erro || responseText.substring(0,250);
                 console.error(`SCRIPT.JS: HTTP Error ${response.status} for ${url}:`, messageDetail);
                 throw { status: response.status, message: messageDetail, data: errorJson };
             }
-            if (response.status === 204) return {}; 
-            return await response.json();
+            if (response.status === 204 || !responseText) return {}; // Trata respostas vazias
+            return JSON.parse(responseText); // Parsear para JSON só se tiver conteúdo
         } catch (error) {
             console.error(`SCRIPT.JS: Error fetching ${url}:`, error);
             throw error;
         }
     }
         
-    // --- SUAS FUNÇÕES DE BUSCA E EXIBIÇÃO DE DADOS EXISTENTES ---
+    // --- SUAS FUNÇÕES DE BUSCA E EXIBIÇÃO DE DADOS (COPIE AS SUAS AQUI) ---
     // (animateCounter, fetchPlatformStats, fetchRecentWinningPools, fetchTopWinners, etc.)
-    // Mantenha o código original dessas funções aqui, garantindo que usam a fetchData acima.
-    function animateCounter(element, finalValueInput) { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    async function fetchPlatformStats() { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    async function fetchRecentWinningPools() { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    async function fetchTopWinners() { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    async function fetchAndDisplayFrequencyStats(lotteryName) { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    async function fetchAndDisplayPairFrequencyStats(lotteryName) { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    async function fetchAndDisplayCityStats(lotteryName) { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    async function fetchAndDisplayCityPrizeSumStats(lotteryName) { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    function initializeCarousels() { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    function openModal(modalElement) { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    function closeModal(modalElement) { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    function showAppContentNow() { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    function initializeFirebase() { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    function attemptFirebaseInit() { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    async function fetchAndDisplayResults(lottery) {  /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    function renderGameNumbers(container, numbersArray, highlightedNumbers = [], almostNumbers = []) { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    function triggerConfetti() { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    function checkGame(userGameNumbers, officialResults) { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
+    function animateCounter(element, finalValueInput) { /* ... (sua implementação) ... */ }
+    async function fetchPlatformStats() { /* ... (sua implementação) ... */ }
+    async function fetchRecentWinningPools() { /* ... (sua implementação) ... */ }
+    async function fetchTopWinners() { /* ... (sua implementação) ... */ }
+    async function fetchAndDisplayFrequencyStats(lotteryName) { /* ... (sua implementação) ... */ }
+    async function fetchAndDisplayPairFrequencyStats(lotteryName) { /* ... (sua implementação) ... */ }
+    async function fetchAndDisplayCityStats(lotteryName) { /* ... (sua implementação) ... */ }
+    async function fetchAndDisplayCityPrizeSumStats(lotteryName) { /* ... (sua implementação) ... */ }
+    function initializeCarousels() { /* ... (sua implementação) ... */ }
+    function openModal(modalElement) { /* ... (sua implementação) ... */ }
+    function closeModal(modalElement) { /* ... (sua implementação) ... */ }
+    function showAppContentNow() { /* ... (sua implementação) ... */ }
+    function initializeFirebase() { /* ... (sua implementação) ... */ }
+    function attemptFirebaseInit() { /* ... (sua implementação) ... */ }
+    async function fetchAndDisplayResults(lottery) {  /* ... (sua implementação) ... */ }
+    function renderGameNumbers(container, numbersArray, highlightedNumbers = [], almostNumbers = []) { /* ... (sua implementação) ... */ }
+    function triggerConfetti() { /* ... (sua implementação) ... */ }
+    function checkGame(userGameNumbers, officialResults) { /* ... (sua implementação) ... */ }
 
     // === FUNÇÃO updateLoginUI (MODIFICADA para Palpites Cósmicos e Banner) ===
     function updateLoginUI(user) {
-        const navItems = document.querySelectorAll('#main-nav .nav-item');
-        if (user) {
-            // UI para usuário logado (como antes)
-            if (loginModalBtn) loginModalBtn.style.display = 'none';
-            if (registerModalBtn) registerModalBtn.style.display = 'none';
-            if (userInfoDiv) userInfoDiv.style.display = 'flex';
-            if (userEmailSpan) userEmailSpan.textContent = user.email.split('@')[0];
-            if (logoutBtn) logoutBtn.style.display = 'inline-block';
-            if (mainNav) mainNav.style.display = 'flex';
-            if (navItems) navItems.forEach(item => item.style.display = 'flex');
-            // if (gameGenerationOutputDiv && gameGenerationOutputDiv.dataset.game && saveGameBtn) saveGameBtn.style.display = 'inline-block';
-            if (typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
-            if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
+        // ... (sua lógica de UI existente para login/logout) ...
+        const navItems = document.querySelectorAll('#main-nav .nav-item'); 
+        const mainLotterySelectForStats = quickHunchLotteryTypeSelect || lotteryTypeSelect; // Para carregar stats
+
+        if (user) { 
+            if (loginModalBtn) loginModalBtn.style.display = 'none'; 
+            if (registerModalBtn) registerModalBtn.style.display = 'none'; 
+            if (userInfoDiv) userInfoDiv.style.display = 'flex'; 
+            if (userEmailSpan) userEmailSpan.textContent = user.email.split('@')[0]; 
+            if (logoutBtn) logoutBtn.style.display = 'inline-block'; 
+            if (mainNav) mainNav.style.display = 'flex'; 
+            if (navItems) navItems.forEach(item => item.style.display = 'flex'); 
             
-            // Lógica para Palpites Cósmicos e Banner
-            if (esotericHunchCard) esotericHunchCard.style.display = 'block'; // MOSTRA card esotérico
-            if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'none'; // ESCONDE banner promocional
-        } else {
-            // UI para usuário deslogado (como antes)
-            if (loginModalBtn) loginModalBtn.style.display = 'inline-block';
-            if (registerModalBtn) registerModalBtn.style.display = 'inline-block';
-            if (userInfoDiv) userInfoDiv.style.display = 'none';
-            if (userEmailSpan) userEmailSpan.textContent = '';
-            if (logoutBtn) logoutBtn.style.display = 'none';
-            if (mainNav) mainNav.style.display = 'none';
-            if (navItems) navItems.forEach(item => item.style.display = 'none');
-            // if (saveGameBtn) saveGameBtn.style.display = 'none';
-            if (savedGamesContainer) savedGamesContainer.innerHTML = '';
-            if (noSavedGamesP) noSavedGamesP.style.display = 'block';
+            if (typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); 
+            if (typeof setActiveSection === "function") setActiveSection('dashboard-section'); 
+            
+            // Palpites Cósmicos e Banner
+            if (esotericHunchCard) esotericHunchCard.style.display = 'block';
+            if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'none'; 
+        } else { 
+            if (loginModalBtn) loginModalBtn.style.display = 'inline-block'; 
+            if (registerModalBtn) registerModalBtn.style.display = 'inline-block'; 
+            if (userInfoDiv) userInfoDiv.style.display = 'none'; 
+            if (userEmailSpan) userEmailSpan.textContent = ''; 
+            if (logoutBtn) logoutBtn.style.display = 'none'; 
+            if (mainNav) mainNav.style.display = 'none'; 
+            if (navItems) navItems.forEach(item => item.style.display = 'none'); 
+            if (savedGamesContainer) savedGamesContainer.innerHTML = ''; 
+            if (noSavedGamesP) noSavedGamesP.style.display = 'block'; 
             if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
 
-            // Lógica para Palpites Cósmicos e Banner
-            if (esotericHunchCard) esotericHunchCard.style.display = 'none'; // ESCONDE card esotérico
-            if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'block'; // MOSTRA banner promocional
+            // Palpites Cósmicos e Banner
+            if (esotericHunchCard) esotericHunchCard.style.display = 'none';
+            if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'block';
         }
-        // Esconder botões de salvar palpites se deslogado, mostrar se logado (após um palpite ser gerado)
-        if (saveQuickHunchBtn) saveQuickHunchBtn.style.display = user && quickHunchOutputDiv.style.display !== 'none' ? 'inline-block' : 'none';
-        if (saveEsotericHunchBtn) saveEsotericHunchBtn.style.display = user && esotericHunchOutputDiv.style.display !== 'none' ? 'inline-block' : 'none';
+        // Atualiza visibilidade dos botões de salvar dinamicamente
+        updateSaveButtonVisibility('quick');
+        updateSaveButtonVisibility('esoteric');
     }
     // === FIM DA MODIFICAÇÃO updateLoginUI ===
 
     // --- SUAS FUNÇÕES DE JOGOS SALVOS E PROBABILIDADE MANUAL EXISTENTES ---
     async function loadUserGames(filterLottery = "todos") { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    function createGameCardElement(docId, gameData) { /* ... (COLE SEU CÓDIGO AQUI, adapte os botões de salvar/conferir se necessário) ... */ }
+    function createGameCardElement(docId, gameData) { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
     function updateManualProbNumbersFeedback() { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
 
-    // === NOVA FUNÇÃO PARA GERAR E EXIBIR PALPITE ESOTÉRICO ===
+    // === FUNÇÃO PARA GERAR PALPITE ALEATÓRIO RÁPIDO (NOVO/REFEITO) ===
+    async function generateAndDisplayQuickHunch() {
+        if (!quickHunchLotteryTypeSelect || !generateQuickHunchBtn || !quickHunchOutputDiv || !quickHunchNumbersDiv || !quickHunchStrategyP) {
+            console.error("SCRIPT.JS: Elementos DOM para Palpite Rápido não encontrados.");
+            return;
+        }
+        const lottery = quickHunchLotteryTypeSelect.value;
+        
+        generateQuickHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
+        generateQuickHunchBtn.disabled = true;
+        quickHunchOutputDiv.style.display = 'block';
+        quickHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>';
+        quickHunchStrategyP.textContent = 'Gerando um palpite aleatório...';
+        if(saveQuickHunchBtn) saveQuickHunchBtn.style.display = 'none';
+        if(checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'none';
+        if(quickHunchCheckResultDiv) quickHunchCheckResultDiv.innerHTML = '';
+
+        try {
+            const data = await fetchData(`gerar_jogo/${lottery}`); // Chama o endpoint simplificado
+            console.log(`SCRIPT.JS: Palpite Rápido - Dados recebidos:`, data);
+
+            if (data.erro) { throw new Error(data.detalhes || data.erro);  }
+            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) {
+                throw new Error("Palpite inválido retornado.");
+            }
+            renderGameNumbers(quickHunchNumbersDiv, data.jogo);
+            quickHunchStrategyP.textContent = `Estratégia: ${data.estrategia_usada || 'Aleatório Rápido'}`;
+            
+            lastGeneratedHunch = { 
+                type: 'quick', 
+                lottery: lottery, 
+                jogo: data.jogo, 
+                estrategia_metodo: data.estrategia_usada || 'Aleatório Rápido',
+                outputDiv: quickHunchOutputDiv,
+                numbersDiv: quickHunchNumbersDiv,
+                checkResultDiv: quickHunchCheckResultDiv,
+                saveButton: saveQuickHunchBtn,
+                checkButton: checkQuickHunchBtn
+            };
+            updateSaveButtonVisibility('quick'); // Mostra botão salvar se logado
+            if (checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'inline-block';
+
+        } catch (error) {
+            console.error("SCRIPT.JS: Erro ao gerar palpite rápido:", error);
+            quickHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha ao gerar palpite.'}</p>`;
+            quickHunchStrategyP.textContent = 'Erro ao gerar.';
+            lastGeneratedHunch = { type: null };
+        } finally {
+            generateQuickHunchBtn.innerHTML = '<i class="fas fa-random"></i> Gerar Palpite Rápido';
+            generateQuickHunchBtn.disabled = false;
+        }
+    }
+    // === FIM DA FUNÇÃO PARA GERADOR RÁPIDO ===
+
+    // === FUNÇÃO PARA GERAR E EXIBIR PALPITE ESOTÉRICO (COMO ANTES) ===
     async function generateAndDisplayEsotericHunch() {
         if (!esotericLotteryTypeSelect || !birthDateInput || !generateEsotericHunchBtn ||
             !esotericHunchOutputDiv || !esotericHunchNumbersDiv || !esotericHunchMethodP || !esotericHunchHistoryCheckDiv) {
             console.error("SCRIPT.JS: Elementos DOM para Palpite Cósmico não encontrados.");
             return;
         }
-
         const lotteryName = esotericLotteryTypeSelect.value;
         const birthDateRaw = birthDateInput.value.trim();
         const birthDate = birthDateRaw.replace(/\D/g, '');
@@ -256,7 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if(saveEsotericHunchBtn) saveEsotericHunchBtn.style.display = 'none';
         if(checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'none';
 
-
         try {
             const requestBody = { data_nascimento: birthDate };
             const data = await fetchData(`palpite-esoterico/${lotteryName}`, {
@@ -264,13 +271,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody)
             });
-
             if (data.erro) { throw new Error(data.erro); }
             if (!data.palpite_gerado) { throw new Error("A API não retornou um palpite válido."); }
 
             renderGameNumbers(esotericHunchNumbersDiv, data.palpite_gerado);
             esotericHunchMethodP.textContent = `Método: ${data.metodo_geracao || 'Indefinido'}`;
-            
             let historyHtml = `<strong>Histórico desta combinação:</strong><br>`;
             if (data.historico_desta_combinacao) {
                 const hist = data.historico_desta_combinacao;
@@ -280,100 +285,58 @@ document.addEventListener('DOMContentLoaded', () => {
             } else { historyHtml += "Não foi possível verificar o histórico."; }
             esotericHunchHistoryCheckDiv.innerHTML = historyHtml;
 
-            // Atualiza lastGeneratedGame para o palpite esotérico
-            lastGeneratedGame = { 
+            lastGeneratedHunch = { 
                 type: 'esoteric', 
                 lottery: lotteryName, 
                 jogo: data.palpite_gerado, 
-                estrategia: data.metodo_geracao || 'Indefinido', 
-                checkResult: esotericHunchHistoryCheckDiv.innerHTML 
+                estrategia_metodo: data.metodo_geracao || 'Indefinido',
+                outputDiv: esotericHunchOutputDiv,
+                numbersDiv: esotericHunchNumbersDiv,
+                checkResultDiv: esotericHunchHistoryCheckDiv,
+                saveButton: saveEsotericHunchBtn,
+                checkButton: checkEsotericHunchBtn
             };
-            if (currentUser && saveEsotericHunchBtn) saveEsotericHunchBtn.style.display = 'inline-block';
+            updateSaveButtonVisibility('esoteric');
             if (checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'inline-block';
-
 
         } catch (error) {
             console.error("SCRIPT.JS: Erro ao gerar palpite esotérico:", error);
             esotericHunchNumbersDiv.innerHTML = '';
             esotericHunchMethodP.textContent = '';
             esotericHunchHistoryCheckDiv.innerHTML = `<p class="error-message">Falha ao gerar palpite: ${error.message || 'Erro desconhecido.'}</p>`;
-            lastGeneratedGame = { type: null }; // Limpa em caso de erro
+            lastGeneratedHunch = { type: null };
         } finally {
             generateEsotericHunchBtn.innerHTML = '<i class="fas fa-meteor"></i> Gerar Palpite Cósmico';
             generateEsotericHunchBtn.disabled = false;
         }
     }
-    // === FIM DA NOVA FUNÇÃO ===
+    // === FIM DA FUNÇÃO PALPITE ESOTÉRICO ===
 
-    // === FUNÇÃO PARA GERADOR RÁPIDO (ANTIGO GERADOR INTELIGENTE SIMPLIFICADO) ===
-    async function generateAndDisplayQuickHunch() {
-        if (!quickHunchLotteryTypeSelect || !generateQuickHunchBtn || !quickHunchOutputDiv || !quickHunchNumbersDiv || !quickHunchStrategyP) {
-            console.error("SCRIPT.JS: Elementos DOM para Palpite Rápido não encontrados.");
-            return;
-        }
-        const lottery = quickHunchLotteryTypeSelect.value;
-        
-        generateQuickHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
-        generateQuickHunchBtn.disabled = true;
-        quickHunchOutputDiv.style.display = 'block';
-        quickHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>';
-        quickHunchStrategyP.textContent = 'Gerando um palpite aleatório rápido...';
-        if(saveQuickHunchBtn) saveQuickHunchBtn.style.display = 'none';
-        if(checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'none';
-        if(quickHunchCheckResultDiv) quickHunchCheckResultDiv.innerHTML = '';
-
-        try {
-            // O backend para gerar_jogo agora só tem a estratégia "aleatorio_rapido" (ou o que você definiu lá)
-            const data = await fetchData(`gerar_jogo/${lottery}?estrategia=aleatorio_rapido`); // Força estratégia
-
-            if (data.erro) { throw new Error(data.detalhes || data.erro);  }
-            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) {
-                throw new Error("Palpite inválido retornado pela IA.");
-            }
-            renderGameNumbers(quickHunchNumbersDiv, data.jogo);
-            quickHunchStrategyP.textContent = `Estratégia: ${data.estrategia_usada || 'Aleatório Rápido'}`;
-            
-            lastGeneratedGame = { 
-                type: 'quick', 
-                lottery: lottery, 
-                jogo: data.jogo, 
-                estrategia: data.estrategia_usada || 'Aleatório Rápido',
-                checkResult: ''
-             };
-            if (currentUser && saveQuickHunchBtn) saveQuickHunchBtn.style.display = 'inline-block';
-            if (checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'inline-block';
-
-        } catch (error) {
-            console.error("SCRIPT.JS: Erro ao gerar palpite rápido:", error);
-            quickHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha ao gerar palpite.'}</p>`;
-            quickHunchStrategyP.textContent = 'Erro ao gerar.';
-            lastGeneratedGame = { type: null };
-        } finally {
-            generateQuickHunchBtn.innerHTML = '<i class="fas fa-random"></i> Gerar Palpite Rápido';
-            generateQuickHunchBtn.disabled = false;
+    // === FUNÇÕES DE UTILIDADE PARA BOTÕES DE SALVAR/CONFERIR ===
+    function updateSaveButtonVisibility(hunchType) {
+        const saveButton = (hunchType === 'quick') ? saveQuickHunchBtn : saveEsotericHunchBtn;
+        const outputDiv = (hunchType === 'quick') ? quickHunchOutputDiv : esotericHunchOutputDiv;
+        if (saveButton) {
+            saveButton.style.display = currentUser && outputDiv.style.display !== 'none' && lastGeneratedHunch.type === hunchType ? 'inline-block' : 'none';
         }
     }
-    // === FIM DA FUNÇÃO PARA GERADOR RÁPIDO ===
-
-
-    // === LÓGICA PARA OS BOTÕES DE SALVAR E CONFERIR (Generalizada) ===
-    function setupSaveHunchButton(buttonElement, outputDiv) {
+    
+    function setupSaveHunchButton(buttonElement, hunchType) {
         if (buttonElement) {
             buttonElement.addEventListener('click', () => {
-                if (!firestoreDB || !currentUser || !outputDiv || !lastGeneratedGame.type || lastGeneratedGame.lottery !== outputDiv.dataset.lotteryTypeFromSelect) { // Checa se é do select correto
-                    alert("Logue e gere um palpite válido para salvar.");
+                if (!firestoreDB || !currentUser || !lastGeneratedHunch.jogo || lastGeneratedHunch.type !== hunchType) {
+                    alert("Logue e gere um palpite válido deste tipo para salvar.");
                     return;
                 }
-                const gameToSave = lastGeneratedGame.jogo;
-                const lotteryToSave = lastGeneratedGame.lottery;
-                const strategyToSave = lastGeneratedGame.estrategia;
-                const checkResultToSave = lastGeneratedGame.checkResult;
-
+                const gameToSave = lastGeneratedHunch.jogo;
+                const lotteryToSave = lastGeneratedHunch.lottery;
+                const strategyToSave = lastGeneratedHunch.estrategia_metodo;
+                // A conferência não será salva aqui, será feita sob demanda em "Meus Jogos"
                 firestoreDB.collection('userGames').add({
                     userId: currentUser.uid, userEmail: currentUser.email,
                     lottery: lotteryToSave, game: gameToSave, strategy: strategyToSave,
                     savedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    checkedResult: checkResultToSave || null
+                    checkedResult: null // Resultado da conferência será atualizado depois
                 }).then(() => {
                     alert("Palpite salvo com sucesso!");
                     if (myGamesSection && myGamesSection.classList.contains('active-section')) {
@@ -387,12 +350,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    function setupCheckHunchButton(buttonElement, outputDiv, numbersDiv, checkResultDisplayDiv, lotterySelectElement) {
+    function setupCheckHunchButton(buttonElement, numbersDisplayDiv, checkResultDisplayDiv, lotterySelectElement, hunchType) {
          if (buttonElement) {
              buttonElement.addEventListener('click', async () => {
                  const currentLottery = lotterySelectElement.value;
-                 if (!lastGeneratedGame.jogo || lastGeneratedGame.lottery !== currentLottery) {
-                     checkResultDisplayDiv.innerHTML = '<span class="misses">Gere um palpite para esta loteria primeiro.</span>';
+                 if (!lastGeneratedHunch.jogo || lastGeneratedHunch.lottery !== currentLottery || lastGeneratedHunch.type !== hunchType) {
+                     checkResultDisplayDiv.innerHTML = '<span class="misses">Gere um palpite deste tipo para esta loteria primeiro.</span>';
                      return;
                  }
 
@@ -401,41 +364,35 @@ document.addEventListener('DOMContentLoaded', () => {
                      checkResultDisplayDiv.innerHTML = `<div class="spinner small-spinner"></div> Buscando últimos resultados...`;
                      try {
                          resultsToUse = await fetchData(`resultados/${currentLottery}`);
-                         if(resultsToUse) resultsToUse.loteria_tipo = currentLottery; // Adiciona para checkGame
+                         if(resultsToUse) resultsToUse.loteria_tipo = currentLottery;
                          lastFetchedResults[currentLottery] = resultsToUse;
-                         // Atualiza o card de "Últimos Resultados" se for a loteria selecionada globalmente
-                         if (lotteryTypeSelect && lotteryTypeSelect.value === currentLottery && apiResultsPre) {
+                         // Atualiza o card de "Últimos Resultados" principal se for a mesma loteria
+                         const mainLotterySelectForStats = document.getElementById('quick-hunch-lottery-type') || document.getElementById('lottery-type'); // Adapte se o ID mudou
+                         if (mainLotterySelectForStats && mainLotterySelectForStats.value === currentLottery && document.getElementById('api-results')) {
                              let displayText = resultsToUse.erro || resultsToUse.aviso || `Concurso: ${resultsToUse.ultimo_concurso || 'N/A'}...`;
                              if (resultsToUse.numeros && resultsToUse.numeros.length > 0) {
                                  displayText = `Concurso: ${resultsToUse.ultimo_concurso || 'N/A'}\nData: ${resultsToUse.data || 'N/A'}\nNúmeros Sorteados: ${resultsToUse.numeros.join(', ')}`;
                              }
-                             apiResultsPre.textContent = displayText;
+                             document.getElementById('api-results').textContent = displayText;
                          }
-                     } catch (e) {
-                         checkResultDisplayDiv.innerHTML = `<span class="misses">Falha ao buscar resultados.</span>`;
-                         return;
-                     }
+                     } catch (e) { checkResultDisplayDiv.innerHTML = `<span class="misses">Falha ao buscar resultados.</span>`; return; }
                  }
                  if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) {
-                     checkResultDisplayDiv.innerHTML = `<span class="misses">Resultados oficiais indisponíveis.</span>`;
-                     return;
+                     checkResultDisplayDiv.innerHTML = `<span class="misses">Resultados oficiais indisponíveis.</span>`; return;
                  }
 
-                 const result = checkGame(lastGeneratedGame.jogo, resultsToUse);
+                 const result = checkGame(lastGeneratedHunch.jogo, resultsToUse);
                  checkResultDisplayDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`;
-                 renderGameNumbers(numbersDiv, lastGeneratedGame.jogo, result.hitNumbers, result.almostNumbers);
-                 lastGeneratedGame.checkResult = checkResultDisplayDiv.innerHTML;
+                 renderGameNumbers(numbersDisplayDiv, lastGeneratedHunch.jogo, result.hitNumbers, result.almostNumbers);
+                 lastGeneratedHunch.checkResult = checkResultDisplayDiv.innerHTML;
              });
          }
     }
     // === FIM DAS FUNÇÕES DE SALVAR E CONFERIR ===
 
-
-    // --- EVENT LISTENERS ---
-    // (Seus event listeners existentes para modais, navegação, fetchResultsBtn, lotteryTypeSelect (agora quickHunchLotteryTypeSelect para stats),
-    //  generateGameBtn (agora generateQuickHunchBtn), checkGeneratedGameBtn (agora checkQuickHunchBtn), auth, saveGameBtn (agora saveQuickHunchBtn), etc.)
-    if (splashProgressBarFill && splashProgressContainer) { /* ... (splash logic) ... */ }
-    criticalSplashTimeout = setTimeout(() => { /* ... (splash logic) ... */ }, SPLASH_MINIMUM_VISIBLE_TIME + 1500);  
+    // --- EVENT LISTENERS (Seu código existente + Novos) ---
+    if (splashProgressBarFill && splashProgressContainer) { /* ... (sua lógica splash) */ }
+    criticalSplashTimeout = setTimeout(() => { if (splashHiddenTimestamp === 0) { showAppContentNow(); } if (!firebaseApp) { showGlobalError("Falha crítica na inicialização dos serviços."); disableFirebaseFeatures(); } criticalSplashTimeout = null; }, SPLASH_MINIMUM_VISIBLE_TIME + 1500);  
     setTimeout(attemptFirebaseInit, 100); 
 
     if(loginModalBtn) loginModalBtn.addEventListener('click', () => openModal(loginModal));
@@ -443,20 +400,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if(closeLoginModalBtn) closeLoginModalBtn.addEventListener('click', () => closeModal(loginModal));
     if(closeRegisterModalBtn) closeRegisterModalBtn.addEventListener('click', () => closeModal(registerModal));
     window.addEventListener('click', (event) => { if (event.target === loginModal) closeModal(loginModal); if (event.target === registerModal) closeModal(registerModal); });
+    
     if (navDashboardBtn) navDashboardBtn.addEventListener('click', () => setActiveSection('dashboard-section'));
     if (navMyGamesBtn) navMyGamesBtn.addEventListener('click', () => { setActiveSection('my-games-section'); if (currentUser && typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); });
-    if (navPoolsBtn) navPoolsBtn.addEventListener('click', () => setActiveSection('pools-section'));
-    
-    // Listener para o select de loteria principal (que atualiza as estatísticas)
-    // Usa quickHunchLotteryTypeSelect como o select principal para estatísticas agora, ou o antigo lotteryTypeSelect se preferir.
-    // Vou assumir que o select dentro do card de "Palpite Rápido" agora também controla as estatísticas.
-    const mainLotterySelectForStats = quickHunchLotteryTypeSelect || lotteryTypeSelect; // Escolha um
-    if (mainLotterySelectForStats) {
-        mainLotterySelectForStats.addEventListener('change', () => {
-            const selectedLottery = mainLotterySelectForStats.value;
-            if (resultsLotteryNameSpan && mainLotterySelectForStats.options[mainLotterySelectForStats.selectedIndex]) {
-                 resultsLotteryNameSpan.textContent = mainLotterySelectForStats.options[mainLotterySelectForStats.selectedIndex].text;
-            }
+    if (navPoolsBtn) navPoolsBtn.addEventListener('click', () => setActiveSection('pools-section')); // Seção de bolões, se existir
+
+    // Listener para o select de loteria principal (que atualiza as estatísticas e resultados)
+    const mainLotterySelectForDisplay = quickHunchLotteryTypeSelect || lotteryTypeSelect; // Use o ID do seu select principal
+    if (mainLotterySelectForDisplay) {
+        mainLotterySelectForDisplay.addEventListener('change', (e) => {
+            const selectedLottery = e.target.value;
+            const selectedOptionText = e.target.options[e.target.selectedIndex].text;
+            if (document.getElementById('results-lottery-name')) document.getElementById('results-lottery-name').textContent = selectedOptionText;
+            
             fetchAndDisplayResults(selectedLottery); 
             fetchAndDisplayFrequencyStats(selectedLottery); 
             fetchAndDisplayPairFrequencyStats(selectedLottery); 
@@ -464,76 +420,57 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchAndDisplayCityPrizeSumStats(selectedLottery);
         });
     }
-    if (fetchResultsBtn && mainLotterySelectForStats) { 
+    if (fetchResultsBtn && mainLotterySelectForDisplay) { 
          fetchResultsBtn.addEventListener('click', () => {
-             const selectedLottery = mainLotterySelectForStats.value;
-              fetchAndDisplayResults(selectedLottery); fetchAndDisplayFrequencyStats(selectedLottery); 
-              fetchAndDisplayPairFrequencyStats(selectedLottery); fetchAndDisplayCityStats(selectedLottery);
-              fetchAndDisplayCityPrizeSumStats(selectedLottery);
+             const selectedLottery = mainLotterySelectForDisplay.value;
+             fetchAndDisplayResults(selectedLottery); fetchAndDisplayFrequencyStats(selectedLottery); 
+             fetchAndDisplayPairFrequencyStats(selectedLottery); fetchAndDisplayCityStats(selectedLottery);
+             fetchAndDisplayCityPrizeSumStats(selectedLottery);
          });
      }
 
-    // Listener para o Gerador Rápido (antigo Gerador Inteligente)
-    if (generateQuickHunchBtn && quickHunchLotteryTypeSelect) { 
+    // Listener para o Gerador Rápido
+    if (generateQuickHunchBtn) { 
         generateQuickHunchBtn.addEventListener('click', generateAndDisplayQuickHunch);
     }
-    // Configura botões de salvar e conferir para o Palpite Rápido
-    if (quickHunchOutputDiv && quickHunchLotteryTypeSelect) { // Para pegar o tipo de loteria do select correto
-         setupSaveHunchButton(saveQuickHunchBtn, quickHunchOutputDiv);
-         setupCheckHunchButton(checkQuickHunchBtn, quickHunchOutputDiv, quickHunchNumbersDiv, quickHunchCheckResultDiv, quickHunchLotteryTypeSelect);
-         quickHunchOutputDiv.dataset.lotteryTypeFromSelect = quickHunchLotteryTypeSelect.id; // Ajuda a identificar o select
+    setupSaveHunchButton(saveQuickHunchBtn, 'quick');
+    if (quickHunchLotteryTypeSelect) { // Passa o select correto
+        setupCheckHunchButton(checkQuickHunchBtn, quickHunchNumbersDiv, quickHunchCheckResultDiv, quickHunchLotteryTypeSelect, 'quick');
     }
 
 
-    // Listeners de Autenticação (loginSubmitBtn, registerSubmitBtn, logoutBtn)
+    // Listeners de Autenticação (COPIE OS SEUS COMPLETOS AQUI)
     if(loginSubmitBtn) loginSubmitBtn.addEventListener('click', () => { /* ... (sua lógica de login) ... */ });
     if(registerSubmitBtn) registerSubmitBtn.addEventListener('click', () => { /* ... (sua lógica de registro) ... */ });
     if(logoutBtn) logoutBtn.addEventListener('click', () => { /* ... (sua lógica de logout) ... */ });
     
-    // Listener para filtro de jogos salvos
-    if (filterLotteryMyGamesSelect) filterLotteryMyGamesSelect.addEventListener('change', (e) => { if (currentUser && typeof loadUserGames === "function") loadUserGames(e.target.value); });
+    // Listener para filtro de jogos salvos (COPIE O SEU COMPLETO AQUI)
+    if (filterLotteryMyGamesSelect) filterLotteryMyGamesSelect.addEventListener('change', (e) => { /* ... */ });
     
-    // Listeners para Probabilidade Manual
+    // Listeners para Probabilidade Manual (COPIE OS SEUS COMPLETOS AQUI)
     if (manualProbUserNumbersInput && manualProbLotteryTypeSelect) { 
         manualProbUserNumbersInput.addEventListener('input', updateManualProbNumbersFeedback);
-        manualProbLotteryTypeSelect.addEventListener('change', () => { /* ... (sua lógica) ... */ });
+        manualProbLotteryTypeSelect.addEventListener('change', () => { /* ... */ });
         const initialSelectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
-        if (initialSelectedOption && initialSelectedOption.dataset.count && initialSelectedOption.dataset.min && initialSelectedOption.dataset.max){
-            manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${initialSelectedOption.dataset.count} de ${initialSelectedOption.dataset.min}-${initialSelectedOption.dataset.max})`;
-        }
+        if (initialSelectedOption && initialSelectedOption.dataset.count){ /* ... */ }
         updateManualProbNumbersFeedback(); 
     }
-    if (manualCalculateProbBtn) { manualCalculateProbBtn.addEventListener('click', async () => { /* ... (sua lógica) ... */ }); }
+    if (manualCalculateProbBtn) { manualCalculateProbBtn.addEventListener('click', async () => { /* ... */ }); }
 
-
-    // === NOVOS EVENT LISTENERS (ADICIONADOS) ===
+    // === NOVOS EVENT LISTENERS ===
     if (generateEsotericHunchBtn) {
         generateEsotericHunchBtn.addEventListener('click', generateAndDisplayEsotericHunch);
     }
-    // Configura botões de salvar e conferir para o Palpite Esotérico
-    if (esotericHunchOutputDiv && esotericLotteryTypeSelect) { // Para pegar o tipo de loteria do select correto
-         setupSaveHunchButton(saveEsotericHunchBtn, esotericHunchOutputDiv);
-         setupCheckHunchButton(checkEsotericHunchBtn, esotericHunchOutputDiv, esotericHunchNumbersDiv, esotericHunchHistoryCheckDiv, esotericLotteryTypeSelect);
-         esotericHunchOutputDiv.dataset.lotteryTypeFromSelect = esotericLotteryTypeSelect.id; // Ajuda a identificar o select
+    setupSaveHunchButton(saveEsotericHunchBtn, 'esoteric');
+    if (esotericLotteryTypeSelect) { // Passa o select correto
+         setupCheckHunchButton(checkEsotericHunchBtn, esotericHunchNumbersDiv, esotericHunchHistoryCheckDiv, esotericLotteryTypeSelect, 'esoteric');
     }
-
-    // Listeners para os botões no banner promocional e no prompt do card esotérico
+    
     if (promoRegisterBtn && registerModalBtn) {
         promoRegisterBtn.addEventListener('click', () => openModal(registerModal));
     }
     if (promoLoginBtn && loginModalBtn) {
         promoLoginBtn.addEventListener('click', () => openModal(loginModal));
-    }
-    // (Os listeners para esotericPromptRegisterBtn e esotericPromptLoginBtn já estavam na minha sugestão anterior,
-    //  garanta que eles estejam aqui também se você manteve aqueles botões no HTML)
-    const esotericPromptRegisterBtnInstance = document.getElementById('esoteric-prompt-register-btn'); // Re-seleciona se necessário
-    const esotericPromptLoginBtnInstance = document.getElementById('esoteric-prompt-login-btn'); // Re-seleciona se necessário
-
-    if (esotericPromptRegisterBtnInstance && registerModalBtn) {
-        esotericPromptRegisterBtnInstance.addEventListener('click', () => { openModal(registerModal); });
-    }
-    if (esotericPromptLoginBtnInstance && loginModalBtn) {
-        esotericPromptLoginBtnInstance.addEventListener('click', () => { openModal(loginModal); });
     }
     // === FIM DOS NOVOS EVENT LISTENERS ===
     
