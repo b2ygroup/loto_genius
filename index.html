@@ -36,7 +36,8 @@
         <nav id="main-nav" style="display:none;" aria-label="Navegação Principal">
             <button id="nav-dashboard-btn" class="nav-item active" title="Painel Principal"><i class="fas fa-tachometer-alt" aria-hidden="true"></i> <span class="nav-text">Painel</span></button>
             <button id="nav-my-games-btn" class="nav-item" title="Meus Jogos"><i class="fas fa-ticket-alt" aria-hidden="true"></i> <span class="nav-text">Meus Jogos</span></button>
-            </nav>
+            <button id="nav-pools-btn" class="nav-item" title="Bolões"><i class="fas fa-users" aria-hidden="true"></i> <span class="nav-text">Bolões</span></button>
+        </nav>
         <div id="auth-section" aria-label="Autenticação do Usuário">
             <button id="login-modal-btn" class="auth-btn">Login</button>
             <button id="register-modal-btn" class="auth-btn">Registrar</button>
@@ -46,7 +47,7 @@
 
     <main id="app-content" style="display:none;" role="main">
         <section id="dashboard-section" class="main-section active-section" aria-labelledby="dashboard-title">
-            <h2 id="dashboard-title" class="visually-hidden">Painel Principal</h2>
+            <h2 id="dashboard-title" class="visually-hidden">Painel Principal e Geradores</h2>
             
             <section id="platform-highlights" class="card" aria-labelledby="platform-highlights-title">
                 <h3 id="platform-highlights-title" class="card-title-accessible"><i class="fas fa-star" aria-hidden="true"></i> Loto Genius em Números</h3>
@@ -57,7 +58,7 @@
                 </div>
             </section>
 
-            <div id="cosmic-promo-banner" class="card promo-banner" style="display:none;">
+            <div id="cosmic-promo-banner" class="card promo-banner" style="display:block;">
                 <h3 class="promo-title"><i class="fas fa-meteor"></i> Descubra Seus Números da Sorte Cósmicos! <i class="fas fa-hat-wizard"></i></h3>
                 <p class="promo-text">Use a sabedoria ancestral da numerologia e astrologia para gerar palpites únicos. Nossos algoritmos combinam esses conhecimentos para te ajudar a encontrar a sorte!</p>
                 <p class="promo-cta"><strong>Registre-se ou faça login</strong> para ter acesso exclusivo a esta ferramenta e desvendar os mistérios dos números!</p>
@@ -65,6 +66,12 @@
                     <button class="action-btn primary-action" id="promo-register-btn">Quero Me Registrar!</button>
                     <button class="action-btn" id="promo-login-btn">Já Tenho Conta</button>
                 </div>
+            </div>
+            
+            <div class="ad-placeholder banner-top-dashboard carousel-ad" role="complementary" aria-label="Espaço para anúncio superior">
+                <img src="https://placehold.co/728x90/1a1a2e/47aeff?text=Anuncio+Dinâmico+1&fontsize=16" alt="Anúncio 1" class="carousel-item active">
+                <img src="https://placehold.co/728x90/162447/e0e0e0?text=Anuncio+Dinâmico+2&fontsize=16" alt="Anúncio 2" class="carousel-item">
+                <img src="https://placehold.co/728x90/1f4068/ffffff?text=Anuncio+Dinâmico+3&fontsize=16" alt="Anúncio 3" class="carousel-item">
             </div>
 
             <div class="grid-container">
@@ -93,7 +100,7 @@
                 </div>
 
                 <div class="card large-card" id="esoteric-hunch-card" style="display:none;" aria-labelledby="esoteric-title">
-                    <h2 id="esoteric-title"><i class="fas fa-hat-wizard" aria-hidden="true"></i> Palpites Cósmicos & Numerológicos <span class="premium-tag">(Exclusivo)</span></h2>
+                    <h2 id="esoteric-title"><i class="fas fa-hat-wizard" aria-hidden="true"></i> Palpites Cósmicos & Numerológicos <span class="premium-tag">(Exclusivo Assinantes)</span></h2>
                     <label for="esoteric-lottery-type">Selecione a Loteria:</label>
                     <select id="esoteric-lottery-type">
                         <option value="megasena">Mega-Sena</option>
@@ -111,7 +118,7 @@
                         <div id="esoteric-hunch-numbers" class="game-numbers"></div>
                         <p id="esoteric-hunch-method" class="strategy-text"></p>
                         <div id="esoteric-hunch-history-check" class="check-result-display" style="margin-top: 0.5rem; font-size: 0.85em;"></div>
-                        <div class="game-card-actions">
+                         <div class="game-card-actions">
                             <button id="save-esoteric-hunch-btn" class="action-btn small-btn" title="Salvar este jogo" style="display:none;"><i class="fas fa-save"></i> Salvar</button>
                             <button id="check-esoteric-hunch-btn" class="action-btn small-btn" title="Conferir este jogo" style="display:none;"><i class="fas fa-check-circle"></i> Conferir</button>
                         </div>
@@ -121,26 +128,26 @@
                 <div class="card" id="results-display-card" aria-labelledby="results-title">
                     <h3 id="results-title"><i class="fas fa-poll" aria-hidden="true"></i> Últimos Resultados</h3>
                     <div class="results-header">
-                        <span id="results-lottery-name">Mega-Sena</span>
+                        <span id="results-lottery-name">Mega-Sena</span> 
                         <button id="fetch-results-btn" class="action-btn small-btn refresh-btn" title="Atualizar Resultados"><i class="fas fa-sync-alt"></i></button>
                     </div>
-                    <pre id="api-results" class="code-block" aria-live="polite">Selecione uma loteria e clique em atualizar.</pre>
+                    <pre id="api-results" class="code-block" aria-live="polite">Selecione uma loteria no "Palpite Rápido" e clique em atualizar.</pre>
                 </div>
                 
                 <div class="card" id="manual-game-probability-card" aria-labelledby="manual-game-prob-title">
                     <h3 id="manual-game-prob-title"><i class="fas fa-calculator"></i> Probabilidade do Meu Jogo</h3>
                     <label for="manual-prob-lottery-type">Selecione a Loteria:</label>
                     <select id="manual-prob-lottery-type">
-                        <option value="megasena" data-count="6" data-min="1" data-max="60">Mega-Sena</option>
-                        <option value="lotofacil" data-count="15" data-min="1" data-max="25">Lotofácil</option>
-                        <option value="lotomania" data-count="50" data-min="0" data-max="99">Lotomania</option>
-                        <option value="quina" data-count="5" data-min="1" data-max="80">Quina</option>
+                        <option value="megasena" data-count="6" data-min="1" data-max="60">Mega-Sena (6 números de 1-60)</option>
+                        <option value="lotofacil" data-count="15" data-min="1" data-max="25">Lotofácil (15 números de 1-25)</option>
+                        <option value="lotomania" data-count="50" data-min="0" data-max="99">Lotomania (Aposta 50 de 0-99)</option>
+                        <option value="quina" data-count="5" data-min="1" data-max="80">Quina (5 números de 1-80)</option>
                     </select>
                     <label for="manual-prob-user-numbers">Seus números (separados por vírgula):</label>
                     <textarea id="manual-prob-user-numbers" rows="3" placeholder="Ex: 01,02,03,04,05,06"></textarea>
                     <p id="manual-prob-numbers-count-feedback" class="input-feedback">Números: 0 de 6.</p>
                     <button id="manual-calculate-prob-btn" class="action-btn primary-action"><i class="fas fa-percent"></i> Calcular Probabilidade</button>
-                    <div id="manual-probability-result-display" class="result-display-box" aria-live="polite" style="margin-top:15px;">
+                    <div id="manual-probability-result-display" class="result-display-box" style="margin-top:15px;">
                         Aguardando seu jogo...
                     </div>
                 </div>
@@ -156,42 +163,81 @@
                     <ol id="top-winners-list"><li><div class="spinner small-spinner"></div></li></ol>
                 </section>
                 <div class="card" id="frequency-stats-card" aria-labelledby="frequency-stats-title">
-                    <h3 id="frequency-stats-title"><i class="fas fa-sort-numeric-up-alt"></i> Mais Sorteados (<span id="freq-stats-lottery-name"></span>)</h3>
+                    <h3 id="frequency-stats-title"><i class="fas fa-sort-numeric-up-alt"></i> Mais Sorteados (<span id="freq-stats-lottery-name">Mega-Sena</span>)</h3>
                     <div id="frequency-list-container" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
                 </div>
                 <div class="card" id="pair-frequency-stats-card" aria-labelledby="pair-frequency-stats-title">
-                    <h3 id="pair-frequency-stats-title"><i class="fas fa-project-diagram"></i> Pares Frequentes (<span id="pair-freq-stats-lottery-name"></span>)</h3>
+                    <h3 id="pair-frequency-stats-title"><i class="fas fa-project-diagram"></i> Pares Frequentes (<span id="pair-freq-stats-lottery-name">Mega-Sena</span>)</h3>
                     <div id="pair-frequency-list-container" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
                 </div>
                  <div class="card" id="city-stats-card" aria-labelledby="city-stats-title">
-                    <h3 id="city-stats-title"><i class="fas fa-city"></i> Cidades Premiadas (<span id="city-stats-lottery-name"></span>)</h3>
+                    <h3 id="city-stats-title"><i class="fas fa-city"></i> Cidades Premiadas (<span id="city-stats-lottery-name">Mega-Sena</span>)</h3>
                     <p class="stats-subtitle">(Ganhadores do prêmio principal)</p>
                     <div id="city-list-container" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
                 </div>
                 <div class="card" id="city-prize-sum-card" aria-labelledby="city-prize-sum-title">
-                    <h3 id="city-prize-sum-title"><i class="fas fa-hand-holding-usd"></i> Prêmios por Cidade (<span id="city-prize-sum-lottery-name"></span>)</h3>
+                    <h3 id="city-prize-sum-title"><i class="fas fa-hand-holding-usd"></i> Prêmios por Cidade (<span id="city-prize-sum-lottery-name">Mega-Sena</span>)</h3>
                     <p class="stats-subtitle">(Soma dos prêmios principais)</p>
                     <div id="city-prize-sum-list-container" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
                 </div>
             </div>
-             <div class="ad-placeholder banner-bottom-dashboard carousel-ad" role="complementary" aria-label="Espaço para anúncio inferior">
-                <img src="https://placehold.co/300x250/1a1a2e/47aeff?text=Descubra+Seus+Números+Cósmicos!+✨&fontsize=16" alt="Anúncio Palpites Cósmicos 1" class="carousel-item active">
-                <img src="https://placehold.co/300x250/162447/e0e0e0?text=Numerologia+e+Astros+a+seu+favor!+Registre-se!&fontsize=14" alt="Anúncio Palpites Cósmicos 2" class="carousel-item">
-                <p>Seu anúncio aqui (300x250)</p>
+            <div class="ad-placeholder banner-bottom-dashboard carousel-ad" role="complementary" aria-label="Espaço para anúncio inferior">
+                <img src="https://placehold.co/300x250/1a1a2e/be93f9?text=Palpites+Cósmicos+Te+Aguardam!&fontsize=14" alt="Anúncio Palpites Cósmicos 1" class="carousel-item active">
+                <img src="https://placehold.co/300x250/162447/ffd700?text=Numerologia+Exclusiva+para+Membros!+Registre-se+Já!&fontsize=12" alt="Anúncio Palpites Cósmicos 2" class="carousel-item">
             </div>
         </section>
 
         <section id="my-games-section" class="main-section" aria-labelledby="my-games-title">
-            </section>
+            <h2 id="my-games-title"><i class="fas fa-history" aria-hidden="true"></i> Meus Jogos Salvos</h2>
+            <div id="saved-games-filters" style="margin-bottom: 1rem; display:flex; gap:10px; align-items:center;">
+                <label for="filter-lottery-mygames">Filtrar:</label>
+                <select id="filter-lottery-mygames" aria-label="Filtrar jogos salvos por loteria">
+                    <option value="todos">Todas</option>
+                    <option value="megasena">Mega-Sena</option><option value="lotofacil">Lotofácil</option>
+                    <option value="lotomania">Lotomania</option><option value="quina">Quina</option>
+                </select>
+            </div>
+            <div id="saved-games-container" class="grid-container cards-display">
+                <p id="no-saved-games" style="display:none;">Você ainda não tem jogos salvos.</p>
+            </div>
+        </section>
         <section id="pools-section" class="main-section" aria-labelledby="pools-title">
              <h2 id="pools-title"><i class="fas fa-users"></i> Bolões Comunitários</h2>
              <p>Em breve: Crie e participe de bolões inteligentes para aumentar suas chances!</p>
         </section>
     </main>
 
-    <div id="login-modal" class="modal" role="dialog" aria-labelledby="login-modal-title" aria-modal="true"> </div>
-    <div id="register-modal" class="modal" role="dialog" aria-labelledby="register-modal-title" aria-modal="true"> </div>
-    <footer role="contentinfo"> </footer>
+    <div id="login-modal" class="modal" role="dialog" aria-labelledby="login-modal-title" aria-modal="true">
+        <div class="modal-content">
+            <button class="close-btn" id="close-login-modal" aria-label="Fechar modal de login">&times;</button>
+            <h2 id="login-modal-title">Login</h2>
+            <label for="login-email" class="visually-hidden">Email</label>
+            <input type="email" id="login-email" placeholder="Seu Email" required aria-required="true">
+            <label for="login-password" class="visually-hidden">Senha</label>
+            <input type="password" id="login-password" placeholder="Sua Senha" required aria-required="true">
+            <button id="login-submit-btn" class="modal-btn">Entrar</button>
+            <p id="login-error" class="error-message" aria-live="assertive"></p>
+        </div>
+    </div>
+
+    <div id="register-modal" class="modal" role="dialog" aria-labelledby="register-modal-title" aria-modal="true">
+        <div class="modal-content">
+            <button class="close-btn" id="close-register-modal" aria-label="Fechar modal de registro">&times;</button>
+            <h2 id="register-modal-title">Criar Conta</h2>
+            <label for="register-email" class="visually-hidden">Email</label>
+            <input type="email" id="register-email" placeholder="Seu Email" required aria-required="true">
+            <label for="register-password" class="visually-hidden">Senha</label>
+            <input type="password" id="register-password" placeholder="Crie uma Senha (mín. 6 caracteres)" required aria-required="true">
+            <label for="register-confirm-password" class="visually-hidden">Confirme a Senha</label>
+            <input type="password" id="register-confirm-password" placeholder="Confirme a Senha" required aria-required="true">
+            <button id="register-submit-btn" class="modal-btn">Registrar</button>
+            <p id="register-error" class="error-message" aria-live="assertive"></p>
+        </div>
+    </div>
+
+    <footer role="contentinfo">
+        <p>&copy; <span id="current-year"></span> Loto Genius AI. Jogue com consciência e responsabilidade.</p>
+    </footer>
     <div id="global-error-msg" role="alert" aria-live="assertive"></div>
     <div id="confetti-canvas" aria-hidden="true"></div>
 

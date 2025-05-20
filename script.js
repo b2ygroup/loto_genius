@@ -1,35 +1,66 @@
-// script.js (Seu código da resposta #40 + Minhas Refatorações da Resposta #43, revisado)
+// script.js (SEU CÓDIGO da Resposta #47 + Minhas Integrações FINAIS v10.10)
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver 10.4 (Refatoração UI + Cósmicos)");
+    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver 10.10 (Integração Final Completa)");
     const domContentLoadedTimestamp = Date.now(); 
 
-    // --- Constantes de Tempo da Splash Screen (DO SEU CÓDIGO) ---
+    // --- Constantes de Tempo da Splash Screen ---
     const SPLASH_LOGO_ANIM_MAX_DELAY = 1300; 
     const SPLASH_LOGO_ANIM_DURATION = 600;  
-    // ... (resto das suas constantes de splash)
-    const SPLASH_MINIMUM_VISIBLE_TIME = Math.max(
+    const SPLASH_TEXT_ANIM_DELAY = 2200; 
+    const SPLASH_TEXT_ANIM_DURATION = 1000; 
+    const SPLASH_PROGRESS_BAR_START_DELAY = 2500; 
+    const SPLASH_PROGRESS_BAR_FILL_DURATION = 3000; 
+    const APPROX_TOTAL_CSS_ANIM_DURATION = Math.max(
         SPLASH_LOGO_ANIM_MAX_DELAY + SPLASH_LOGO_ANIM_DURATION,
-        2200 + 1000, // SPLASH_TEXT_ANIM_DELAY + SPLASH_TEXT_ANIM_DURATION
-        2500 + 3000  // SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION
-    ) + 1000;
+        SPLASH_TEXT_ANIM_DELAY + SPLASH_TEXT_ANIM_DURATION,
+        SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION
+    );
+    const SPLASH_MINIMUM_VISIBLE_TIME = APPROX_TOTAL_CSS_ANIM_DURATION + 1000;
 
-
-    // --- Seletores de Elementos (DO SEU CÓDIGO + NOVOS para refatoração) ---
+    // --- Seletores de Elementos ---
+    console.log("SCRIPT.JS: Declarando seletores de elementos...");
     const accessibleSplashScreen = document.getElementById('accessible-splash-screen');
-    // ... (todos os seus seletores existentes da resposta #40) ...
-    const lotteryTypeSelect = document.getElementById('lottery-type'); // Este era o seletor do Gerador Inteligente
-    const iaStrategySelect = document.getElementById('ia-strategy-select'); // Do Gerador Inteligente
-    const generateGameBtn = document.getElementById('generate-game-btn'); // Do Gerador Inteligente
-    const gameGenerationOutputDiv = document.getElementById('game-generation-output');
-    const generatedGameNumbersDiv = document.getElementById('generated-game-numbers');
-    const generatedGameStrategyP = document.getElementById('generated-game-strategy');
-    const saveGameBtn = document.getElementById('save-game-btn'); // Do Gerador Inteligente
-    const checkGeneratedGameBtn = document.getElementById('check-generated-game-btn'); // Do Gerador Inteligente
-    const generatedGameCheckResultDiv = document.getElementById('generated-game-check-result');
-    const simulatePremiumCheckbox = document.getElementById('simulate-premium-checkbox');
+    let splashProgressBarFill = null;
+    let splashProgressContainer = null;
 
+    if (accessibleSplashScreen) {
+        splashProgressBarFill = accessibleSplashScreen.querySelector('.progress-bar-fill');
+        splashProgressContainer = accessibleSplashScreen.querySelector('.progress-bar-container');
+        console.log("SCRIPT.JS: Elementos da splash screen principais encontrados.");
+    } else {
+        console.warn("SCRIPT.JS: Elemento 'accessible-splash-screen' NÃO encontrado.");
+    }
+    
+    const appContent = document.getElementById('app-content');
+    const currentYearSpan = document.getElementById('current-year');
+    const navDashboardBtn = document.getElementById('nav-dashboard-btn');
+    const navMyGamesBtn = document.getElementById('nav-my-games-btn');
+    const navPoolsBtn = document.getElementById('nav-pools-btn');
+    const mainNav = document.getElementById('main-nav');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const myGamesSection = document.getElementById('my-games-section');
+    const poolsSection = document.getElementById('pools-section');
+    const mainSections = document.querySelectorAll('.main-section');
+    const statsJogosGeradosSpan = document.getElementById('stats-jogos-gerados');
+    const statsJogosPremiadosSpan = document.getElementById('stats-jogos-premiados');
+    const statsValorPremiosSpan = document.getElementById('stats-valor-premios');
+    const recentPoolsList = document.getElementById('recent-pools-list');
+    const topWinnersList = document.getElementById('top-winners-list');
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    
+    // Seletores do Gerador Inteligente ANTIGO - Serão substituídos pelos novos
+    // const lotteryTypeSelect = document.getElementById('lottery-type'); 
+    // const iaStrategySelect = document.getElementById('ia-strategy-select'); 
+    // const simulatePremiumCheckbox = document.getElementById('simulate-premium-checkbox');
+    // const generateGameBtn = document.getElementById('generate-game-btn');
+    // const gameGenerationOutputDiv = document.getElementById('game-generation-output');
+    // const generatedGameNumbersDiv = document.getElementById('generated-game-numbers');
+    // const generatedGameStrategyP = document.getElementById('generated-game-strategy');
+    // const saveGameBtn = document.getElementById('save-game-btn');
+    // const checkGeneratedGameBtn = document.getElementById('check-generated-game-btn');
+    // const generatedGameCheckResultDiv = document.getElementById('generated-game-check-result');
 
-    // NOVOS Seletores para a refatoração
+    // NOVOS Seletores para Palpite Aleatório Rápido
     const quickHunchLotteryTypeSelect = document.getElementById('quick-hunch-lottery-type');
     const generateQuickHunchBtn = document.getElementById('generate-quick-hunch-btn');
     const quickHunchOutputDiv = document.getElementById('quick-hunch-output');
@@ -39,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkQuickHunchBtn = document.getElementById('check-quick-hunch-btn');
     const quickHunchCheckResultDiv = document.getElementById('quick-hunch-check-result');
     
+    // NOVOS Seletores para Palpites Cósmicos
     const esotericLotteryTypeSelect = document.getElementById('esoteric-lottery-type');
     const birthDateInput = document.getElementById('birth-date-input');
     const generateEsotericHunchBtn = document.getElementById('generate-esoteric-hunch-btn');
@@ -50,101 +82,458 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveEsotericHunchBtn = document.getElementById('save-esoteric-hunch-btn');
     const checkEsotericHunchBtn = document.getElementById('check-esoteric-hunch-btn');
     
+    // NOVOS Seletores para Banner Promocional
     const cosmicPromoBanner = document.getElementById('cosmic-promo-banner');
     const promoRegisterBtn = document.getElementById('promo-register-btn');
     const promoLoginBtn = document.getElementById('promo-login-btn');
-    // (O antigo `esotericRegisterPromptDiv` foi removido pois o banner e o card esotérico (apenas para logados) cuidam disso)
-    
-    // Certifique-se que TODOS os outros seletores do seu script original estão aqui.
-    // ... (statsJogosGeradosSpan, recentPoolsList, etc. etc.)
 
+    // Seletores para Resultados e Estatísticas (o select principal agora é o do Palpite Rápido)
+    const mainDisplayLotterySelect = quickHunchLotteryTypeSelect; // Este controlará os displays de stats/results
+    const apiResultsPre = document.getElementById('api-results');
+    const resultsLotteryNameSpan = document.getElementById('results-lottery-name');
+    const fetchResultsBtn = document.getElementById('fetch-results-btn'); 
+
+    const savedGamesContainer = document.getElementById('saved-games-container');
+    const noSavedGamesP = document.getElementById('no-saved-games');
+    const filterLotteryMyGamesSelect = document.getElementById('filter-lottery-mygames');
+    const loginModalBtn = document.getElementById('login-modal-btn');
+    const registerModalBtn = document.getElementById('register-modal-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userInfoDiv = document.getElementById('user-info');
+    const userEmailSpan = document.getElementById('user-email');
+    const loginModal = document.getElementById('login-modal');
+    const registerModal = document.getElementById('register-modal');
+    const closeLoginModalBtn = document.getElementById('close-login-modal');
+    const closeRegisterModalBtn = document.getElementById('close-register-modal');
+    const loginEmailInput = document.getElementById('login-email');
+    const loginPasswordInput = document.getElementById('login-password');
+    const loginSubmitBtn = document.getElementById('login-submit-btn');
+    const loginErrorP = document.getElementById('login-error');
+    const registerEmailInput = document.getElementById('register-email');
+    const registerPasswordInput = document.getElementById('register-password');
+    const registerConfirmPasswordInput = document.getElementById('register-confirm-password');
+    const registerSubmitBtn = document.getElementById('register-submit-btn');
+    const registerErrorP = document.getElementById('register-error');
+    const errorDiv = document.getElementById('global-error-msg'); 
+    
+    const freqStatsLotteryNameSpan = document.getElementById('freq-stats-lottery-name');
+    const frequencyListContainer = document.getElementById('frequency-list-container');
+    const pairFreqStatsLotteryNameSpan = document.getElementById('pair-freq-stats-lottery-name');
+    const pairFrequencyListContainer = document.getElementById('pair-frequency-list-container');
+    const cityStatsLotteryNameSpan = document.getElementById('city-stats-lottery-name');
+    const cityListContainer = document.getElementById('city-list-container');
+    const cityPrizeSumLotteryNameSpan = document.getElementById('city-prize-sum-lottery-name');
+    const cityPrizeSumListContainer = document.getElementById('city-prize-sum-list-container');
+    const manualProbLotteryTypeSelect = document.getElementById('manual-prob-lottery-type');
+    const manualProbUserNumbersInput = document.getElementById('manual-prob-user-numbers');
+    const manualCalculateProbBtn = document.getElementById('manual-calculate-prob-btn');
+    const manualProbabilityResultDisplay = document.getElementById('manual-probability-result-display');
+    const manualProbNumbersCountFeedback = document.getElementById('manual-prob-numbers-count-feedback');
+    
+    // --- Variáveis Globais ---
     let splashHiddenTimestamp = 0; 
-    if (document.getElementById('current-year')) document.getElementById('current-year').textContent = new Date().getFullYear();
+    if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
     let BACKEND_URL_BASE;
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:") { 
         BACKEND_URL_BASE = 'http://127.0.0.1:5000'; 
     } else { 
-        BACKEND_URL_BASE = '';
+        BACKEND_URL_BASE = ''; // Para Vercel, usa caminhos relativos para /api/...
     }
     
     let firebaseApp, firebaseAuth, firestoreDB, currentUser = null;
     let lastFetchedResults = {}; 
-    let lastGeneratedHunch = { // Armazena o último palpite gerado (rápido OU esotérico)
+    // Variável para armazenar o último palpite gerado (seja rápido ou esotérico) e seus elementos associados
+    let lastGeneratedHunch = { 
         type: null, // 'quick' ou 'esoteric'
         lottery: null,
         jogo: [],
-        estrategia_metodo: '', // Nome da estratégia ou método
-        outputDiv: null, // Referência ao DIV de saída do palpite
-        numbersDiv: null, // Referência ao DIV dos números
-        checkResultDiv: null, // Referência ao DIV do resultado da conferência
-        saveButton: null, // Referência ao botão de salvar
-        checkButton: null // Referência ao botão de conferir
+        estrategia_metodo: '', 
+        outputDiv: null, 
+        numbersDiv: null,
+        checkResultDiv: null,
+        saveButton: null,
+        checkButton: null
     };  
     let criticalSplashTimeout; 
     let firebaseInitAttempts = 0; 
     const maxFirebaseInitAttempts = 10; 
     const LOTTERY_CONFIG_JS = { 
-        megasena: { count: 6, color: "#209869" }, 
-        lotofacil: { count: 15, color: "#930089" },
-        quina: { count: 5, color: "#260085" }, 
-        lotomania: { count_sorteadas: 20, count_apostadas: 50, color: "#f78100" }
+        megasena: { count: 6, color: "#209869", name: "Mega-Sena" }, 
+        lotofacil: { count: 15, color: "#930089", name: "Lotofácil" },
+        quina: { count: 5, color: "#260085", name: "Quina" }, 
+        lotomania: { count_sorteadas: 20, count_apostadas: 50, color: "#f78100", name: "Lotomania" }
     };
 
-    // --- Funções Utilitárias (COPIE AS SUAS AQUI) ---
-    function showGlobalError(message) { /* ... (sua implementação) ... */ }
-    function disableFirebaseFeatures() { /* ... (sua implementação) ... */ }
-    function enableFirebaseFeatures() { /* ... (sua implementação) ... */ }
-    function setActiveSection(sectionId) { /* ... (sua implementação) ... */ }
+    // ================================================================================================
+    // === INÍCIO DAS DEFINIÇÕES DE FUNÇÕES (MOVIDAS PARA CIMA PARA EVITAR ReferenceError) ===
+    // ================================================================================================
 
-    // --- FUNÇÃO fetchData (MODIFICADA para aceitar 'options') ---
+    function showGlobalError(message) { if (errorDiv) { errorDiv.textContent = message; errorDiv.style.display = 'block'; } else { console.error("SCRIPT.JS: Global error div não encontrado:", message); } }
+    function disableFirebaseFeatures() { if (loginModalBtn) loginModalBtn.disabled = true; if (registerModalBtn) registerModalBtn.disabled = true; }
+    function enableFirebaseFeatures() { if (loginModalBtn) loginModalBtn.disabled = false; if (registerModalBtn) registerModalBtn.disabled = false; if(document.getElementById('global-error-msg')) document.getElementById('global-error-msg').style.display = 'none';}
+    function setActiveSection(sectionId) { if (!mainSections || mainSections.length === 0) { console.warn("SCRIPT.JS: setActiveSection - mainSections não encontrado."); return; } mainSections.forEach(section => { section.classList.remove('active-section'); if (section.id === sectionId) section.classList.add('active-section'); }); if (mainNav) { const navButtons = mainNav.querySelectorAll('.nav-item'); navButtons.forEach(btn => { btn.classList.remove('active'); if (btn.id === `nav-${sectionId.replace('-section', '')}-btn`) btn.classList.add('active'); }); } }
+    
     async function fetchData(endpoint, options = {}) {
-        const url = `${BACKEND_URL_BASE}/api/main/${endpoint}`;
-        console.log(`SCRIPT.JS: Fetching ${url} com options:`, options.method || 'GET');
+        const url = `${BACKEND_URL_BASE}/${endpoint}`; // Removido /api/main/ daqui, pois os endpoints da API Flask agora são completos
+        console.log(`SCRIPT.JS: Iniciando fetchData para ${options.method || 'GET'} ${url}`, options.body ? (typeof options.body === 'string' ? JSON.parse(options.body) : options.body) : 'sem body');
         try {
             const response = await fetch(url, options);
-            const responseText = await response.text(); // Ler como texto primeiro
+            const responseText = await response.text(); 
+            console.log(`SCRIPT.JS: Resposta recebida de ${url} - Status: ${response.status}`);
+            
             if (!response.ok) {
                 let errorJson = {};
-                try { errorJson = JSON.parse(responseText); } catch(e) { /* ignora */ }
-                const messageDetail = errorJson.message || (errorJson.data ? errorJson.data.detalhes || errorJson.data.erro : null) || errorJson.erro || responseText.substring(0,250);
-                console.error(`SCRIPT.JS: HTTP Error ${response.status} for ${url}:`, messageDetail);
+                try { errorJson = JSON.parse(responseText); } catch(e) { console.warn("SCRIPT.JS: Resposta de erro não era JSON válido:", responseText); }
+                const messageDetail = errorJson.message || (errorJson.data ? errorJson.data.detalhes || errorJson.data.erro : null) || errorJson.erro || responseText.substring(0,250) || `Erro HTTP ${response.status}`;
+                console.error(`SCRIPT.JS: HTTP Error ${response.status} for ${url}:`, messageDetail, "Raw Response:", responseText);
                 throw { status: response.status, message: messageDetail, data: errorJson };
             }
-            if (response.status === 204 || !responseText) return {}; // Trata respostas vazias
-            return JSON.parse(responseText); // Parsear para JSON só se tiver conteúdo
+            if (response.status === 204 || !responseText) { console.log(`SCRIPT.JS: Resposta 204 ou vazia para ${url}`); return {}; }
+            const jsonData = JSON.parse(responseText);
+            return jsonData;
         } catch (error) {
-            console.error(`SCRIPT.JS: Error fetching ${url}:`, error);
-            throw error;
+            if (error.status && error.message) { throw error; }
+            console.error(`SCRIPT.JS: Erro geral em fetchData para ${url}:`, error);
+            throw { status: error.status || 503, message: error.message || "Erro de comunicação com o servidor.", data: {} }; 
         }
     }
         
-    // --- SUAS FUNÇÕES DE BUSCA E EXIBIÇÃO DE DADOS (COPIE AS SUAS AQUI) ---
-    // (animateCounter, fetchPlatformStats, fetchRecentWinningPools, fetchTopWinners, etc.)
-    function animateCounter(element, finalValueInput) { /* ... (sua implementação) ... */ }
-    async function fetchPlatformStats() { /* ... (sua implementação) ... */ }
-    async function fetchRecentWinningPools() { /* ... (sua implementação) ... */ }
-    async function fetchTopWinners() { /* ... (sua implementação) ... */ }
-    async function fetchAndDisplayFrequencyStats(lotteryName) { /* ... (sua implementação) ... */ }
-    async function fetchAndDisplayPairFrequencyStats(lotteryName) { /* ... (sua implementação) ... */ }
-    async function fetchAndDisplayCityStats(lotteryName) { /* ... (sua implementação) ... */ }
-    async function fetchAndDisplayCityPrizeSumStats(lotteryName) { /* ... (sua implementação) ... */ }
-    function initializeCarousels() { /* ... (sua implementação) ... */ }
-    function openModal(modalElement) { /* ... (sua implementação) ... */ }
-    function closeModal(modalElement) { /* ... (sua implementação) ... */ }
-    function showAppContentNow() { /* ... (sua implementação) ... */ }
-    function initializeFirebase() { /* ... (sua implementação) ... */ }
-    function attemptFirebaseInit() { /* ... (sua implementação) ... */ }
-    async function fetchAndDisplayResults(lottery) {  /* ... (sua implementação) ... */ }
-    function renderGameNumbers(container, numbersArray, highlightedNumbers = [], almostNumbers = []) { /* ... (sua implementação) ... */ }
-    function triggerConfetti() { /* ... (sua implementação) ... */ }
-    function checkGame(userGameNumbers, officialResults) { /* ... (sua implementação) ... */ }
+    function animateCounter(element, finalValueInput) {
+        if (!element) { console.warn("animateCounter: element not found for ID:", element ? element.id : "undefined"); return; }
+        const numericFinalValue = parseInt(finalValueInput, 10);
+        if (isNaN(numericFinalValue)) { element.textContent = "N/A"; return; }
+        let startValue = 0;
+        const currentText = element.textContent;
+        if (currentText && currentText !== '--' && currentText !== 'N/A' && currentText.trim() !== '') {
+            const parsedStart = parseInt(currentText.replace(/\D/g, ''), 10);
+            if (!isNaN(parsedStart)) { startValue = parsedStart; }
+        }
+        if (numericFinalValue === startValue && currentText !== '--' && currentText !== 'N/A' && currentText.trim() !== '') {
+            element.textContent = numericFinalValue.toLocaleString('pt-BR'); return;
+        }
+        let duration = 1200; let startTime = null;
+        function animationStep(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+            let currentValue = (startValue > numericFinalValue) ? 
+                Math.max(numericFinalValue, Math.floor(startValue - progress * (startValue - numericFinalValue))) :
+                Math.min(numericFinalValue, Math.floor(startValue + progress * (numericFinalValue - startValue)));
+            element.textContent = currentValue.toLocaleString('pt-BR');
+            if (progress < 1) { requestAnimationFrame(animationStep); }
+            else { element.textContent = numericFinalValue.toLocaleString('pt-BR'); }
+        }
+        requestAnimationFrame(animationStep);
+    }
+
+    async function fetchPlatformStats() {
+        console.log("SCRIPT.JS: fetchPlatformStats chamado");
+        if (!statsJogosGeradosSpan || !statsJogosPremiadosSpan || !statsValorPremiosSpan) { 
+            console.warn("SCRIPT.JS: Elementos de stats da plataforma não encontrados.");
+            if(statsJogosGeradosSpan) statsJogosGeradosSpan.textContent = "N/A";
+            if(statsJogosPremiadosSpan) statsJogosPremiadosSpan.textContent = "N/A";
+            if(statsValorPremiosSpan) statsValorPremiosSpan.textContent = "R$ N/A";
+            return; 
+        }
+        try {
+            const stats = await fetchData('api/main/platform-stats');
+            console.log("SCRIPT.JS: Stats da plataforma recebidos:", stats);
+            if (stats && typeof stats.jogos_gerados_total === 'number') { animateCounter(statsJogosGeradosSpan, stats.jogos_gerados_total); } 
+            else { statsJogosGeradosSpan.textContent = "N/A"; }
+            if (stats && typeof stats.jogos_premiados_estimativa === 'number') { animateCounter(statsJogosPremiadosSpan, stats.jogos_premiados_estimativa); } 
+            else { statsJogosPremiadosSpan.textContent = "N/A"; }
+            if (stats && typeof stats.valor_premios_estimativa_formatado === 'string') { statsValorPremiosSpan.textContent = stats.valor_premios_estimativa_formatado; } 
+            else { statsValorPremiosSpan.textContent = "R$ N/A"; }
+        } catch (error) {
+            statsJogosGeradosSpan.textContent = "N/A"; statsJogosPremiadosSpan.textContent = "N/A"; statsValorPremiosSpan.textContent = "R$ N/A";
+            console.error("SCRIPT.JS: Erro em fetchPlatformStats:", error);
+        }
+    }
+    
+    async function fetchRecentWinningPools() {
+        console.log("SCRIPT.JS: fetchRecentWinningPools chamado");
+        if (!recentPoolsList) { console.warn("SCRIPT.JS: recentPoolsList não encontrado."); return; }
+        recentPoolsList.innerHTML = '<li><div class="spinner small-spinner"></div> Carregando...</li>';
+        try {
+            const pools = await fetchData('api/main/recent-winning-pools');
+            recentPoolsList.innerHTML = ''; 
+            if (pools && pools.length > 0) { pools.forEach(pool => { const li = document.createElement('li'); li.innerHTML = `<span><i class="fas fa-trophy pool-icon"></i> ${pool.name} (${pool.lottery})</span> <span class="pool-prize">${pool.prize}</span> <small>${pool.date}</small>`; recentPoolsList.appendChild(li); }); }
+            else { recentPoolsList.innerHTML = '<li>Nenhum bolão premiado recentemente.</li>'; }
+        } catch (error) { recentPoolsList.innerHTML = '<li>Erro ao carregar bolões.</li>'; console.error("SCRIPT.JS: Erro em fetchRecentWinningPools:", error); }
+    }
+
+    async function fetchTopWinners() {
+        console.log("SCRIPT.JS: fetchTopWinners chamado");
+        if (!topWinnersList) { console.warn("SCRIPT.JS: topWinnersList não encontrado."); return; }
+        topWinnersList.innerHTML = '<li><div class="spinner small-spinner"></div> Carregando...</li>';
+        try {
+            const winners = await fetchData('api/main/top-winners');
+            topWinnersList.innerHTML = ''; 
+            if (winners && winners.length > 0) { winners.forEach((winner, index) => { const li = document.createElement('li'); li.innerHTML = `<span>${index + 1}. <i class="fas fa-user-astronaut winner-icon"></i> ${winner.nick}</span> <span class="winner-prize">${winner.prize_total}</span>`; topWinnersList.appendChild(li); }); }
+            else { topWinnersList.innerHTML = '<li>Ranking de ganhadores indisponível.</li>'; }
+        } catch (error) { topWinnersList.innerHTML = '<li>Erro ao carregar ranking.</li>'; console.error("SCRIPT.JS: Erro em fetchTopWinners:", error); }
+    }
+
+    async function fetchAndDisplayStatsGeneric(lotteryName, statType, container, nameSpanInCard, endpointPrefix) {
+        console.log(`SCRIPT.JS: fetchAndDisplayStatsGeneric para ${statType} de ${lotteryName}`);
+        if (!container || !nameSpanInCard || !mainDisplayLotterySelect) { 
+            console.warn(`SCRIPT.JS: Elementos faltando para fetchAndDisplayStatsGeneric (${statType}, ${lotteryName})`);
+            if(container) container.innerHTML = '<p class="error-message">Erro interno (elementos DOM não encontrados).</p>';
+            return; 
+        }
+        // A loteria já é pega do mainDisplayLotterySelect no event listener, aqui usamos o lotteryName passado
+        const lotteryConfigEntry = Object.values(LOTTERY_CONFIG_JS).find(config => mainDisplayLotterySelect.options[mainDisplayLotterySelect.selectedIndex]?.text.includes(config.name));
+        const lotteryFriendlyName = lotteryConfigEntry ? lotteryConfigEntry.name : lotteryName.toUpperCase();
+
+        nameSpanInCard.textContent = lotteryFriendlyName;
+        container.innerHTML = '<p class="loading-stats"><div class="spinner small-spinner"></div> Carregando...</p>';
+        try {
+            const result = await fetchData(`api/main/stats/${endpointPrefix}/${lotteryName}`);
+            container.innerHTML = '';
+            if (result.erro) { container.innerHTML = `<p class="error-message">${result.erro}</p>`; return; }
+            if (!result.data || result.data.length === 0) { container.innerHTML = `<p class="no-stats">Sem dados de ${statType.toLowerCase()} para ${lotteryFriendlyName}.</p>`; return; }
+            const statsData = result.data;
+            const maxFreq = (endpointPrefix === 'frequencia' || endpointPrefix === 'pares-frequentes') && statsData.length > 0 ? statsData[0].frequencia : 1;
+            const topN = (endpointPrefix === 'frequencia') ? Math.min(statsData.length, 15) : Math.min(statsData.length, 10);
+
+            for (let i = 0; i < topN; i++) {
+                const item = statsData[i];
+                const itemDiv = document.createElement('div');
+                if (endpointPrefix === 'frequencia') {
+                    itemDiv.classList.add('frequency-item');
+                    const numSpan = document.createElement('span'); numSpan.classList.add('num'); numSpan.textContent = item.numero;
+                    if (LOTTERY_CONFIG_JS[lotteryName]?.color) { numSpan.style.backgroundColor = LOTTERY_CONFIG_JS[lotteryName].color; numSpan.style.borderColor = LOTTERY_CONFIG_JS[lotteryName].color; numSpan.style.color = '#fff'; }
+                    const barBgDiv = document.createElement('div'); barBgDiv.classList.add('freq-bar-bg');
+                    const barDiv = document.createElement('div'); barDiv.classList.add('freq-bar');
+                    const barWidth = Math.max(1, (item.frequencia / maxFreq) * 100); barDiv.style.width = `${barWidth}%`;
+                    if (LOTTERY_CONFIG_JS[lotteryName]?.color) { barDiv.style.background = `linear-gradient(90deg, ${LOTTERY_CONFIG_JS[lotteryName].color}99, ${LOTTERY_CONFIG_JS[lotteryName].color}cc)`; }
+                    barBgDiv.appendChild(barDiv);
+                    const freqSpan = document.createElement('span'); freqSpan.classList.add('freq-count'); freqSpan.textContent = `${item.frequencia}x`;
+                    itemDiv.appendChild(numSpan); itemDiv.appendChild(barBgDiv); itemDiv.appendChild(freqSpan);
+                } else if (endpointPrefix === 'pares-frequentes') {
+                    itemDiv.classList.add('pair-frequency-item');
+                    const pairNumsDiv = document.createElement('div'); pairNumsDiv.classList.add('pair-nums');
+                    item.par.forEach(numStr => { const numSpan = document.createElement('span'); numSpan.classList.add('num'); numSpan.textContent = numStr; if (LOTTERY_CONFIG_JS[lotteryName]?.color) { numSpan.style.backgroundColor = LOTTERY_CONFIG_JS[lotteryName].color; numSpan.style.borderColor = LOTTERY_CONFIG_JS[lotteryName].color; numSpan.style.color = '#fff'; } pairNumsDiv.appendChild(numSpan); });
+                    const barBgDiv = document.createElement('div'); barBgDiv.classList.add('freq-bar-bg');
+                    const barDiv = document.createElement('div'); barDiv.classList.add('freq-bar');
+                    const barWidth = Math.max(1, (item.frequencia / maxFreq) * 100); barDiv.style.width = `${barWidth}%`;
+                    if (LOTTERY_CONFIG_JS[lotteryName]?.color) { barDiv.style.background = `linear-gradient(90deg, ${LOTTERY_CONFIG_JS[lotteryName].color}99, ${LOTTERY_CONFIG_JS[lotteryName].color}cc)`; }
+                    barBgDiv.appendChild(barDiv);
+                    const freqSpan = document.createElement('span'); freqSpan.classList.add('freq-count'); freqSpan.textContent = `${item.frequencia}x`;
+                    itemDiv.appendChild(pairNumsDiv); itemDiv.appendChild(barBgDiv); itemDiv.appendChild(freqSpan);
+                } else if (endpointPrefix === 'cidades-premiadas') {
+                    itemDiv.classList.add('city-stats-item');
+                    const nameSpan = document.createElement('span'); nameSpan.classList.add('city-name'); nameSpan.textContent = item.cidade_uf;
+                    const countSpan = document.createElement('span'); countSpan.classList.add('city-prize-count'); countSpan.textContent = `${item.premios_principais} prêmio(s)`;
+                    itemDiv.appendChild(nameSpan); itemDiv.appendChild(countSpan);
+                } else if (endpointPrefix === 'maiores-premios-cidade') {
+                    itemDiv.classList.add('city-prize-item');
+                    const nameSpan = document.createElement('span'); nameSpan.classList.add('city-name'); nameSpan.textContent = item.cidade_uf;
+                    const amountSpan = document.createElement('span'); amountSpan.classList.add('city-prize-amount'); amountSpan.textContent = `${item.total_ganho_principal_formatado}`;
+                    if (item.total_ganho_principal_float > 1000000) { amountSpan.style.fontWeight = 'bold'; amountSpan.style.color = '#2ecc71'; }
+                    itemDiv.appendChild(nameSpan); itemDiv.appendChild(amountSpan);
+                }
+                container.appendChild(itemDiv);
+            }
+        } catch (error) {
+            container.innerHTML = `<p class="error-message">Falha ao carregar estatísticas.</p>`;
+            console.error(`SCRIPT.JS: Erro em fetchAndDisplayStatsGeneric para ${statType} de ${lotteryName}:`, error);
+        }
+    }
+    async function fetchAndDisplayFrequencyStats(lotteryName) { if(frequencyListContainer && freqStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Frequência", frequencyListContainer, freqStatsLotteryNameSpan, "frequencia"); else console.warn("Elementos de Frequência não encontrados");}
+    async function fetchAndDisplayPairFrequencyStats(lotteryName) { if(pairFrequencyListContainer && pairFreqStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Pares Frequentes", pairFrequencyListContainer, pairFreqStatsLotteryNameSpan, "pares-frequentes"); else console.warn("Elementos de Pares Frequentes não encontrados"); }
+    async function fetchAndDisplayCityStats(lotteryName) { if(cityListContainer && cityStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Cidades Premiadas", cityListContainer, cityStatsLotteryNameSpan, "cidades-premiadas"); else console.warn("Elementos de Cidades Premiadas não encontrados"); }
+    async function fetchAndDisplayCityPrizeSumStats(lotteryName) { if(cityPrizeSumListContainer && cityPrizeSumLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Prêmios por Cidade", cityPrizeSumListContainer, cityPrizeSumLotteryNameSpan, "maiores-premios-cidade"); else console.warn("Elementos de Prêmios por Cidade não encontrados");}
+
+    function initializeCarousels() { /* Sua implementação original */ }
+    function openModal(modalElement) { if (modalElement) { modalElement.style.display = 'flex'; document.body.style.overflow = 'hidden'; } else {console.warn("openModal: modalElement não encontrado")} }
+    function closeModal(modalElement) { if (modalElement) { modalElement.style.display = 'none'; document.body.style.overflow = ''; if (modalElement === loginModal && loginEmailInput && loginPasswordInput && loginErrorP) { loginEmailInput.value = ''; loginPasswordInput.value = ''; loginErrorP.textContent = ''; } else if (modalElement === registerModal && registerEmailInput && registerPasswordInput && registerConfirmPasswordInput && registerErrorP) { registerEmailInput.value = ''; registerPasswordInput.value = ''; registerConfirmPasswordInput.value = ''; registerErrorP.textContent = ''; } }  else {console.warn("closeModal: modalElement não encontrado")} }
+    
+    function initializeFirebase() {
+        console.log("SCRIPT.JS: initializeFirebase chamada");
+        if (typeof firebase !== 'undefined' && typeof firebaseConfig !== 'undefined') {
+            try {
+                if (firebase.apps.length === 0) { firebaseApp = firebase.initializeApp(firebaseConfig); }
+                else { firebaseApp = firebase.app(); }
+                firebaseAuth = firebase.auth(firebaseApp);
+                firestoreDB = firebase.firestore(firebaseApp);
+                console.log("SCRIPT.JS: Firebase App, Auth, Firestore inicializados.");
+                
+                firebaseAuth.onAuthStateChanged(user => {
+                    console.log("SCRIPT.JS: onAuthStateChanged - Novo estado de autenticação:", user ? user.email : "Nenhum usuário");
+                    currentUser = user; 
+                    if (typeof updateLoginUI === "function") updateLoginUI(user);
+                    else console.error("SCRIPT.JS: Função updateLoginUI não definida em onAuthStateChanged!");
+
+                    if (criticalSplashTimeout) { clearTimeout(criticalSplashTimeout); criticalSplashTimeout = null; console.log("SCRIPT.JS: Timeout crítico da splash cancelado."); }
+                    
+                    const timeSinceDOMLoad = Date.now() - domContentLoadedTimestamp;
+                    let delayToHideSplash = 0;
+                    if (splashHiddenTimestamp === 0) { 
+                        if (timeSinceDOMLoad < SPLASH_MINIMUM_VISIBLE_TIME) {
+                            delayToHideSplash = SPLASH_MINIMUM_VISIBLE_TIME - timeSinceDOMLoad;
+                        }
+                        console.log(`SCRIPT.JS: Agendando showAppContentNow com delay de ${delayToHideSplash}ms.`);
+                        setTimeout(showAppContentNow, delayToHideSplash);
+                    } else { 
+                        console.log("SCRIPT.JS: Chamando showAppContentNow diretamente (splash já foi escondida).");
+                        showAppContentNow();  
+                    }
+                });
+                if (typeof enableFirebaseFeatures === "function") enableFirebaseFeatures();
+                return true;
+            } catch (error) { 
+                console.error("SCRIPT.JS: CRITICAL Firebase init error:", error);
+                if (typeof showGlobalError === "function") showGlobalError(`Erro ao inicializar serviços: ${error.message}. Funcionalidades de login podem estar desabilitadas.`);
+                if (typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); 
+                return false; 
+            }
+        } else { 
+            console.error("SCRIPT.JS: Firebase SDK ou firebaseConfig não definidos GLOBALMENTE."); 
+            if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") {
+                console.log("SCRIPT.JS: Firebase não carregado, mostrando conteúdo da app.");
+                setTimeout(showAppContentNow, SPLASH_MINIMUM_VISIBLE_TIME > (Date.now() - domContentLoadedTimestamp) ? SPLASH_MINIMUM_VISIBLE_TIME - (Date.now() - domContentLoadedTimestamp) : 0);
+            }
+            if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
+            return false; 
+        }
+    }
+
+    function attemptFirebaseInit() {
+        console.log("SCRIPT.JS: attemptFirebaseInit chamada, tentativa:", firebaseInitAttempts + 1);
+        if (initializeFirebase()) { 
+            console.log("SCRIPT.JS: Firebase inicializado com sucesso.");
+        } else { 
+            firebaseInitAttempts++;
+            if (firebaseInitAttempts < maxFirebaseInitAttempts) {
+                console.log(`SCRIPT.JS: Tentativa ${firebaseInitAttempts} de inicializar Firebase falhou. Tentando novamente em 500ms.`);
+                setTimeout(attemptFirebaseInit, 500);
+            } else { 
+                console.error("SCRIPT.JS: Falha ao inicializar Firebase após múltiplas tentativas.");
+                if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") { showAppContentNow(); } 
+                if(typeof showGlobalError === "function") showGlobalError("Não foi possível carregar os serviços de usuário. Algumas funcionalidades podem estar indisponíveis. Por favor, recarregue.");
+                if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
+            }
+        }
+    }
+
+    async function fetchAndDisplayResults(lottery) { 
+        console.log(`SCRIPT.JS: fetchAndDisplayResults para ${lottery}`);
+        if (!apiResultsPre || !resultsLotteryNameSpan || !mainDisplayLotterySelect) { 
+             console.warn("SCRIPT.JS: Elementos para fetchAndDisplayResults não encontrados."); return; 
+        }
+        const selectedOption = Array.from(mainDisplayLotterySelect.options).find(opt => opt.value === lottery);
+        const lotteryFriendlyName = selectedOption ? selectedOption.text : (LOTTERY_CONFIG_JS[lottery] ? LOTTERY_CONFIG_JS[lottery].name : lottery.toUpperCase());
+        resultsLotteryNameSpan.textContent = lotteryFriendlyName;
+        apiResultsPre.textContent = 'Buscando...';
+        try {
+            const data = await fetchData(`api/main/resultados/${lottery}`);
+            console.log(`SCRIPT.JS: Dados de resultados/${lottery} recebidos:`, data);
+            let displayText = "";
+            if (data.erro) { displayText = `Erro da API: ${data.erro}`; }
+            else if (data.aviso) { displayText = `Aviso: ${data.aviso}\nConcurso: ${data.ultimo_concurso || 'N/A'}\nData: ${data.data || 'N/A'}\nNúmeros: ${data.numeros ? data.numeros.join(', ') : 'N/A'}`; }
+            else { displayText = `Concurso: ${data.ultimo_concurso || 'N/A'}\nData: ${data.data || 'N/A'}\nNúmeros Sorteados: ${data.numeros ? data.numeros.join(', ') : 'N/A'}`; }
+            apiResultsPre.textContent = displayText;
+            lastFetchedResults[lottery] = data; 
+            if(lastFetchedResults[lottery] && !lastFetchedResults[lottery].erro && !lastFetchedResults[lottery].aviso) {
+                 lastFetchedResults[lottery].loteria_tipo = lottery;
+            }
+        } catch (error) {
+            apiResultsPre.textContent = `Falha ao buscar resultados para ${lotteryFriendlyName}: ${error.message || 'Erro desconhecido'}`;
+            lastFetchedResults[lottery] = { erro: `Falha ao buscar: ${error.message || 'Erro desconhecido'}`, numeros: [] };
+            console.error(`SCRIPT.JS: Erro em fetchAndDisplayResults para ${lottery}:`, error);
+        }
+    }
+
+    function renderGameNumbers(container, numbersArray, highlightedNumbers = [], almostNumbers = [], currentLotteryForColor = null) {
+        if (!container) { console.warn("renderGameNumbers: container não encontrado"); return; }
+        container.innerHTML = ''; 
+        if (!numbersArray || !Array.isArray(numbersArray) || numbersArray.length === 0) {
+            container.textContent = "N/A"; return;
+        }
+        const highlightedStrings = highlightedNumbers.map(String);
+        const almostStrings = almostNumbers.map(String);
+        let activeLottery = currentLotteryForColor || (mainDisplayLotterySelect ? mainDisplayLotterySelect.value : 'megasena');
+
+        numbersArray.forEach((numInput, index) => {
+            const numStr = String(numInput).trim(); const num = parseInt(numStr, 10); 
+            if (isNaN(num)) { console.warn(`renderGameNumbers: Valor inválido '${numInput}' encontrado.`); return; }
+            const numDiv = document.createElement('div'); numDiv.classList.add('game-number');
+            numDiv.style.opacity = '0'; numDiv.style.transform = 'scale(0.5) translateY(10px)';
+            numDiv.style.transition = `opacity 0.3s ease-out ${index * 0.07}s, transform 0.3s ease-out ${index * 0.07}s`;
+            if (highlightedStrings.includes(numStr)) numDiv.classList.add('hit');
+            else if (almostStrings.includes(numStr)) numDiv.classList.add('almost');
+            numDiv.textContent = String(num).padStart(2, '0');
+            if (LOTTERY_CONFIG_JS[activeLottery] && LOTTERY_CONFIG_JS[activeLottery].color) {
+                if (!numDiv.classList.contains('hit') && !numDiv.classList.contains('almost')) {
+                    numDiv.style.backgroundColor = LOTTERY_CONFIG_JS[activeLottery].color;
+                    numDiv.style.color = '#fff'; 
+                }
+            }
+            container.appendChild(numDiv);
+            requestAnimationFrame(() => { setTimeout(() => { numDiv.style.opacity = '1'; numDiv.style.transform = 'scale(1) translateY(0)'; }, 20); });
+        });
+    }
+    function triggerConfetti() { /* Sua implementação original */ }
+    function checkGame(userGameNumbers, officialResults) { /* Sua implementação original */ }
+    async function loadUserGames(filterLottery = "todos") { /* Sua implementação original */ }
+    function createGameCardElement(docId, gameData) { /* Sua implementação original, lembre-se que os IDs dos botões internos podem precisar ser únicos se você tem múltiplos cards de jogo */ }
+    function updateManualProbNumbersFeedback() { /* Sua implementação original */ }
+
+    // === FUNÇÃO showAppContentNow (MODIFICADA) ===
+    function showAppContentNow() {
+        console.log("SCRIPT.JS: showAppContentNow INICIADA.");
+        if (accessibleSplashScreen && !accessibleSplashScreen.classList.contains('hidden')) {
+            accessibleSplashScreen.classList.add('hidden');
+            splashHiddenTimestamp = Date.now();
+            if(splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', '100');
+            console.log("SCRIPT.JS: Splash screen foi escondida agora.");
+        } else if (splashHiddenTimestamp > 0 && appContent && appContent.style.display !== 'none') {
+            console.log("SCRIPT.JS: Conteúdo já visível e splash já foi escondida. Retornando de showAppContentNow.");
+            return; 
+        }
+        
+        if (appContent) {
+            if (appContent.style.display === 'none') {
+                appContent.style.display = 'block';
+                console.log("SCRIPT.JS: Conteúdo principal (app-content) tornado visível.");
+                if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
+                
+                console.log("SCRIPT.JS: Chamando fetches iniciais para o dashboard.");
+                if (typeof fetchPlatformStats === "function") fetchPlatformStats(); 
+                if (typeof fetchRecentWinningPools === "function") fetchRecentWinningPools();
+                if (typeof fetchTopWinners === "function") fetchTopWinners();
+                
+                if (mainDisplayLotterySelect) { 
+                    const initialLottery = mainDisplayLotterySelect.value;
+                    console.log(`SCRIPT.JS: Carregando dados e estatísticas iniciais para loteria: ${initialLottery}`);
+                    if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(initialLottery);
+                    if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(initialLottery); 
+                    if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(initialLottery);
+                    if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(initialLottery);
+                    if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(initialLottery); 
+                     setTimeout(() => { 
+                         if (mainDisplayLotterySelect.dispatchEvent) {
+                            console.log("SCRIPT.JS: Disparando evento 'change' no select de loteria principal para estatísticas.");
+                            mainDisplayLotterySelect.dispatchEvent(new Event('change'));
+                         }
+                     }, 300);
+                } else {
+                    console.warn("SCRIPT.JS: Select de loteria principal (mainDisplayLotterySelect) não encontrado para carregar dados iniciais.");
+                }
+                if(typeof initializeCarousels === "function") initializeCarousels();
+            } else {
+                 console.log("SCRIPT.JS: appContent já estava visível, mas showAppContentNow foi chamada (talvez pelo Firebase Auth).");
+            }
+        } else {
+            console.error("SCRIPT.JS: Elemento CRÍTICO #app-content NÃO encontrado no DOM!");
+        }
+    }
+    // === FIM DE showAppContentNow ===
 
     // === FUNÇÃO updateLoginUI (MODIFICADA para Palpites Cósmicos e Banner) ===
     function updateLoginUI(user) {
-        // ... (sua lógica de UI existente para login/logout) ...
+        console.log("SCRIPT.JS: updateLoginUI chamada, usuário:", user ? user.email : "Nenhum");
         const navItems = document.querySelectorAll('#main-nav .nav-item'); 
-        const mainLotterySelectForStats = quickHunchLotteryTypeSelect || lotteryTypeSelect; // Para carregar stats
-
         if (user) { 
             if (loginModalBtn) loginModalBtn.style.display = 'none'; 
             if (registerModalBtn) registerModalBtn.style.display = 'none'; 
@@ -152,13 +541,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (userEmailSpan) userEmailSpan.textContent = user.email.split('@')[0]; 
             if (logoutBtn) logoutBtn.style.display = 'inline-block'; 
             if (mainNav) mainNav.style.display = 'flex'; 
-            if (navItems) navItems.forEach(item => item.style.display = 'flex'); 
+            if (navItems && typeof setActiveSection === "function") navItems.forEach(item => item.style.display = 'flex');
             
             if (typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); 
-            if (typeof setActiveSection === "function") setActiveSection('dashboard-section'); 
             
-            // Palpites Cósmicos e Banner
-            if (esotericHunchCard) esotericHunchCard.style.display = 'block';
+            if (esotericHunchCard) esotericHunchCard.style.display = 'block'; 
             if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'none'; 
         } else { 
             if (loginModalBtn) loginModalBtn.style.display = 'inline-block'; 
@@ -170,31 +557,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (navItems) navItems.forEach(item => item.style.display = 'none'); 
             if (savedGamesContainer) savedGamesContainer.innerHTML = ''; 
             if (noSavedGamesP) noSavedGamesP.style.display = 'block'; 
-            if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
-
-            // Palpites Cósmicos e Banner
+            
             if (esotericHunchCard) esotericHunchCard.style.display = 'none';
             if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'block';
         }
-        // Atualiza visibilidade dos botões de salvar dinamicamente
-        updateSaveButtonVisibility('quick');
-        updateSaveButtonVisibility('esoteric');
+        if (typeof updateSaveButtonVisibility === "function") {
+            updateSaveButtonVisibility('quick');
+            updateSaveButtonVisibility('esoteric');
+        }
+        // if (appContent && appContent.style.display !== 'none' && !document.querySelector('.main-section.active-section')) {
+        //     if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
+        // } // Removido para evitar conflito de setActiveSection na inicialização
     }
     // === FIM DA MODIFICAÇÃO updateLoginUI ===
-
-    // --- SUAS FUNÇÕES DE JOGOS SALVOS E PROBABILIDADE MANUAL EXISTENTES ---
-    async function loadUserGames(filterLottery = "todos") { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    function createGameCardElement(docId, gameData) { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-    function updateManualProbNumbersFeedback() { /* ... (COLE SEU CÓDIGO AQUI) ... */ }
-
-    // === FUNÇÃO PARA GERAR PALPITE ALEATÓRIO RÁPIDO (NOVO/REFEITO) ===
+    
+    // === FUNÇÃO PARA GERADOR RÁPIDO (NOVO/REFEITO) ===
     async function generateAndDisplayQuickHunch() {
+        console.log("SCRIPT.JS: generateAndDisplayQuickHunch chamado");
         if (!quickHunchLotteryTypeSelect || !generateQuickHunchBtn || !quickHunchOutputDiv || !quickHunchNumbersDiv || !quickHunchStrategyP) {
-            console.error("SCRIPT.JS: Elementos DOM para Palpite Rápido não encontrados.");
-            return;
+            console.error("SCRIPT.JS: Elementos DOM para Palpite Rápido não encontrados."); return;
         }
         const lottery = quickHunchLotteryTypeSelect.value;
-        
         generateQuickHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
         generateQuickHunchBtn.disabled = true;
         quickHunchOutputDiv.style.display = 'block';
@@ -203,32 +586,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if(saveQuickHunchBtn) saveQuickHunchBtn.style.display = 'none';
         if(checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'none';
         if(quickHunchCheckResultDiv) quickHunchCheckResultDiv.innerHTML = '';
-
         try {
-            const data = await fetchData(`gerar_jogo/${lottery}`); // Chama o endpoint simplificado
-            console.log(`SCRIPT.JS: Palpite Rápido - Dados recebidos:`, data);
-
+            const data = await fetchData(`api/main/gerar_jogo/${lottery}`);
+            console.log("SCRIPT.JS: Palpite Rápido - Dados recebidos:", data);
             if (data.erro) { throw new Error(data.detalhes || data.erro);  }
-            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) {
-                throw new Error("Palpite inválido retornado.");
-            }
-            renderGameNumbers(quickHunchNumbersDiv, data.jogo);
-            quickHunchStrategyP.textContent = `Estratégia: ${data.estrategia_usada || 'Aleatório Rápido'}`;
-            
-            lastGeneratedHunch = { 
-                type: 'quick', 
-                lottery: lottery, 
-                jogo: data.jogo, 
-                estrategia_metodo: data.estrategia_usada || 'Aleatório Rápido',
-                outputDiv: quickHunchOutputDiv,
-                numbersDiv: quickHunchNumbersDiv,
-                checkResultDiv: quickHunchCheckResultDiv,
-                saveButton: saveQuickHunchBtn,
-                checkButton: checkQuickHunchBtn
-            };
-            updateSaveButtonVisibility('quick'); // Mostra botão salvar se logado
+            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) { throw new Error("Palpite inválido retornado.");}
+            if (typeof renderGameNumbers === "function") renderGameNumbers(quickHunchNumbersDiv, data.jogo, [], [], lottery);
+            else console.error("SCRIPT.JS: Função renderGameNumbers não definida!");
+            quickHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Aleatório Rápido'}`;
+            lastGeneratedHunch = { type: 'quick', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Aleatório Rápido', outputDiv: quickHunchOutputDiv, numbersDiv: quickHunchNumbersDiv, checkResultDiv: quickHunchCheckResultDiv, saveButton: saveQuickHunchBtn, checkButton: checkQuickHunchBtn };
+            if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('quick');
             if (checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'inline-block';
-
         } catch (error) {
             console.error("SCRIPT.JS: Erro ao gerar palpite rápido:", error);
             quickHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha ao gerar palpite.'}</p>`;
@@ -241,69 +609,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // === FIM DA FUNÇÃO PARA GERADOR RÁPIDO ===
 
-    // === FUNÇÃO PARA GERAR E EXIBIR PALPITE ESOTÉRICO (COMO ANTES) ===
+    // === FUNÇÃO PARA GERAR E EXIBIR PALPITE ESOTÉRICO ===
     async function generateAndDisplayEsotericHunch() {
-        if (!esotericLotteryTypeSelect || !birthDateInput || !generateEsotericHunchBtn ||
-            !esotericHunchOutputDiv || !esotericHunchNumbersDiv || !esotericHunchMethodP || !esotericHunchHistoryCheckDiv) {
-            console.error("SCRIPT.JS: Elementos DOM para Palpite Cósmico não encontrados.");
-            return;
+        console.log("SCRIPT.JS: generateAndDisplayEsotericHunch chamado");
+        if (!esotericLotteryTypeSelect || !birthDateInput || !generateEsotericHunchBtn || !esotericHunchOutputDiv || !esotericHunchNumbersDiv || !esotericHunchMethodP || !esotericHunchHistoryCheckDiv) {
+            console.error("SCRIPT.JS: Elementos DOM para Palpite Cósmico não encontrados."); return;
         }
         const lotteryName = esotericLotteryTypeSelect.value;
         const birthDateRaw = birthDateInput.value.trim();
         const birthDate = birthDateRaw.replace(/\D/g, '');
-
         if (!birthDate) { alert("Por favor, insira sua data de nascimento."); birthDateInput.focus(); return; }
         if (birthDate.length !== 8) { alert("Formato da data de nascimento inválido. Use DDMMAAAA."); birthDateInput.focus(); return; }
-        
         generateEsotericHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando Magia...';
         generateEsotericHunchBtn.disabled = true;
         esotericHunchOutputDiv.style.display = 'block';
         esotericHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>';
-        esotericHunchMethodP.textContent = 'Consultando os astros e os números...';
+        esotericHunchMethodP.textContent = 'Consultando os astros...';
         esotericHunchHistoryCheckDiv.innerHTML = '';
         if(saveEsotericHunchBtn) saveEsotericHunchBtn.style.display = 'none';
         if(checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'none';
-
         try {
             const requestBody = { data_nascimento: birthDate };
-            const data = await fetchData(`palpite-esoterico/${lotteryName}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
+            const data = await fetchData(`api/main/palpite-esoterico/${lotteryName}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody)
             });
+            console.log("SCRIPT.JS: Palpite Cósmico - Dados recebidos:", data);
             if (data.erro) { throw new Error(data.erro); }
-            if (!data.palpite_gerado) { throw new Error("A API não retornou um palpite válido."); }
-
-            renderGameNumbers(esotericHunchNumbersDiv, data.palpite_gerado);
+            if (!data.palpite_gerado) { throw new Error("API não retornou palpite."); }
+            if (typeof renderGameNumbers === "function") renderGameNumbers(esotericHunchNumbersDiv, data.palpite_gerado, [], [], lotteryName);
+            else console.error("SCRIPT.JS: Função renderGameNumbers não definida!");
             esotericHunchMethodP.textContent = `Método: ${data.metodo_geracao || 'Indefinido'}`;
             let historyHtml = `<strong>Histórico desta combinação:</strong><br>`;
             if (data.historico_desta_combinacao) {
                 const hist = data.historico_desta_combinacao;
-                historyHtml += `Já foi premiada (faixa principal)? <span style="color: ${hist.ja_foi_premiada_faixa_principal ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${hist.ja_foi_premiada_faixa_principal ? 'Sim' : 'Não'}</span><br>`;
-                historyHtml += `Vezes premiada: ${hist.vezes_premiada_faixa_principal}<br>`;
-                historyHtml += `Valor total ganho (aprox.): ${hist.valor_total_ganho_faixa_principal_formatado}`;
-            } else { historyHtml += "Não foi possível verificar o histórico."; }
+                historyHtml += `Premiada (principal)? <span style="color: ${hist.ja_foi_premiada_faixa_principal ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${hist.ja_foi_premiada_faixa_principal ? 'Sim' : 'Não'}</span><br>`;
+                historyHtml += `Vezes: ${hist.vezes_premiada_faixa_principal}<br>`;
+                historyHtml += `Valor total (aprox.): ${hist.valor_total_ganho_faixa_principal_formatado}`;
+            } else { historyHtml += "Não foi possível verificar histórico."; }
             esotericHunchHistoryCheckDiv.innerHTML = historyHtml;
-
-            lastGeneratedHunch = { 
-                type: 'esoteric', 
-                lottery: lotteryName, 
-                jogo: data.palpite_gerado, 
-                estrategia_metodo: data.metodo_geracao || 'Indefinido',
-                outputDiv: esotericHunchOutputDiv,
-                numbersDiv: esotericHunchNumbersDiv,
-                checkResultDiv: esotericHunchHistoryCheckDiv,
-                saveButton: saveEsotericHunchBtn,
-                checkButton: checkEsotericHunchBtn
-            };
-            updateSaveButtonVisibility('esoteric');
+            lastGeneratedHunch = { type: 'esoteric', lottery: lotteryName, jogo: data.palpite_gerado, estrategia_metodo: data.metodo_geracao || 'Indefinido', outputDiv: esotericHunchOutputDiv, numbersDiv: esotericHunchNumbersDiv, checkResultDiv: esotericHunchHistoryCheckDiv, saveButton: saveEsotericHunchBtn, checkButton: checkEsotericHunchBtn };
+            if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('esoteric');
             if (checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'inline-block';
-
         } catch (error) {
             console.error("SCRIPT.JS: Erro ao gerar palpite esotérico:", error);
-            esotericHunchNumbersDiv.innerHTML = '';
-            esotericHunchMethodP.textContent = '';
-            esotericHunchHistoryCheckDiv.innerHTML = `<p class="error-message">Falha ao gerar palpite: ${error.message || 'Erro desconhecido.'}</p>`;
+            esotericHunchNumbersDiv.innerHTML = ''; esotericHunchMethodP.textContent = '';
+            esotericHunchHistoryCheckDiv.innerHTML = `<p class="error-message">Falha: ${error.message || 'Erro desconhecido.'}</p>`;
             lastGeneratedHunch = { type: null };
         } finally {
             generateEsotericHunchBtn.innerHTML = '<i class="fas fa-meteor"></i> Gerar Palpite Cósmico';
@@ -314,165 +664,259 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === FUNÇÕES DE UTILIDADE PARA BOTÕES DE SALVAR/CONFERIR ===
     function updateSaveButtonVisibility(hunchType) {
-        const saveButton = (hunchType === 'quick') ? saveQuickHunchBtn : saveEsotericHunchBtn;
-        const outputDiv = (hunchType === 'quick') ? quickHunchOutputDiv : esotericHunchOutputDiv;
-        if (saveButton) {
-            saveButton.style.display = currentUser && outputDiv.style.display !== 'none' && lastGeneratedHunch.type === hunchType ? 'inline-block' : 'none';
-        }
+        const currentHunch = lastGeneratedHunch;
+        if (!currentHunch || !currentHunch.saveButton || !currentHunch.outputDiv ) {console.warn("SCRIPT.JS: updateSaveButtonVisibility - Elementos não encontrados para tipo", hunchType); return;}
+        currentHunch.saveButton.style.display = currentUser && currentHunch.type === hunchType && currentHunch.outputDiv.style.display !== 'none' ? 'inline-block' : 'none';
     }
-    
-    function setupSaveHunchButton(buttonElement, hunchType) {
-        if (buttonElement) {
-            buttonElement.addEventListener('click', () => {
-                if (!firestoreDB || !currentUser || !lastGeneratedHunch.jogo || lastGeneratedHunch.type !== hunchType) {
-                    alert("Logue e gere um palpite válido deste tipo para salvar.");
-                    return;
-                }
-                const gameToSave = lastGeneratedHunch.jogo;
-                const lotteryToSave = lastGeneratedHunch.lottery;
-                const strategyToSave = lastGeneratedHunch.estrategia_metodo;
-                // A conferência não será salva aqui, será feita sob demanda em "Meus Jogos"
-                firestoreDB.collection('userGames').add({
-                    userId: currentUser.uid, userEmail: currentUser.email,
-                    lottery: lotteryToSave, game: gameToSave, strategy: strategyToSave,
-                    savedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    checkedResult: null // Resultado da conferência será atualizado depois
-                }).then(() => {
-                    alert("Palpite salvo com sucesso!");
-                    if (myGamesSection && myGamesSection.classList.contains('active-section')) {
-                        loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
-                    }
-                }).catch((error) => {
-                    alert(`Erro ao salvar palpite: ${error.message}`);
-                    console.error("SCRIPT.JS: Erro ao salvar palpite:", error);
-                });
-            });
-        }
+    function setupSaveHunchButtonListeners() {
+        if (saveQuickHunchBtn) saveQuickHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('quick'));
+        if (saveEsotericHunchBtn) saveEsotericHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('esoteric'));
     }
-    
-    function setupCheckHunchButton(buttonElement, numbersDisplayDiv, checkResultDisplayDiv, lotterySelectElement, hunchType) {
-         if (buttonElement) {
-             buttonElement.addEventListener('click', async () => {
-                 const currentLottery = lotterySelectElement.value;
-                 if (!lastGeneratedHunch.jogo || lastGeneratedHunch.lottery !== currentLottery || lastGeneratedHunch.type !== hunchType) {
-                     checkResultDisplayDiv.innerHTML = '<span class="misses">Gere um palpite deste tipo para esta loteria primeiro.</span>';
-                     return;
-                 }
+    function saveLastGeneratedHunch(expectedHunchType) {
+        console.log(`SCRIPT.JS: saveLastGeneratedHunch chamado para tipo: ${expectedHunchType}`);
+        if (!firestoreDB || !currentUser || !lastGeneratedHunch.jogo || !Array.isArray(lastGeneratedHunch.jogo) || lastGeneratedHunch.jogo.length === 0 || lastGeneratedHunch.type !== expectedHunchType) {
+            alert("Logue-se e gere um palpite válido deste tipo para salvar."); 
+            console.warn("SCRIPT.JS: Condições para salvar não atendidas:", { firestoreDB, currentUser, lastGeneratedHunch, expectedHunchType });
+            return;
+        }
+        const { lottery, jogo, estrategia_metodo } = lastGeneratedHunch;
+        firestoreDB.collection('userGames').add({
+            userId: currentUser.uid, userEmail: currentUser.email,
+            lottery: lottery, game: jogo, strategy: estrategia_metodo,
+            savedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            checkedResult: null 
+        }).then(() => {
+            alert("Palpite salvo com sucesso!");
+            if (myGamesSection && myGamesSection.classList.contains('active-section') && typeof loadUserGames === "function") {
+                loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
+            }
+        }).catch((error) => { alert(`Erro ao salvar palpite: ${error.message}`); console.error("SCRIPT.JS: Erro ao salvar palpite:", error); });
+    }
+    function setupCheckHunchButtonListeners() {
+        if (checkQuickHunchBtn && quickHunchLotteryTypeSelect) checkQuickHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('quick', quickHunchLotteryTypeSelect));
+        if (checkEsotericHunchBtn && esotericLotteryTypeSelect) checkEsotericHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('esoteric', esotericLotteryTypeSelect));
+    }
+    async function checkLastGeneratedHunch(expectedHunchType, lotterySelectElement) {
+        console.log(`SCRIPT.JS: checkLastGeneratedHunch chamado para tipo: ${expectedHunchType}`);
+        const currentLottery = lotterySelectElement.value;
+        const currentHunch = lastGeneratedHunch;
 
-                 let resultsToUse = lastFetchedResults[currentLottery];
-                 if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) {
-                     checkResultDisplayDiv.innerHTML = `<div class="spinner small-spinner"></div> Buscando últimos resultados...`;
-                     try {
-                         resultsToUse = await fetchData(`resultados/${currentLottery}`);
-                         if(resultsToUse) resultsToUse.loteria_tipo = currentLottery;
-                         lastFetchedResults[currentLottery] = resultsToUse;
-                         // Atualiza o card de "Últimos Resultados" principal se for a mesma loteria
-                         const mainLotterySelectForStats = document.getElementById('quick-hunch-lottery-type') || document.getElementById('lottery-type'); // Adapte se o ID mudou
-                         if (mainLotterySelectForStats && mainLotterySelectForStats.value === currentLottery && document.getElementById('api-results')) {
-                             let displayText = resultsToUse.erro || resultsToUse.aviso || `Concurso: ${resultsToUse.ultimo_concurso || 'N/A'}...`;
-                             if (resultsToUse.numeros && resultsToUse.numeros.length > 0) {
-                                 displayText = `Concurso: ${resultsToUse.ultimo_concurso || 'N/A'}\nData: ${resultsToUse.data || 'N/A'}\nNúmeros Sorteados: ${resultsToUse.numeros.join(', ')}`;
-                             }
-                             document.getElementById('api-results').textContent = displayText;
-                         }
-                     } catch (e) { checkResultDisplayDiv.innerHTML = `<span class="misses">Falha ao buscar resultados.</span>`; return; }
-                 }
-                 if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) {
-                     checkResultDisplayDiv.innerHTML = `<span class="misses">Resultados oficiais indisponíveis.</span>`; return;
-                 }
-
-                 const result = checkGame(lastGeneratedHunch.jogo, resultsToUse);
-                 checkResultDisplayDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`;
-                 renderGameNumbers(numbersDisplayDiv, lastGeneratedHunch.jogo, result.hitNumbers, result.almostNumbers);
-                 lastGeneratedHunch.checkResult = checkResultDisplayDiv.innerHTML;
-             });
-         }
+        if (!currentHunch.jogo || !Array.isArray(currentHunch.jogo) || currentHunch.jogo.length === 0 || 
+            currentHunch.lottery !== currentLottery || currentHunch.type !== expectedHunchType || 
+            !currentHunch.checkResultDiv || !currentHunch.numbersDiv) {
+            if(currentHunch.checkResultDiv) currentHunch.checkResultDiv.innerHTML = '<span class="misses">Gere um palpite deste tipo para esta loteria primeiro.</span>'; 
+            console.warn("SCRIPT.JS: Condições para conferir não atendidas:", {currentHunch, currentLottery, expectedHunchType});
+            return;
+        }
+        let resultsToUse = lastFetchedResults[currentLottery];
+        if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) {
+            currentHunch.checkResultDiv.innerHTML = `<div class="spinner small-spinner"></div> Buscando últimos resultados...`;
+            try {
+                resultsToUse = await fetchData(`api/main/resultados/${currentLottery}`); // URL COMPLETA RELATIVA
+                if(resultsToUse) resultsToUse.loteria_tipo = currentLottery; // Importante para checkGame
+                lastFetchedResults[currentLottery] = resultsToUse;
+            } catch (e) { currentHunch.checkResultDiv.innerHTML = `<span class="misses">Falha ao buscar resultados.</span>`; return; }
+        }
+        if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) {
+            currentHunch.checkResultDiv.innerHTML = `<span class="misses">Resultados oficiais indisponíveis.</span>`; return;
+        }
+        if(typeof checkGame !== "function" || typeof renderGameNumbers !== "function") {
+            console.error("SCRIPT.JS: Funções checkGame ou renderGameNumbers não definidas!"); currentHunch.checkResultDiv.innerHTML = "Erro interno."; return;
+        }
+        const result = checkGame(currentHunch.jogo, resultsToUse);
+        currentHunch.checkResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`;
+        renderGameNumbers(currentHunch.numbersDiv, currentHunch.jogo, result.hitNumbers, result.almostNumbers, currentLottery);
+        // Não precisa atualizar lastGeneratedHunch.checkResult aqui, pois não é usado para salvar.
     }
     // === FIM DAS FUNÇÕES DE SALVAR E CONFERIR ===
 
-    // --- EVENT LISTENERS (Seu código existente + Novos) ---
-    if (splashProgressBarFill && splashProgressContainer) { /* ... (sua lógica splash) */ }
-    criticalSplashTimeout = setTimeout(() => { if (splashHiddenTimestamp === 0) { showAppContentNow(); } if (!firebaseApp) { showGlobalError("Falha crítica na inicialização dos serviços."); disableFirebaseFeatures(); } criticalSplashTimeout = null; }, SPLASH_MINIMUM_VISIBLE_TIME + 1500);  
-    setTimeout(attemptFirebaseInit, 100); 
+    // --- EVENT LISTENERS (Seu código original da resposta #40 + Novos) ---
+    console.log("SCRIPT.JS: Configurando lógica da splash screen e inicialização...");
+    if (splashProgressBarFill && splashProgressContainer && accessibleSplashScreen && !accessibleSplashScreen.classList.contains('hidden')) {
+        console.log("SCRIPT.JS: Iniciando animação da barra de progresso da splash screen.");
+        let progress = 0; 
+        const totalVisualBarTime = SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION; 
+        const intervalTime = Math.max(10, totalVisualBarTime / 100); 
+        const progressInterval = setInterval(() => { 
+            progress++; 
+            if (splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', progress); 
+            if (progress >= 100) { 
+                clearInterval(progressInterval); 
+                console.log("SCRIPT.JS: Animação da barra de progresso da splash screen concluída.");
+            } 
+        }, intervalTime); 
+    } else {
+        console.warn("SCRIPT.JS: Elementos da splash screen não encontrados ou já escondida na configuração inicial.");
+    }
 
-    if(loginModalBtn) loginModalBtn.addEventListener('click', () => openModal(loginModal));
-    if(registerModalBtn) registerModalBtn.addEventListener('click', () => openModal(registerModal));
-    if(closeLoginModalBtn) closeLoginModalBtn.addEventListener('click', () => closeModal(loginModal));
-    if(closeRegisterModalBtn) closeRegisterModalBtn.addEventListener('click', () => closeModal(registerModal));
-    window.addEventListener('click', (event) => { if (event.target === loginModal) closeModal(loginModal); if (event.target === registerModal) closeModal(registerModal); });
+    criticalSplashTimeout = setTimeout(() => { 
+        console.log("SCRIPT.JS: Timeout crítico da splash screen atingido.");
+        if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") { 
+            console.log("SCRIPT.JS: Forçando exibição do conteúdo da app via timeout crítico.");
+            showAppContentNow(); 
+        } 
+        if (!firebaseApp) { 
+            if(typeof showGlobalError === "function") showGlobalError("Falha crítica na inicialização dos serviços. Tente recarregar a página."); 
+            if (typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); 
+        } 
+        criticalSplashTimeout = null; 
+    }, SPLASH_MINIMUM_VISIBLE_TIME + 2500); 
     
-    if (navDashboardBtn) navDashboardBtn.addEventListener('click', () => setActiveSection('dashboard-section'));
-    if (navMyGamesBtn) navMyGamesBtn.addEventListener('click', () => { setActiveSection('my-games-section'); if (currentUser && typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); });
-    if (navPoolsBtn) navPoolsBtn.addEventListener('click', () => setActiveSection('pools-section')); // Seção de bolões, se existir
+    if (typeof attemptFirebaseInit === "function") {
+        console.log("SCRIPT.JS: Agendando attemptFirebaseInit.");
+        setTimeout(attemptFirebaseInit, 100); 
+    } else {
+        console.error("SCRIPT.JS: Função attemptFirebaseInit não definida! Firebase não será inicializado.");
+        if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") {
+            console.log("SCRIPT.JS: Firebase não inicializado, mostrando conteúdo da app.");
+            showAppContentNow();
+        }
+        if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
+    }
 
-    // Listener para o select de loteria principal (que atualiza as estatísticas e resultados)
-    const mainLotterySelectForDisplay = quickHunchLotteryTypeSelect || lotteryTypeSelect; // Use o ID do seu select principal
-    if (mainLotterySelectForDisplay) {
-        mainLotterySelectForDisplay.addEventListener('change', (e) => {
+    // Listeners de Modais e Navegação (Do seu script da Resposta #40)
+    if(loginModalBtn && typeof openModal === "function") loginModalBtn.addEventListener('click', () => openModal(loginModal));
+    if(registerModalBtn && typeof openModal === "function") registerModalBtn.addEventListener('click', () => openModal(registerModal));
+    if(closeLoginModalBtn && typeof closeModal === "function") closeLoginModalBtn.addEventListener('click', () => closeModal(loginModal));
+    if(closeRegisterModalBtn && typeof closeModal === "function") closeRegisterModalBtn.addEventListener('click', () => closeModal(registerModal));
+    window.addEventListener('click', (event) => { 
+        if (typeof closeModal === "function") {
+            if (event.target === loginModal) closeModal(loginModal); 
+            if (event.target === registerModal) closeModal(registerModal); 
+        }
+    });
+    if (navDashboardBtn && typeof setActiveSection === "function") navDashboardBtn.addEventListener('click', () => setActiveSection('dashboard-section'));
+    if (navMyGamesBtn && typeof setActiveSection === "function") navMyGamesBtn.addEventListener('click', () => { setActiveSection('my-games-section'); if (currentUser && typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); });
+    if (navPoolsBtn && typeof setActiveSection === "function") navPoolsBtn.addEventListener('click', () => setActiveSection('pools-section'));
+    
+    // Listener para o select de loteria principal (mainDisplayLotterySelect foi definido como quickHunchLotteryTypeSelect)
+    if (mainDisplayLotterySelect) {
+        mainDisplayLotterySelect.addEventListener('change', (e) => {
             const selectedLottery = e.target.value;
-            const selectedOptionText = e.target.options[e.target.selectedIndex].text;
-            if (document.getElementById('results-lottery-name')) document.getElementById('results-lottery-name').textContent = selectedOptionText;
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const lotteryFriendlyName = selectedOption ? selectedOption.text : (LOTTERY_CONFIG_JS[selectedLottery] ? LOTTERY_CONFIG_JS[selectedLottery].name : selectedLottery.toUpperCase());
             
-            fetchAndDisplayResults(selectedLottery); 
-            fetchAndDisplayFrequencyStats(selectedLottery); 
-            fetchAndDisplayPairFrequencyStats(selectedLottery); 
-            fetchAndDisplayCityStats(selectedLottery);
-            fetchAndDisplayCityPrizeSumStats(selectedLottery);
+            console.log(`SCRIPT.JS: Loteria principal para display (stats/results) mudou para: ${selectedLottery} (${lotteryFriendlyName})`);
+
+            if (resultsLotteryNameSpan) resultsLotteryNameSpan.textContent = lotteryFriendlyName;
+            if(freqStatsLotteryNameSpan) freqStatsLotteryNameSpan.textContent = lotteryFriendlyName;
+            if(pairFreqStatsLotteryNameSpan) pairFreqStatsLotteryNameSpan.textContent = lotteryFriendlyName;
+            if(cityStatsLotteryNameSpan) cityStatsLotteryNameSpan.textContent = lotteryFriendlyName;
+            if(cityPrizeSumLotteryNameSpan) cityPrizeSumLotteryNameSpan.textContent = lotteryFriendlyName;
+
+            if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery); 
+            if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery); 
+            if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery); 
+            if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery);
+            if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(selectedLottery);
         });
     }
-    if (fetchResultsBtn && mainLotterySelectForDisplay) { 
+    if (fetchResultsBtn && mainDisplayLotterySelect) { 
          fetchResultsBtn.addEventListener('click', () => {
-             const selectedLottery = mainLotterySelectForDisplay.value;
-             fetchAndDisplayResults(selectedLottery); fetchAndDisplayFrequencyStats(selectedLottery); 
-             fetchAndDisplayPairFrequencyStats(selectedLottery); fetchAndDisplayCityStats(selectedLottery);
-             fetchAndDisplayCityPrizeSumStats(selectedLottery);
+             const selectedLottery = mainDisplayLotterySelect.value;
+             console.log(`SCRIPT.JS: Botão fetchResultsBtn (refresh de stats/results) clicado para ${selectedLottery}`);
+             if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery); 
+             if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery); 
+             if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery); 
+             if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery);
+             if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(selectedLottery);
          });
      }
 
-    // Listener para o Gerador Rápido
-    if (generateQuickHunchBtn) { 
-        generateQuickHunchBtn.addEventListener('click', generateAndDisplayQuickHunch);
-    }
-    setupSaveHunchButton(saveQuickHunchBtn, 'quick');
-    if (quickHunchLotteryTypeSelect) { // Passa o select correto
-        setupCheckHunchButton(checkQuickHunchBtn, quickHunchNumbersDiv, quickHunchCheckResultDiv, quickHunchLotteryTypeSelect, 'quick');
-    }
-
-
-    // Listeners de Autenticação (COPIE OS SEUS COMPLETOS AQUI)
-    if(loginSubmitBtn) loginSubmitBtn.addEventListener('click', () => { /* ... (sua lógica de login) ... */ });
-    if(registerSubmitBtn) registerSubmitBtn.addEventListener('click', () => { /* ... (sua lógica de registro) ... */ });
-    if(logoutBtn) logoutBtn.addEventListener('click', () => { /* ... (sua lógica de logout) ... */ });
+    // === NOVOS LISTENERS PARA OS NOVOS GERADORES ===
+    if (generateQuickHunchBtn) generateQuickHunchBtn.addEventListener('click', generateAndDisplayQuickHunch);
+    if (generateEsotericHunchBtn) generateEsotericHunchBtn.addEventListener('click', generateAndDisplayEsotericHunch);
     
-    // Listener para filtro de jogos salvos (COPIE O SEU COMPLETO AQUI)
-    if (filterLotteryMyGamesSelect) filterLotteryMyGamesSelect.addEventListener('change', (e) => { /* ... */ });
+    if (typeof setupSaveHunchButtonListeners === "function") setupSaveHunchButtonListeners(); 
+    if (typeof setupCheckHunchButtonListeners === "function") setupCheckHunchButtonListeners();
     
-    // Listeners para Probabilidade Manual (COPIE OS SEUS COMPLETOS AQUI)
+    // Listeners para os botões no banner promocional
+    if (promoRegisterBtn && registerModalBtn && typeof openModal === "function") promoRegisterBtn.addEventListener('click', () => openModal(registerModal));
+    if (promoLoginBtn && loginModalBtn && typeof openModal === "function") promoLoginBtn.addEventListener('click', () => openModal(loginModal));
+    // === FIM DOS NOVOS EVENT LISTENERS ===
+    
+    // Listeners de Autenticação (Do seu script original da resposta #40)
+    if(loginSubmitBtn && typeof firebaseAuth !== 'undefined' && firebaseAuth) {
+        loginSubmitBtn.addEventListener('click', () => {
+            if (!loginEmailInput || !loginPasswordInput || !loginErrorP) return;
+            const email = loginEmailInput.value; const password = loginPasswordInput.value;
+            loginErrorP.textContent = ""; if (!email || !password) { loginErrorP.textContent = "Preencha email e senha."; return; }
+            firebaseAuth.signInWithEmailAndPassword(email, password)
+                .then(() => { if(typeof closeModal === "function") closeModal(loginModal); })
+                .catch((error) => { loginErrorP.textContent = `Erro: ${error.message}`; });
+        });
+    }
+    if(registerSubmitBtn && typeof firebaseAuth !== 'undefined' && firebaseAuth) {
+        registerSubmitBtn.addEventListener('click', () => {
+            if (!registerEmailInput || !registerPasswordInput || !registerConfirmPasswordInput || !registerErrorP) return;
+            const email = registerEmailInput.value; const password = registerPasswordInput.value; const confirmPassword = registerConfirmPasswordInput.value;
+            registerErrorP.textContent = ""; if (!email || !password || !confirmPassword) { registerErrorP.textContent = "Preencha todos os campos."; return; }
+            if (password !== confirmPassword) { registerErrorP.textContent = "As senhas não coincidem."; return; }
+            if (password.length < 6) { registerErrorP.textContent = "A senha deve ter no mínimo 6 caracteres."; return; }
+            firebaseAuth.createUserWithEmailAndPassword(email, password)
+                .then(() => { alert("Usuário registrado! Você já está logado."); if(typeof closeModal === "function") closeModal(registerModal); })
+                .catch((error) => { registerErrorP.textContent = `Erro: ${error.message}`; });
+        });
+    }
+    if(logoutBtn && typeof firebaseAuth !== 'undefined' && firebaseAuth) {
+        logoutBtn.addEventListener('click', () => {
+            firebaseAuth.signOut().catch((error) => { alert(`Erro no logout: ${error.message}`); });
+        });
+    }
+    
+    // Listener para filtro de jogos salvos (Do seu script original da resposta #40)
+    if (filterLotteryMyGamesSelect) {
+        filterLotteryMyGamesSelect.addEventListener('change', (e) => { 
+            if (currentUser && typeof loadUserGames === "function") loadUserGames(e.target.value); 
+        });
+    }
+    
+    // Listeners para Probabilidade Manual (Do seu script original da resposta #40)
     if (manualProbUserNumbersInput && manualProbLotteryTypeSelect) { 
         manualProbUserNumbersInput.addEventListener('input', updateManualProbNumbersFeedback);
-        manualProbLotteryTypeSelect.addEventListener('change', () => { /* ... */ });
+        manualProbLotteryTypeSelect.addEventListener('change', () => { 
+            const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
+            if (!selectedOption || !selectedOption.dataset.count || !selectedOption.dataset.min || !selectedOption.dataset.max) return;
+            manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${selectedOption.dataset.count} de ${selectedOption.dataset.min}-${selectedOption.dataset.max})`;
+            manualProbUserNumbersInput.value = ''; 
+            if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback(); 
+            if(manualProbabilityResultDisplay) manualProbabilityResultDisplay.textContent = "Aguardando seu jogo...";
+        });
         const initialSelectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
-        if (initialSelectedOption && initialSelectedOption.dataset.count){ /* ... */ }
-        updateManualProbNumbersFeedback(); 
+         if (initialSelectedOption && initialSelectedOption.dataset.count && initialSelectedOption.dataset.min && initialSelectedOption.dataset.max){
+            manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${initialSelectedOption.dataset.count} de ${initialSelectedOption.dataset.min}-${initialSelectedOption.dataset.max})`;
+         }
+        if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback(); 
     }
-    if (manualCalculateProbBtn) { manualCalculateProbBtn.addEventListener('click', async () => { /* ... */ }); }
-
-    // === NOVOS EVENT LISTENERS ===
-    if (generateEsotericHunchBtn) {
-        generateEsotericHunchBtn.addEventListener('click', generateAndDisplayEsotericHunch);
+    if (manualCalculateProbBtn && manualProbLotteryTypeSelect && manualProbUserNumbersInput && manualProbabilityResultDisplay) { 
+        manualCalculateProbBtn.addEventListener('click', async () => { 
+            const lotteryType = manualProbLotteryTypeSelect.value;
+            const numbersStr = manualProbUserNumbersInput.value;
+            const userNumbersRaw = numbersStr.split(/[ ,;/\t\n]+/);
+            const userNumbers = userNumbersRaw.map(n => n.trim()).filter(n => n !== "" && !isNaN(n)).map(n => parseInt(n,10));
+            const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
+            const expectedCount = parseInt(selectedOption.dataset.count, 10);
+            if (userNumbers.length === 0) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Por favor, insira os números do seu jogo.</p>`; return; }
+            if (userNumbers.length !== expectedCount) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Para ${selectedOption.text.split('(')[0].trim()}, você deve fornecer ${expectedCount} números.</p>`; return; }
+            if (new Set(userNumbers).size !== userNumbers.length) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Seu jogo contém números repetidos.</p>`; return; }
+            const minNum = parseInt(selectedOption.dataset.min, 10); const maxNum = parseInt(selectedOption.dataset.max, 10);
+            for (const num of userNumbers) { if (num < minNum || num > maxNum) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">O número ${num} está fora do range (${minNum}-${maxNum}).</p>`; return; } }
+            manualProbabilityResultDisplay.innerHTML = '<div class="spinner small-spinner"></div> Calculando...';
+            try {
+                const resultData = await fetchData(`api/main/jogo-manual/probabilidade`, { // URL COMPLETA RELATIVA
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lottery_type: lotteryType, numeros_usuario: userNumbers })
+                });
+                if (resultData.erro) { throw new Error(resultData.erro); }
+                let displayText = `Loteria: <span class="highlight">${resultData.loteria}</span>\n`;
+                displayText += `Seu Jogo: <span class="highlight">${resultData.jogo_usuario.join(', ')}</span>\n`;
+                displayText += `Probabilidade (Prêmio Máximo): <span class="highlight">${resultData.probabilidade_texto}</span>\n`;
+                if (resultData.probabilidade_decimal > 0) { displayText += `(Decimal Aprox.: ${resultData.probabilidade_decimal.toExponential(4)})\n`; }
+                if(resultData.descricao) displayText += `\n<small>${resultData.descricao}</small>`;
+                manualProbabilityResultDisplay.innerHTML = displayText.replace(/\n/g, '<br>');
+            } catch (error) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Erro: ${error.message}</p>`; }
+        }); 
     }
-    setupSaveHunchButton(saveEsotericHunchBtn, 'esoteric');
-    if (esotericLotteryTypeSelect) { // Passa o select correto
-         setupCheckHunchButton(checkEsotericHunchBtn, esotericHunchNumbersDiv, esotericHunchHistoryCheckDiv, esotericLotteryTypeSelect, 'esoteric');
-    }
-    
-    if (promoRegisterBtn && registerModalBtn) {
-        promoRegisterBtn.addEventListener('click', () => openModal(registerModal));
-    }
-    if (promoLoginBtn && loginModalBtn) {
-        promoLoginBtn.addEventListener('click', () => openModal(loginModal));
-    }
-    // === FIM DOS NOVOS EVENT LISTENERS ===
     
     console.log("SCRIPT.JS: Final do script atingido, todos os listeners configurados.");
 });
