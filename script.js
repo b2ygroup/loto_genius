@@ -665,6 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (navItems && typeof setActiveSection === "function") navItems.forEach(item => item.style.display = 'flex');
             if (typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
             if (esotericHunchCard) esotericHunchCard.style.display = 'block'; if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'none';
+            if (typeof checkForPrizesAndNotify === 'function') checkForPrizesAndNotify(user.uid);
         } else {
             if (loginModalBtn) loginModalBtn.style.display = 'inline-block'; if (registerModalBtn) registerModalBtn.style.display = 'inline-block';
             if (userInfoDiv) userInfoDiv.style.display = 'none'; if (userEmailSpan) userEmailSpan.textContent = '';
@@ -986,12 +987,111 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const strategyP = document.createElement('p'); strategyP.classList.add('strategy-text'); strategyP.textContent = `Estratégia: ${gameData.strategy || 'N/A'}`;
         const dateP = document.createElement('p'); dateP.classList.add('game-card-info'); dateP.textContent = `Salvo em: ${gameData.savedAt ? new Date(gameData.savedAt.toDate()).toLocaleDateString() : 'N/A'}`;
+        
+        const verificationStatusP = document.createElement('p');
+        verificationStatusP.classList.add('game-card-info', 'verification-status');
+        if (gameData.foiVerificado) { // Assumindo que este campo será adicionado via backend
+            if (gameData.premiado) {
+                verificationStatusP.innerHTML = `<i class="fas fa-trophy" style="color:gold;"></i> Premiado! ${gameData.acertos || '?'} acertos (${gameData.faixaPremio || 'Verifique detalhes'}). Verificado em: ${gameData.dataDaVerificacao ? new Date(gameData.dataDaVerificacao.toDate()).toLocaleDateString() : 'N/A'}`;
+                verificationStatusP.style.color = '#2ecc71';
+            } else {
+                verificationStatusP.innerHTML = `<i class="fas fa-check-circle"></i> Verificado. ${gameData.acertos || '0'} acertos. Em: ${gameData.dataDaVerificacao ? new Date(gameData.dataDaVerificacao.toDate()).toLocaleDateString() : 'N/A'}`;
+            }
+        } else {
+            verificationStatusP.textContent = "Aguardando verificação do resultado.";
+            verificationStatusP.style.fontStyle = 'italic';
+        }
+
         const actionsDiv = document.createElement('div'); actionsDiv.classList.add('game-card-actions');
         const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'small-btn'); deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Excluir';
         deleteBtn.addEventListener('click', async () => { if (confirm("Excluir este jogo?")) { try { await firestoreDB.collection('userGames').doc(docId).delete(); card.remove(); if (savedGamesContainer.children.length === 0) noSavedGamesP.style.display = 'block'; } catch (e) { alert("Erro ao excluir.");}}});
-        actionsDiv.appendChild(deleteBtn); card.innerHTML = `<h4>${lotteryName}</h4>`;
-        card.appendChild(gameNumbersDiv); card.appendChild(strategyP); card.appendChild(dateP); card.appendChild(actionsDiv);
+        
+        actionsDiv.appendChild(deleteBtn);
+        card.innerHTML = `<h4>${lotteryName}</h4>`;
+        card.appendChild(gameNumbersDiv);
+        card.appendChild(strategyP);
+        card.appendChild(dateP);
+        card.appendChild(verificationStatusP);
+        card.appendChild(actionsDiv);
         return card;
+    }
+
+    async function checkForPrizesAndNotify(userId) {
+        if (!firestoreDB || !userId) return;
+        try {
+            const gamesRef = firestoreDB.collection('userGames');
+            const querySnapshot = await gamesRef
+                                    .where('userId', '==', userId)
+                                    .where('premiado', '==', true)
+                                    .where('notificacaoPendente', '==', true)
+                                    .get();
+
+            if (!querySnapshot.empty) {
+                const prizeModal = document.getElementById('prize-notification-modal');
+                const prizeDetailsContainer = document.getElementById('prize-details-container');
+                const prizeMessage = document.getElementById('prize-message');
+                
+                if(!prizeModal || !prizeDetailsContainer || !prizeMessage) {
+                    console.error("Elementos do modal de premiação não encontrados!");
+                    return;
+                }
+
+                prizeDetailsContainer.innerHTML = '';
+                let firstPrize = true;
+                let gamesToUpdate = [];
+
+                querySnapshot.forEach(doc => {
+                    const gameData = doc.data();
+                    const gameDetail = document.createElement('p');
+                    gameDetail.style.marginBottom = "0.5em";
+                    gameDetail.innerHTML = `Jogo da <strong>${LOTTERY_CONFIG_JS[gameData.lottery]?.name || gameData.lottery}</strong> (Concurso: ${gameData.concursoVerificado || 'N/A'}) - <strong>${gameData.acertos || '?'} acertos!</strong> Faixa: ${gameData.faixaPremio || 'Não especificada'}.`;
+                    prizeDetailsContainer.appendChild(gameDetail);
+                    gamesToUpdate.push(doc.id);
+
+                    if (firstPrize && currentUser) {
+                        prizeMessage.textContent = `Parabéns, ${currentUser.email.split('@')[0]}! Você tem jogos premiados!`;
+                        firstPrize = false;
+                    }
+                });
+
+                openModal(prizeModal);
+                if(typeof triggerConfetti === 'function') triggerConfetti();
+                
+                const okBtn = document.getElementById('ok-prize-modal-btn');
+                const closeBtn = document.getElementById('close-prize-modal');
+                const copyPixBtn = document.getElementById('copy-pix-key-btn');
+
+                const handleCloseAndMarkNotified = () => {
+                    closeModal(prizeModal);
+                    gamesToUpdate.forEach(gameId => {
+                        firestoreDB.collection('userGames').doc(gameId).update({ notificacaoPendente: false })
+                            .catch(err => console.error("Erro ao atualizar notificação do jogo:", gameId, err));
+                    });
+                    if(okBtn) okBtn.removeEventListener('click', handleCloseAndMarkNotified);
+                    if(closeBtn) closeBtn.removeEventListener('click', handleCloseAndMarkNotified);
+                };
+
+                if(okBtn) okBtn.addEventListener('click', handleCloseAndMarkNotified, { once: true });
+                if(closeBtn) closeBtn.addEventListener('click', handleCloseAndMarkNotified, { once: true });
+
+                if (copyPixBtn) {
+                    copyPixBtn.onclick = () => {
+                        const pixKeyDisplay = document.getElementById('pix-key-display');
+                        if(pixKeyDisplay) {
+                            const pixKey = pixKeyDisplay.textContent;
+                            navigator.clipboard.writeText(pixKey).then(() => {
+                                alert('Chave PIX copiada para a área de transferência!');
+                            }).catch(err => {
+                                console.error('Falha ao copiar PIX:', err);
+                                alert('Não foi possível copiar a chave PIX.');
+                            });
+                        }
+                    };
+                }
+            }
+        } catch (error) {
+            console.error("Erro ao verificar prêmios:", error);
+        }
     }
 
     function updateManualProbNumbersFeedback() {
@@ -1005,7 +1105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const expectedCount = selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count;
+        const expectedCount = selectedLotteryConfig.count_apostadas;
         const numbersStr = manualProbUserNumbersInput.value;
         const userNumbersCount = numbersStr.split(/[ ,;/\t\n]+/).filter(n => n.trim() !== "" && !isNaN(n)).length;
         manualProbNumbersCountFeedback.textContent = `Números: ${userNumbersCount} de ${expectedCount}.`;

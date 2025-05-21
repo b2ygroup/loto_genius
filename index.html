@@ -307,6 +307,25 @@
         </div>
     </div>
 
+    <div id="prize-notification-modal" class="modal" role="dialog" aria-labelledby="prize-modal-title" aria-modal="true" style="display:none;">
+        <div class="modal-content">
+            <button class="close-btn" id="close-prize-modal" aria-label="Fechar modal de premiação">&times;</button>
+            <div id="confetti-canvas-modal" style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:-1;"></div>
+            <h2 id="prize-modal-title" style="color: #ffd700;"><i class="fas fa-trophy"></i> Parabéns!</h2>
+            <p id="prize-message" aria-live="assertive" style="font-size: 1.1rem; margin-bottom: 1rem;">Você tem jogos premiados!</p>
+            <div id="prize-details-container" style="margin-top:1rem; margin-bottom:1.5rem; max-height: 150px; overflow-y: auto; padding-right: 10px;">
+            </div>
+            <p style="font-size:0.9em; margin-top:1.5rem; color: #c5dcf0;">
+                Gostou da ajuda do Loto Genius? Considere uma contribuição para mantermos a plataforma no ar e evoluindo!
+            </p>
+            <p style="margin-top:0.5rem;">
+                <strong>Chave PIX:</strong> <span id="pix-key-display">[SUA_CHAVE_PIX_AQUI]</span>
+                <button id="copy-pix-key-btn" class="action-btn small-btn" title="Copiar Chave PIX" style="margin-left: 10px;"><i class="fas fa-copy"></i> Copiar</button>
+            </p>
+            <button id="ok-prize-modal-btn" class="modal-btn" style="margin-top:1.5rem;">Ok, Entendi!</button>
+        </div>
+    </div>
+
     <footer role="contentinfo">
         <p>&copy; <span id="current-year"></span> Loto Genius AI. Jogue com consciência e responsabilidade.</p>
     </footer>
