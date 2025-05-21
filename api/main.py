@@ -1,4 +1,3 @@
-# api/main.py
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import random
@@ -45,7 +44,6 @@ def parse_currency_to_float(currency_str):
     try: return float(cleaned_str)
     except ValueError: app.logger.warning(f"Não foi possível converter '{currency_str}' para float."); return 0.0
 
-
 def parse_ganhadores_cidades(cidade_uf_str, num_ganhadores_str):
     cidades_parsed = []
     try:
@@ -85,10 +83,8 @@ def load_processed_lottery_data(lottery_key):
     if not config: app.logger.error(f"[load_data] Config não encontrada para {lottery_key}"); return None
     processed_json_path = config.get("processed_json_file")
     if not processed_json_path: app.logger.error(f"[load_data] Caminho JSON não configurado para {lottery_key}"); return None
-    
     abs_json_path = os.path.join(APP_ROOT, 'lottery_data', os.path.basename(processed_json_path))
     app.logger.info(f"[load_data] Tentando caminho absoluto: {abs_json_path}")
-
     if not os.path.exists(abs_json_path):
         app.logger.error(f"[load_data] ARQUIVO JSON NÃO ENCONTRADO em: {abs_json_path}")
         try:
@@ -122,7 +118,6 @@ def combinations_count(n, k):
     for i in range(k): res = res * (n - i) // (i + 1)
     return res
 
-# --- ROTAS DA API ---
 @app.route('/')
 def api_base_root():
     app.logger.info(f"Rota / acessada (raiz da função em api/main.py). Path: {request.path}")
@@ -131,7 +126,7 @@ def api_base_root():
 @app.route('/api/main/')
 def api_main_home():
     app.logger.info(f"Rota /api/main/ acessada. Path: {request.path}")
-    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.3.0"})
+    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.3.1"})
 
 @app.route('/api/main/platform-stats', methods=['GET'])
 def get_platform_stats():
@@ -168,7 +163,6 @@ def get_resultados_api(lottery_name):
     latest_result = all_results[0]
     return jsonify({"ultimo_concurso": latest_result.get("concurso"),"data": latest_result.get("data"),"numeros": latest_result.get("numeros"),"ganhadores_principal_contagem": latest_result.get("ganhadores_principal_contagem"),"cidades_ganhadoras_principal": latest_result.get("cidades_ganhadoras_principal"),"rateio_principal_valor": latest_result.get("rateio_principal_valor"),"fonte": f"Dados Processados - {lottery_name.upper()}"})
 
-# --- Endpoints de Estatísticas ---
 @app.route('/api/main/stats/frequencia/<lottery_name>', methods=['GET'])
 def get_frequencia_numeros(lottery_name):
     app.logger.info(f"Endpoint /api/main/stats/frequencia/{lottery_name} acessado. Path: {request.path}")
@@ -272,8 +266,6 @@ def calcular_probabilidade_jogo():
         else: prob_txt = "Combinações resultou em zero."
     return jsonify({"loteria": nome_loteria, "jogo_usuario": sorted(numeros_usuario), "probabilidade_decimal": prob_dec, "probabilidade_texto": prob_txt, "descricao": f"Probabilidade de acertar o prêmio máximo."})
 
-
-# --- GERADORES DE JOGO ---
 def gerar_jogo_ia_aleatorio_rapido(lottery_name):
     app.logger.info(f"[gerar_jogo_ia_aleatorio_rapido] Solicitado para {lottery_name}")
     config = LOTTERY_CONFIG.get(lottery_name)
@@ -313,7 +305,6 @@ def gerar_jogo_api(lottery_name):
     app.logger.info(f"Jogo aleatório rápido gerado com sucesso para {lottery_name}.")
     return jsonify(resultado_geracao)
 
-# ++ NOVA ESTRATÉGIA: NÚMEROS QUENTES ++
 def get_hot_numbers_strategy(all_results, num_concursos_analisar, num_numeros_gerar, lottery_min, lottery_max, lottery_name_for_log=""):
     app.logger.info(f"[get_hot_numbers_strategy] Para {lottery_name_for_log.upper()}: Analisando {num_concursos_analisar} concursos para gerar {num_numeros_gerar} números quentes.")
     
@@ -407,7 +398,6 @@ def gerar_jogo_numeros_quentes_api(lottery_name):
     app.logger.info(f"Jogo 'Números Quentes' gerado para {lottery_name_lower}: {jogo_final}")
     return jsonify({"jogo": jogo_final, "estrategia_usada": estrategia_aplicada})
 
-# ++ NOVA ESTRATÉGIA: NÚMEROS FRIOS ++
 def get_cold_numbers_strategy(all_results, num_concursos_analisar, num_numeros_gerar, lottery_min, lottery_max, lottery_name_for_log=""):
     app.logger.info(f"[get_cold_numbers_strategy] Para {lottery_name_for_log.upper()}: Analisando {num_concursos_analisar} concursos para gerar {num_numeros_gerar} números frios.")
 
@@ -436,28 +426,21 @@ def get_cold_numbers_strategy(all_results, num_concursos_analisar, num_numeros_g
         
     cold_numbers_candidates.sort(key=lambda x: (x['frequencia'], x['numero']))
     
-    generated_game = [candidate['numero'] for candidate in cold_numbers_candidates]
+    generated_game_candidates = [candidate['numero'] for candidate in cold_numbers_candidates]
     
-    # Selecionar os primeiros 'num_numeros_gerar' da lista ordenada (os mais frios)
-    # Se a lista for menor que o necessário (altamente improvável, pois contém todos os números do universo),
-    # a seleção abaixo pegará todos disponíveis.
-    final_cold_selection = generated_game[:num_numeros_gerar]
+    final_cold_selection = generated_game_candidates[:num_numeros_gerar]
     
     app.logger.info(f"[get_cold_numbers_strategy] {lottery_name_for_log.upper()}: Seleção inicial de números frios ({len(final_cold_selection)}): {final_cold_selection}")
 
     if len(final_cold_selection) < num_numeros_gerar:
         app.logger.warning(f"[get_cold_numbers_strategy] {lottery_name_for_log.upper()}: Não foram encontrados {num_numeros_gerar} frios distintos (encontrados: {len(final_cold_selection)}). Completando aleatoriamente com números não selecionados.")
-        
         remaining_possible = [num for num in all_possible_numbers if num not in final_cold_selection]
         random.shuffle(remaining_possible)
-        
         needed_to_complete = num_numeros_gerar - len(final_cold_selection)
         final_cold_selection.extend(remaining_possible[:needed_to_complete])
 
-    # Garantir ordenação final
     final_game = sorted(final_cold_selection)
 
-    # Verificação final de tamanho, embora a lógica acima deva garantir isso
     if len(final_game) != num_numeros_gerar:
         app.logger.error(f"[get_cold_numbers_strategy] {lottery_name_for_log.upper()}: Falha ao gerar a quantidade correta de números. Solicitados: {num_numeros_gerar}, Gerados: {len(final_game)}. Usando fallback aleatório total.")
         return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
@@ -465,7 +448,6 @@ def get_cold_numbers_strategy(all_results, num_concursos_analisar, num_numeros_g
     app.logger.info(f"[get_cold_numbers_strategy] {lottery_name_for_log.upper()}: Jogo final de números frios: {final_game}")
     return final_game
 
-# ++ Endpoint para Números Frios ++
 @app.route('/api/main/gerar_jogo/numeros_frios/<lottery_name>', methods=['GET'])
 def gerar_jogo_numeros_frios_api(lottery_name):
     lottery_name_lower = lottery_name.lower()
@@ -485,7 +467,7 @@ def gerar_jogo_numeros_frios_api(lottery_name):
         return jsonify({"erro": f"Dados históricos para {lottery_name.upper()} indisponíveis."}), 500
 
     try:
-        num_concursos_analisar = int(request.args.get('num_concursos_analisar', 20)) # Default 20
+        num_concursos_analisar = int(request.args.get('num_concursos_analisar', 20))
         if num_concursos_analisar <= 0 or num_concursos_analisar > len(all_results):
             num_concursos_analisar = min(20, len(all_results)) if len(all_results) > 0 else 1
     except ValueError:
@@ -499,7 +481,7 @@ def gerar_jogo_numeros_frios_api(lottery_name):
 
     if not jogo_final or len(jogo_final) != numeros_a_gerar:
         app.logger.error(f"Falha na geração de jogo 'Números Frios' para {lottery_name}. Resultado: {jogo_final}. Usando fallback.")
-        fallback_result = gerar_jogo_ia_aleatorio_rapido(lottery_name_lower) # Usar o aleatório rápido como fallback
+        fallback_result = gerar_jogo_ia_aleatorio_rapido(lottery_name_lower)
         return jsonify({
             "jogo": fallback_result.get("jogo", []),
             "estrategia_usada": f"{config.get('nome_exibicao', lottery_name.capitalize())}: Números Frios (Fallback para Aleatório) - Analisados: {num_concursos_analisar} concursos",
@@ -512,8 +494,6 @@ def gerar_jogo_numeros_frios_api(lottery_name):
     app.logger.info(f"Jogo 'Números Frios' gerado para {lottery_name_lower}: {jogo_final}")
     return jsonify({"jogo": jogo_final, "estrategia_usada": estrategia_aplicada})
 
-
-# --- PALPITE ESOTÉRICO ---
 def gerar_numeros_baseados_em_data_simples(data_nascimento_str, num_numeros, min_val, max_val):
     app.logger.info(f"Gerando palpite esotérico simples com data: {data_nascimento_str} para {num_numeros} números entre {min_val}-{max_val}")
     numeros_base = set(); soma_total_digitos = 0

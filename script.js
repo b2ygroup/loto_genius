@@ -40,7 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const recentPoolsList = document.getElementById('recent-pools-list');
     const topWinnersList = document.getElementById('top-winners-list');
 
-    const quickHunchLotteryTypeSelect = document.getElementById('quick-hunch-lottery-type');
+    const mainLotterySelect = document.getElementById('main-lottery-select');
+    const refreshAllDashboardDataBtn = document.getElementById('refresh-all-dashboard-data-btn');
+    const dynamicLotteryNameInfoSpan = document.getElementById('dynamic-lottery-name-info');
+    const dynamicLotteryNameHunchSpan = document.getElementById('dynamic-lottery-name-hunch');
+    const dynamicLotteryNameManualSpan = document.getElementById('dynamic-lottery-name-manual');
+
     const generateQuickHunchBtn = document.getElementById('generate-quick-hunch-btn');
     const quickHunchOutputDiv = document.getElementById('quick-hunch-output');
     const quickHunchNumbersDiv = document.getElementById('quick-hunch-numbers');
@@ -49,17 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkQuickHunchBtn = document.getElementById('check-quick-hunch-btn');
     const quickHunchCheckResultDiv = document.getElementById('quick-hunch-check-result');
 
-    const coldNumbersLotteryTypeSelect = document.getElementById('cold-numbers-lottery-type');
-    const coldNumbersAnalyzeCountInput = document.getElementById('cold-numbers-analyze-count');
-    const generateColdNumbersHunchBtn = document.getElementById('generate-cold-numbers-hunch-btn');
-    const coldNumbersHunchOutputDiv = document.getElementById('cold-numbers-hunch-output');
-    const coldNumbersHunchNumbersDiv = document.getElementById('cold-numbers-hunch-numbers');
-    const coldNumbersHunchStrategyP = document.getElementById('cold-numbers-hunch-strategy');
-    const saveColdHunchBtn = document.getElementById('save-cold-hunch-btn');
-    const checkColdHunchBtn = document.getElementById('check-cold-hunch-btn');
-    const coldHunchCheckResultDiv = document.getElementById('cold-hunch-check-result');
-
-    const hotNumbersLotteryTypeSelect = document.getElementById('hot-numbers-lottery-type');
     const hotNumbersAnalyzeCountInput = document.getElementById('hot-numbers-analyze-count');
     const generateHotNumbersHunchBtn = document.getElementById('generate-hot-numbers-hunch-btn');
     const hotNumbersHunchOutputDiv = document.getElementById('hot-numbers-hunch-output');
@@ -69,10 +63,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkHotHunchBtn = document.getElementById('check-hot-hunch-btn');
     const hotHunchCheckResultDiv = document.getElementById('hot-hunch-check-result');
 
-    const esotericLotteryTypeSelect = document.getElementById('esoteric-lottery-type');
+    const coldNumbersAnalyzeCountInput = document.getElementById('cold-numbers-analyze-count');
+    const generateColdNumbersHunchBtn = document.getElementById('generate-cold-numbers-hunch-btn');
+    const coldNumbersHunchOutputDiv = document.getElementById('cold-numbers-hunch-output');
+    const coldNumbersHunchNumbersDiv = document.getElementById('cold-numbers-hunch-numbers');
+    const coldNumbersHunchStrategyP = document.getElementById('cold-numbers-hunch-strategy');
+    const saveColdHunchBtn = document.getElementById('save-cold-hunch-btn');
+    const checkColdHunchBtn = document.getElementById('check-cold-hunch-btn');
+    const coldHunchCheckResultDiv = document.getElementById('cold-hunch-check-result');
+
+    const esotericHunchCard = document.getElementById('esoteric-hunch-card');
     const birthDateInput = document.getElementById('birth-date-input');
     const generateEsotericHunchBtn = document.getElementById('generate-esoteric-hunch-btn');
-    const esotericHunchCard = document.getElementById('esoteric-hunch-card');
     const esotericHunchOutputDiv = document.getElementById('esoteric-hunch-output');
     const esotericHunchNumbersDiv = document.getElementById('esoteric-hunch-numbers');
     const esotericHunchMethodP = document.getElementById('esoteric-hunch-method');
@@ -84,11 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const promoRegisterBtn = document.getElementById('promo-register-btn');
     const promoLoginBtn = document.getElementById('promo-login-btn');
 
-    const mainDisplayLotterySelect = quickHunchLotteryTypeSelect;
     const apiResultsPre = document.getElementById('api-results');
-    const resultsLotteryNameSpan = document.getElementById('results-lottery-name');
-    const fetchResultsBtn = document.getElementById('fetch-results-btn');
-
+    
     const loginModalBtn = document.getElementById('login-modal-btn');
     const registerModalBtn = document.getElementById('register-modal-btn');
     const logoutBtn = document.getElementById('logout-btn');
@@ -114,16 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorDiv = document.getElementById('global-error-msg');
     const confettiCanvas = document.getElementById('confetti-canvas');
 
-    const freqStatsLotteryNameSpan = document.getElementById('freq-stats-lottery-name');
     const frequencyListContainer = document.getElementById('frequency-list-container');
-    const pairFreqStatsLotteryNameSpan = document.getElementById('pair-freq-stats-lottery-name');
     const pairFrequencyListContainer = document.getElementById('pair-frequency-list-container');
-    const cityStatsLotteryNameSpan = document.getElementById('city-stats-lottery-name');
     const cityListContainer = document.getElementById('city-list-container');
-    const cityPrizeSumLotteryNameSpan = document.getElementById('city-prize-sum-lottery-name');
     const cityPrizeSumListContainer = document.getElementById('city-prize-sum-list-container');
 
-    const manualProbLotteryTypeSelect = document.getElementById('manual-prob-lottery-type');
     const manualProbUserNumbersInput = document.getElementById('manual-prob-user-numbers');
     const manualCalculateProbBtn = document.getElementById('manual-calculate-prob-btn');
     const manualProbabilityResultDisplay = document.getElementById('manual-probability-result-display');
@@ -150,7 +144,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let criticalSplashTimeout;
     let firebaseInitAttempts = 0;
     const maxFirebaseInitAttempts = 10;
-    const LOTTERY_CONFIG_JS = { megasena: { count: 6, color: "#209869", name: "Mega-Sena" }, lotofacil: { count: 15, color: "#930089", name: "Lotofácil" }, quina: { count: 5, color: "#260085", name: "Quina" }, lotomania: { count_sorteadas: 20, count_apostadas: 50, color: "#f78100", name: "Lotomania" } };
+    const LOTTERY_CONFIG_JS = {
+        megasena: { count: 6, count_apostadas: 6, min:1, max:60, color: "#209869", name: "Mega-Sena" },
+        lotofacil: { count: 15, count_apostadas: 15, min:1, max:25, color: "#930089", name: "Lotofácil" },
+        quina: { count: 5, count_apostadas: 5, min:1, max:80, color: "#260085", name: "Quina" },
+        lotomania: { count_sorteadas: 20, count_apostadas: 50, min:0, max:99, color: "#f78100", name: "Lotomania" }
+    };
     const bannerConfigurations = {
         'banner-top-dashboard': [
             { imageUrl: 'images/banner1.png', altText: 'Tammy\'s Store - Comprar agora!', linkUrl: 'https://www.instagram.com/tammysstore_/', isExternal: true },
@@ -170,12 +169,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let firstInteractionDoneForAudio = false;
     let voiceContext = { action: null, awaiting: null, data: {} };
 
-    function showGlobalError(message) { if (errorDiv) { errorDiv.textContent = message; errorDiv.style.display = 'block'; } else { console.error("SCRIPT.JS: Global error div não encontrado:", message); } }
+    function showGlobalError(message) { if (errorDiv) { errorDiv.textContent = message; errorDiv.style.display = 'block'; } else { console.error("Global error div não encontrado:", message); } }
     function disableFirebaseFeatures() { if (loginModalBtn) loginModalBtn.disabled = true; if (registerModalBtn) registerModalBtn.disabled = true; }
     function enableFirebaseFeatures() { if (loginModalBtn) loginModalBtn.disabled = false; if (registerModalBtn) registerModalBtn.disabled = false; if(document.getElementById('global-error-msg')) document.getElementById('global-error-msg').style.display = 'none';}
 
     function setActiveSection(sectionId) {
-        if (!mainSections || mainSections.length === 0) { console.warn("SCRIPT.JS: setActiveSection - mainSections não encontrado."); return; }
+        if (!mainSections || mainSections.length === 0) { console.warn("setActiveSection - mainSections não encontrado."); return; }
         mainSections.forEach(section => { section.classList.remove('active-section'); if (section.id === sectionId) section.classList.add('active-section'); });
         if (mainNav) {
             const navButtons = mainNav.querySelectorAll('.nav-item');
@@ -191,14 +190,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 let errorJson = {}; try { errorJson = JSON.parse(responseText); } catch(e) {}
                 const messageDetail = errorJson.message || (errorJson.data ? errorJson.data.detalhes || errorJson.data.erro : null) || errorJson.erro || responseText.substring(0,250) || `Erro HTTP ${response.status}`;
-                console.error(`SCRIPT.JS: HTTP Error ${response.status} for ${url}:`, messageDetail);
+                console.error(`HTTP Error ${response.status} for ${url}:`, messageDetail);
                 throw { status: response.status, message: messageDetail, data: errorJson };
             }
             if (response.status === 204 || !responseText) { return {}; }
             return JSON.parse(responseText);
         } catch (error) {
             if (error.status && error.message) { throw error; }
-            console.error(`SCRIPT.JS: Erro geral em fetchData para ${url}:`, error);
+            console.error(`Erro geral em fetchData para ${url}:`, error);
             throw { status: error.status || 503, message: error.message || "Erro de comunicação.", data: {} };
         }
     }
@@ -237,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (stats && typeof stats.jogos_gerados_total === 'number') { animateCounter(statsJogosGeradosSpan, stats.jogos_gerados_total); } else { statsJogosGeradosSpan.textContent = "N/A"; }
             if (stats && typeof stats.jogos_premiados_estimativa === 'number') { animateCounter(statsJogosPremiadosSpan, stats.jogos_premiados_estimativa); } else { statsJogosPremiadosSpan.textContent = "N/A"; }
             if (stats && typeof stats.valor_premios_estimativa_formatado === 'string') { statsValorPremiosSpan.textContent = stats.valor_premios_estimativa_formatado; } else { statsValorPremiosSpan.textContent = "R$ N/A"; }
-        } catch (error) { statsJogosGeradosSpan.textContent = "N/A"; statsJogosPremiadosSpan.textContent = "N/A"; statsValorPremiosSpan.textContent = "R$ N/A"; console.error("SCRIPT.JS: Erro em fetchPlatformStats:", error); }
+        } catch (error) { statsJogosGeradosSpan.textContent = "N/A"; statsJogosPremiadosSpan.textContent = "N/A"; statsValorPremiosSpan.textContent = "R$ N/A"; console.error("Erro em fetchPlatformStats:", error); }
     }
 
     async function fetchRecentWinningPools() {
@@ -248,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             recentPoolsList.innerHTML = '';
             if (pools && pools.length > 0) { pools.forEach(pool => { const li = document.createElement('li'); li.innerHTML = `<span><i class="fas fa-trophy pool-icon"></i> ${pool.name} (${pool.lottery})</span> <span class="pool-prize">${pool.prize}</span> <small>${pool.date}</small>`; recentPoolsList.appendChild(li); }); }
             else { recentPoolsList.innerHTML = '<li>Nenhum bolão premiado recentemente.</li>'; }
-        } catch (error) { recentPoolsList.innerHTML = '<li>Erro ao carregar bolões.</li>'; console.error("SCRIPT.JS: Erro em fetchRecentWinningPools:", error);}
+        } catch (error) { recentPoolsList.innerHTML = '<li>Erro ao carregar bolões.</li>'; console.error("Erro em fetchRecentWinningPools:", error);}
     }
 
     async function fetchTopWinners() {
@@ -259,12 +258,12 @@ document.addEventListener('DOMContentLoaded', () => {
             topWinnersList.innerHTML = '';
             if (winners && winners.length > 0) { winners.forEach((winner, index) => { const li = document.createElement('li'); li.innerHTML = `<span>${index + 1}. <i class="fas fa-user-astronaut winner-icon"></i> ${winner.nick}</span> <span class="winner-prize">${winner.prize_total}</span>`; topWinnersList.appendChild(li); }); }
             else { topWinnersList.innerHTML = '<li>Ranking de ganhadores indisponível.</li>'; }
-        } catch (error) { topWinnersList.innerHTML = '<li>Erro ao carregar ranking.</li>'; console.error("SCRIPT.JS: Erro em fetchTopWinners:", error);}
+        } catch (error) { topWinnersList.innerHTML = '<li>Erro ao carregar ranking.</li>'; console.error("Erro em fetchTopWinners:", error);}
     }
 
     function renderGameNumbers(container, gameNumbers, hitNumbers = [], almostNumbers = [], lotteryType = '') {
         if (!container) {
-            console.error("SCRIPT.JS: renderGameNumbers - Container não fornecido.");
+            console.error("renderGameNumbers - Container não fornecido.");
             return;
         }
         container.innerHTML = '';
@@ -306,20 +305,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function fetchAndDisplayStatsGeneric(lotteryName, statType, container, nameSpanInCard, endpointPrefix) {
-        if (!container || !nameSpanInCard || !mainDisplayLotterySelect) { if(container) container.innerHTML = '<p class="error-message">Erro interno.</p>'; return; }
-        const lotteryConfigEntry = Object.values(LOTTERY_CONFIG_JS).find(config => mainDisplayLotterySelect.options[mainDisplayLotterySelect.selectedIndex]?.text.includes(config.name));
-        const lotteryFriendlyName = lotteryConfigEntry ? lotteryConfigEntry.name : lotteryName.toUpperCase();
-        nameSpanInCard.textContent = lotteryFriendlyName;
+    async function fetchAndDisplayStatsGeneric(lotteryName, statType, container, titleHeaderElement, endpointPrefix) {
+        if (!container || !mainLotterySelect) { if(container) container.innerHTML = '<p class="error-message">Erro interno (stats).</p>'; return; }
+        
         container.innerHTML = '<p class="loading-stats"><div class="spinner small-spinner"></div> Carregando...</p>';
         try {
             const result = await fetchData(`api/main/stats/${endpointPrefix}/${lotteryName}`);
             container.innerHTML = '';
             if (result.erro) { container.innerHTML = `<p class="error-message">${result.erro}</p>`; return; }
+            const selectedLotteryConfig = LOTTERY_CONFIG_JS[lotteryName.toLowerCase()];
+            const lotteryFriendlyName = selectedLotteryConfig ? selectedLotteryConfig.name : lotteryName.toUpperCase();
             if (!result.data || result.data.length === 0) { container.innerHTML = `<p class="no-stats">Sem dados de ${statType.toLowerCase()} para ${lotteryFriendlyName}.</p>`; return; }
+            
             const statsData = result.data;
             const maxFreq = (endpointPrefix === 'frequencia' || endpointPrefix === 'pares-frequentes') && statsData.length > 0 ? statsData[0].frequencia : 1;
             const topN = (endpointPrefix === 'frequencia') ? Math.min(statsData.length, 15) : Math.min(statsData.length, 10);
+
             for (let i = 0; i < topN; i++) {
                 const item = statsData[i]; const itemDiv = document.createElement('div');
                 if (endpointPrefix === 'frequencia') {
@@ -358,17 +359,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 container.appendChild(itemDiv);
             }
-        } catch (error) { container.innerHTML = `<p class="error-message">Falha ao carregar.</p>`; console.error(`SCRIPT.JS: Erro em fetchAndDisplayStatsGeneric (${statType}, ${lotteryName}):`, error); }
+        } catch (error) { container.innerHTML = `<p class="error-message">Falha ao carregar.</p>`; console.error(`Erro em fetchAndDisplayStatsGeneric (${statType}, ${lotteryName}):`, error); }
     }
-    async function fetchAndDisplayFrequencyStats(lotteryName) { if(frequencyListContainer && freqStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Frequência", frequencyListContainer, freqStatsLotteryNameSpan, "frequencia"); }
-    async function fetchAndDisplayPairFrequencyStats(lotteryName) { if(pairFrequencyListContainer && pairFreqStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Pares Frequentes", pairFrequencyListContainer, pairFreqStatsLotteryNameSpan, "pares-frequentes"); }
-    async function fetchAndDisplayCityStats(lotteryName) { if(cityListContainer && cityStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Cidades Premiadas", cityListContainer, cityStatsLotteryNameSpan, "cidades-premiadas"); }
-    async function fetchAndDisplayCityPrizeSumStats(lotteryName) { if(cityPrizeSumListContainer && cityPrizeSumLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Prêmios por Cidade", cityPrizeSumListContainer, cityPrizeSumLotteryNameSpan, "maiores-premios-cidade");}
+
+    function updateAllDashboardData(selectedLottery) {
+        const selectedLotteryKey = selectedLottery.toLowerCase();
+        const selectedLotteryConfig = LOTTERY_CONFIG_JS[selectedLotteryKey];
+        const lotteryFriendlyName = selectedLotteryConfig ? selectedLotteryConfig.name : selectedLottery.toUpperCase();
+
+        if (dynamicLotteryNameInfoSpan) dynamicLotteryNameInfoSpan.textContent = lotteryFriendlyName;
+        if (dynamicLotteryNameHunchSpan) dynamicLotteryNameHunchSpan.textContent = lotteryFriendlyName;
+        if (dynamicLotteryNameManualSpan) dynamicLotteryNameManualSpan.textContent = lotteryFriendlyName;
+
+        if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery);
+        if (typeof fetchAndDisplayFrequencyStats === "function" && frequencyListContainer) fetchAndDisplayStatsGeneric(selectedLottery, "Mais Sorteados", frequencyListContainer, null, "frequencia");
+        if (typeof fetchAndDisplayPairFrequencyStats === "function" && pairFrequencyListContainer) fetchAndDisplayStatsGeneric(selectedLottery, "Pares Frequentes", pairFrequencyListContainer, null, "pares-frequentes");
+        if (typeof fetchAndDisplayCityStats === "function" && cityListContainer) fetchAndDisplayStatsGeneric(selectedLottery, "Cidades Premiadas", cityListContainer, null, "cidades-premiadas");
+        if (typeof fetchAndDisplayCityPrizeSumStats === "function" && cityPrizeSumListContainer) fetchAndDisplayStatsGeneric(selectedLottery, "Prêmios por Cidade", cityPrizeSumListContainer, null, "maiores-premios-cidade");
+
+        if (manualProbUserNumbersInput && selectedLotteryConfig) {
+             const expectedCount = selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count;
+             manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${expectedCount} de ${selectedLotteryConfig.min}-${selectedLotteryConfig.max})`;
+             manualProbUserNumbersInput.value = '';
+             if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback();
+             if(manualProbabilityResultDisplay) manualProbabilityResultDisplay.textContent = "Aguardando seu jogo...";
+        }
+    }
 
     async function fetchAndDisplayResults(lotteryName) {
-        if (!apiResultsPre || !resultsLotteryNameSpan) { return; }
-        const lotteryConfigEntry = Object.values(LOTTERY_CONFIG_JS).find(config => mainDisplayLotterySelect.options[mainDisplayLotterySelect.selectedIndex]?.text.includes(config.name));
-        resultsLotteryNameSpan.textContent = lotteryConfigEntry ? lotteryConfigEntry.name : lotteryName.toUpperCase();
+        if (!apiResultsPre) { return; }
         apiResultsPre.innerHTML = '<div class="spinner small-spinner"></div> Carregando...';
         try {
             const data = await fetchData(`api/main/resultados/${lotteryName}`);
@@ -382,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.cidades_ganhadoras_principal && data.cidades_ganhadoras_principal.length > 0) { content += `Cidades: ${data.cidades_ganhadoras_principal.join('; ')}\n`; }
             if (data.rateio_principal_valor !== undefined) { content += `Rateio: R$ ${parseFloat(data.rateio_principal_valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;}
             apiResultsPre.textContent = content;
-        } catch (error) { apiResultsPre.textContent = `Falha ao buscar resultados. ${error.message || ''}`; console.error("SCRIPT.JS: Erro fetchAndDisplayResults:", error); }
+        } catch (error) { apiResultsPre.textContent = `Falha ao buscar resultados. ${error.message || ''}`; console.error("Erro fetchAndDisplayResults:", error); }
     }
 
     let previouslyFocusedElementModal;
@@ -564,14 +583,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (voiceContext.action === 'awaiting_login_for_my_games' && command.includes('login')) {
             openModal(loginModal); speak("Tela de login aberta. Diga 'digitar email'.", {shouldRelisten: true}); voiceContext.action = 'login_prompt_email'; awaitingSpecificInput = true; return;
         }
-        if (command.includes('gerar mega sena rápido') || command.includes('palpite rápido mega sena')) {
-            if (quickHunchLotteryTypeSelect) quickHunchLotteryTypeSelect.value = 'megasena';
-            if (generateQuickHunchBtn) { speak("Gerando palpite rápido para Mega-Sena."); generateQuickHunchBtn.click(); } return;
+        if ((command.includes('gerar') || command.includes('palpite')) && (command.includes('mega sena') || command.includes('mega'))) {
+             if(mainLotterySelect) mainLotterySelect.value = 'megasena';
+             updateAllDashboardData('megasena'); // Atualiza os dados da dashboard para Mega-Sena
+             if (command.includes('rápido') && generateQuickHunchBtn) { generateQuickHunchBtn.click(); speak("Gerando palpite rápido para Mega-Sena.");}
+             else if (command.includes('quente') && generateHotNumbersHunchBtn) { generateHotNumbersHunchBtn.click(); speak("Gerando palpite de números quentes para Mega-Sena.");}
+             else if (command.includes('frio') && generateColdNumbersHunchBtn) { generateColdNumbersHunchBtn.click(); speak("Gerando palpite de números frios para Mega-Sena.");}
+             else if (generateQuickHunchBtn) { generateQuickHunchBtn.click(); speak("Gerando palpite aleatório para Mega-Sena.");} // Default to quick
+             return;
         }
-         if (command.includes('gerar lotofácil rápido') || command.includes('palpite rápido lotofácil')) {
-            if (quickHunchLotteryTypeSelect) quickHunchLotteryTypeSelect.value = 'lotofacil';
-            if (generateQuickHunchBtn) { speak("Gerando palpite rápido para Lotofácil."); generateQuickHunchBtn.click(); } return;
+        if ((command.includes('gerar') || command.includes('palpite')) && (command.includes('lotofácil') || command.includes('fácil'))) {
+            if(mainLotterySelect) mainLotterySelect.value = 'lotofacil';
+            updateAllDashboardData('lotofacil');
+            if (command.includes('rápido') && generateQuickHunchBtn) { generateQuickHunchBtn.click(); speak("Gerando palpite rápido para Lotofácil.");}
+            else if (command.includes('quente') && generateHotNumbersHunchBtn) { generateHotNumbersHunchBtn.click(); speak("Gerando palpite de números quentes para Lotofácil.");}
+            else if (command.includes('frio') && generateColdNumbersHunchBtn) { generateColdNumbersHunchBtn.click(); speak("Gerando palpite de números frios para Lotofácil.");}
+            else if (generateQuickHunchBtn) { generateQuickHunchBtn.click(); speak("Gerando palpite aleatório para Lotofácil.");}
+            return;
         }
+
         if (command.includes('ajuda') || command.includes('comandos')) {
             speak("Comandos: 'login', 'registrar', 'painel', 'meus jogos', 'gerar mega sena rápido', 'onde estou'.", {shouldRelisten: true});
             awaitingSpecificInput = true; return;
@@ -641,12 +671,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (savedGamesContainer) savedGamesContainer.innerHTML = ''; if (noSavedGamesP) noSavedGamesP.style.display = 'block';
             if (esotericHunchCard) esotericHunchCard.style.display = 'none'; if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'block';
         }
-        if (typeof updateSaveButtonVisibility === "function") { updateSaveButtonVisibility('quick'); updateSaveButtonVisibility('esoteric'); updateSaveButtonVisibility('hot'); }
+        if (typeof updateSaveButtonVisibility === "function") { updateSaveButtonVisibility('quick'); updateSaveButtonVisibility('esoteric'); updateSaveButtonVisibility('hot'); updateSaveButtonVisibility('cold');}
     }
 
     async function generateAndDisplayQuickHunch() {
-        if (!quickHunchLotteryTypeSelect || !generateQuickHunchBtn || !quickHunchOutputDiv || !quickHunchNumbersDiv || !quickHunchStrategyP) { return; }
-        const lottery = quickHunchLotteryTypeSelect.value;
+        if (!mainLotterySelect || !generateQuickHunchBtn || !quickHunchOutputDiv || !quickHunchNumbersDiv || !quickHunchStrategyP) { return; }
+        const lottery = mainLotterySelect.value;
         generateQuickHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...'; generateQuickHunchBtn.disabled = true;
         quickHunchOutputDiv.style.display = 'block'; quickHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>'; quickHunchStrategyP.textContent = 'Gerando palpite...';
         if(saveQuickHunchBtn) saveQuickHunchBtn.style.display = 'none'; if(checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'none'; if(quickHunchCheckResultDiv) quickHunchCheckResultDiv.innerHTML = '';
@@ -674,8 +704,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function generateAndDisplayHotNumbersHunch() {
-        if (!hotNumbersLotteryTypeSelect || !generateHotNumbersHunchBtn || !hotNumbersAnalyzeCountInput || !hotNumbersHunchOutputDiv || !hotNumbersHunchNumbersDiv || !hotNumbersHunchStrategyP) { return; }
-        const lottery = hotNumbersLotteryTypeSelect.value; let analyzeCount = parseInt(hotNumbersAnalyzeCountInput.value, 10);
+        if (!mainLotterySelect || !generateHotNumbersHunchBtn || !hotNumbersAnalyzeCountInput || !hotNumbersHunchOutputDiv || !hotNumbersHunchNumbersDiv || !hotNumbersHunchStrategyP) { return; }
+        const lottery = mainLotterySelect.value;
+        let analyzeCount = parseInt(hotNumbersAnalyzeCountInput.value, 10);
         if (isNaN(analyzeCount) || analyzeCount <= 0) { alert("Insira um número válido de concursos (mín. 1)."); hotNumbersAnalyzeCountInput.focus(); analyzeCount = 20; hotNumbersAnalyzeCountInput.value = analyzeCount; }
         generateHotNumbersHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...'; generateHotNumbersHunchBtn.disabled = true;
         hotNumbersHunchOutputDiv.style.display = 'block'; hotNumbersHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>'; hotNumbersHunchStrategyP.textContent = 'Analisando...';
@@ -703,19 +734,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ... (depois da função generateAndDisplayHotNumbersHunch, por exemplo) ...
-
     async function generateAndDisplayColdNumbersHunch() {
-        if (!coldNumbersLotteryTypeSelect || !generateColdNumbersHunchBtn || !coldNumbersAnalyzeCountInput || !coldNumbersHunchOutputDiv || !coldNumbersHunchNumbersDiv || !coldNumbersHunchStrategyP) {
+        if (!mainLotterySelect || !generateColdNumbersHunchBtn || !coldNumbersAnalyzeCountInput || !coldNumbersHunchOutputDiv || !coldNumbersHunchNumbersDiv || !coldNumbersHunchStrategyP) {
             console.error("Elementos da UI para Números Frios não encontrados.");
             return;
         }
-        const lottery = coldNumbersLotteryTypeSelect.value;
+        const lottery = mainLotterySelect.value;
         let analyzeCount = parseInt(coldNumbersAnalyzeCountInput.value, 10);
         if (isNaN(analyzeCount) || analyzeCount <= 0) {
             alert("Insira um número válido de concursos para análise (mínimo 1).");
             coldNumbersAnalyzeCountInput.focus();
-            analyzeCount = 20; // Valor padrão
+            analyzeCount = 20;
             coldNumbersAnalyzeCountInput.value = analyzeCount;
         }
 
@@ -776,8 +805,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function generateAndDisplayEsotericHunch() {
-        if (!esotericLotteryTypeSelect || !birthDateInput || !generateEsotericHunchBtn || !esotericHunchOutputDiv || !esotericHunchNumbersDiv || !esotericHunchMethodP || !esotericHunchHistoryCheckDiv) { return; }
-        const lotteryName = esotericLotteryTypeSelect.value; const birthDateRaw = birthDateInput.value.trim(); const birthDate = birthDateRaw.replace(/\D/g, '');
+        if (!mainLotterySelect || !birthDateInput || !generateEsotericHunchBtn || !esotericHunchOutputDiv || !esotericHunchNumbersDiv || !esotericHunchMethodP || !esotericHunchHistoryCheckDiv) { return; }
+        const lotteryName = mainLotterySelect.value;
+        const birthDateRaw = birthDateInput.value.trim(); const birthDate = birthDateRaw.replace(/\D/g, '');
         if (!birthDate) { alert("Insira sua data de nascimento."); birthDateInput.focus(); return; } if (birthDate.length !== 8) { alert("Formato da data inválido. Use DDMMAAAA."); birthDateInput.focus(); return; }
         generateEsotericHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...'; generateEsotericHunchBtn.disabled = true;
         esotericHunchOutputDiv.style.display = 'block'; esotericHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>'; esotericHunchMethodP.textContent = 'Consultando...'; esotericHunchHistoryCheckDiv.innerHTML = '';
@@ -815,8 +845,9 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (hunchType === 'esoteric') targetSaveButton = saveEsotericHunchBtn;
         else if (hunchType === 'hot') targetSaveButton = saveHotHunchBtn;
         else if (hunchType === 'cold') targetSaveButton = saveColdHunchBtn;
+
         if (targetSaveButton) { targetSaveButton.style.display = currentUser && currentHunch.type === hunchType && currentHunch.outputDiv && currentHunch.outputDiv.style.display !== 'none' ? 'inline-block' : 'none'; }
-        else if (currentHunch.type === hunchType && !targetSaveButton) { console.warn(`SCRIPT.JS: Botão Salvar para '${hunchType}' não encontrado.`); }
+        else if (currentHunch.type === hunchType && !targetSaveButton) { console.warn(`Botão Salvar para '${hunchType}' não encontrado.`); }
     }
 
     function setupSaveHunchButtonListeners() {
@@ -833,19 +864,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const { lottery, jogo, estrategia_metodo } = lastGeneratedHunch;
         firestoreDB.collection('userGames').add({ userId: currentUser.uid, userEmail: currentUser.email, lottery: lottery, game: jogo, strategy: estrategia_metodo, savedAt: firebase.firestore.FieldValue.serverTimestamp(), checkedResult: null })
             .then(() => { alert("Palpite salvo!"); if (myGamesSection && myGamesSection.classList.contains('active-section') && typeof loadUserGames === "function") { loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); } })
-            .catch((error) => { alert(`Erro ao salvar: ${error.message}`); console.error("SCRIPT.JS: Erro ao salvar:", error); });
+            .catch((error) => { alert(`Erro ao salvar: ${error.message}`); console.error("Erro ao salvar:", error); });
     }
 
     function setupCheckHunchButtonListeners() {
-        if (checkQuickHunchBtn && quickHunchLotteryTypeSelect) checkQuickHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('quick', quickHunchLotteryTypeSelect));
-        if (checkEsotericHunchBtn && esotericLotteryTypeSelect) checkEsotericHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('esoteric', esotericLotteryTypeSelect));
-        if (checkHotHunchBtn && hotNumbersLotteryTypeSelect) checkHotHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('hot', hotNumbersLotteryTypeSelect));
-        if (checkColdHunchBtn && coldNumbersLotteryTypeSelect) checkColdHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('cold', coldNumbersLotteryTypeSelect));
+        if (checkQuickHunchBtn && mainLotterySelect) checkQuickHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('quick', mainLotterySelect));
+        if (checkEsotericHunchBtn && mainLotterySelect) checkEsotericHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('esoteric', mainLotterySelect));
+        if (checkHotHunchBtn && mainLotterySelect) checkHotHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('hot', mainLotterySelect));
+        if (checkColdHunchBtn && mainLotterySelect) checkColdHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('cold', mainLotterySelect));
     }
 
     async function checkLastGeneratedHunch(expectedHunchType, lotterySelectElement) {
         const currentLottery = lotterySelectElement.value; const currentHunch = lastGeneratedHunch;
         let targetCheckResultDiv = null; let targetNumbersDiv = null;
+
         if (expectedHunchType === 'quick') { targetCheckResultDiv = quickHunchCheckResultDiv; targetNumbersDiv = quickHunchNumbersDiv; }
         else if (expectedHunchType === 'esoteric') { targetCheckResultDiv = esotericHunchHistoryCheckDiv; targetNumbersDiv = esotericHunchNumbersDiv; }
         else if (expectedHunchType === 'hot') { targetCheckResultDiv = hotHunchCheckResultDiv; targetNumbersDiv = hotNumbersHunchNumbersDiv; }
@@ -868,8 +900,13 @@ document.addEventListener('DOMContentLoaded', () => {
              return;
         }
         const result = checkGame(currentHunch.jogo, resultsToUse);
-        if (expectedHunchType === 'esoteric') { console.log("Conferência p/ esotérico:", result.message); }
-        else { targetCheckResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers && result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`; }
+        if (expectedHunchType === 'esoteric') {
+             let historyHtml = `<strong>Histórico:</strong><br>`;
+             historyHtml += `Premiada? <span style="color: ${result.hits > 0 ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${result.hits > 0 ? 'Sim' : 'Não'}</span> (${result.message})`;
+             targetCheckResultDiv.innerHTML = historyHtml;
+        } else {
+            targetCheckResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers && result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`;
+        }
         renderGameNumbers(targetNumbersDiv, currentHunch.jogo, result.hitNumbers, result.almostNumbers || [], currentLottery);
     }
 
@@ -905,7 +942,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let message = `Você acertou ${hits} número(s).`;
         if (hits > 0) {
             message += ` Acertos: ${hitNumbers.join(', ')}.`;
-            const lotteryConfig = LOTTERY_CONFIG_JS[officialResults.loteria_tipo];
+            const lotteryConfig = LOTTERY_CONFIG_JS[officialResults.loteria_tipo.toLowerCase()];
             const numbersToWin = lotteryConfig?.count_sorteadas || lotteryConfig?.count || 0;
             if (hits === numbersToWin && numbersToWin > 0) {
                 message += " Parabéns, você GANHOU o prêmio máximo!";
@@ -956,12 +993,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateManualProbNumbersFeedback() {
-        if (!manualProbLotteryTypeSelect || !manualProbUserNumbersInput || !manualProbNumbersCountFeedback) return;
-        const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
-        const expectedCount = selectedOption ? parseInt(selectedOption.dataset.count, 10) : 0;
+        if (!mainLotterySelect || !manualProbUserNumbersInput || !manualProbNumbersCountFeedback) return;
+        const selectedLotteryKey = mainLotterySelect.value.toLowerCase();
+        const selectedLotteryConfig = LOTTERY_CONFIG_JS[selectedLotteryKey];
+
+        if (!selectedLotteryConfig) {
+            manualProbNumbersCountFeedback.textContent = 'Selecione uma loteria válida.';
+             if(manualProbUserNumbersInput) manualProbUserNumbersInput.placeholder = `Selecione uma loteria acima.`;
+            return;
+        }
+
+        const expectedCount = selectedLotteryConfig.count_apostadas;
         const numbersStr = manualProbUserNumbersInput.value;
         const userNumbersCount = numbersStr.split(/[ ,;/\t\n]+/).filter(n => n.trim() !== "" && !isNaN(n)).length;
         manualProbNumbersCountFeedback.textContent = `Números: ${userNumbersCount} de ${expectedCount}.`;
+        if(manualProbUserNumbersInput) manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${expectedCount} de ${selectedLotteryConfig.min}-${selectedLotteryConfig.max})`;
     }
 
     function setupAuthEventListeners() {
@@ -1002,7 +1048,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 firebaseAuth.onAuthStateChanged(user => {
                     currentUser = user;
                     if (typeof updateLoginUI === "function") updateLoginUI(user);
-                    if (inclusiveWelcomeScreen && inclusiveWelcomeScreen.classList.contains('hidden')) { // Se a tela de boas vindas já passou
+                    if (inclusiveWelcomeScreen && inclusiveWelcomeScreen.classList.contains('hidden')) {
                         if (splashHiddenTimestamp > 0 || (mainSplashScreen && mainSplashScreen.classList.contains('hidden')) ) {
                              if (typeof effectivelyShowApp === "function") effectivelyShowApp();
                         }
@@ -1013,7 +1059,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) { console.error("SCRIPT.JS: CRITICAL Firebase init error:", error); if (typeof showGlobalError === "function") showGlobalError(`Erro Firebase: ${error.message}`); if (typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); return false; }
         } else {
             console.error("SCRIPT.JS: Firebase SDK ou firebaseConfig não definidos.");
-             if (inclusiveWelcomeScreen && inclusiveWelcomeScreen.classList.contains('hidden')) { // Se a tela de boas vindas já passou (ex: não ativada)
+             if (inclusiveWelcomeScreen && inclusiveWelcomeScreen.classList.contains('hidden')) {
                 if (typeof effectivelyShowApp === "function") {
                     const timeSinceDOMLoad = Date.now() - domContentLoadedTimestamp;
                     setTimeout(effectivelyShowApp, SPLASH_MINIMUM_VISIBLE_TIME > timeSinceDOMLoad ? SPLASH_MINIMUM_VISIBLE_TIME - timeSinceDOMLoad : 0);
@@ -1057,14 +1103,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof fetchTopWinners === "function") fetchTopWinners();
             if (typeof renderBanners === "function") renderBanners();
             if (typeof initializeCarousels === "function") initializeCarousels();
-            if (mainDisplayLotterySelect) {
-                const initialLottery = mainDisplayLotterySelect.value;
-                if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(initialLottery);
-                if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(initialLottery);
-                if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(initialLottery);
-                if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(initialLottery);
-                if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(initialLottery);
-                setTimeout(() => { if (mainDisplayLotterySelect.dispatchEvent) mainDisplayLotterySelect.dispatchEvent(new Event('change')); }, 300);
+            if (mainLotterySelect) {
+                 updateAllDashboardData(mainLotterySelect.value);
             }
         }
     }
@@ -1111,23 +1151,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 speak(greeting, {
                     onEndCallback: () => {
                         if (recognition && !isListening && voiceGuideActive === null) {
-                            isListening = true; awaitingSpecificInput = true;
+                            isListening = true;
                             recognition.onresult = (event) => {
                                 const transcript = event.results[event.results.length-1][0].transcript.trim().toLowerCase();
-                                awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler;
+                                isListening = false; recognition.onresult = defaultRecognitionResultHandler;
                                 if (transcript.includes('sim')) { handleWelcomeChoice(true); }
                                 else if (transcript.includes('não')) { handleWelcomeChoice(false); }
                             };
                             recognition.onerror = (event) => {
                                 console.error("Erro no reconhecimento de voz na tela de boas-vindas:", event.error);
-                                awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler;
+                                isListening = false; recognition.onresult = defaultRecognitionResultHandler;
                             };
                             recognition.onend = () => {
-                                isListening = false; awaitingSpecificInput = false; recognition.onresult = defaultRecognitionResultHandler;
+                                isListening = false; recognition.onresult = defaultRecognitionResultHandler;
                             };
                             try { recognition.start(); } catch (e) {
                                 console.error("Falha ao iniciar reconhecimento na saudação da tela de boas-vindas", e);
-                                isListening = false; awaitingSpecificInput = false;
+                                isListening = false;
                             }
                         }
                     }
@@ -1183,8 +1223,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (activateVoiceGuideBtn) activateVoiceGuideBtn.addEventListener('click', () => { handleWelcomeChoice(true); });
         if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('click', () => { handleWelcomeChoice(false); });
-
-        playInitialGreetingAndListen(); // Tenta iniciar a saudação e escuta. Não há mais timeout para prosseguir automaticamente.
+        playInitialGreetingAndListen();
     }
 
     initializeVoiceCommands();
@@ -1199,37 +1238,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navMyGamesBtn) navMyGamesBtn.addEventListener('click', () => { setActiveSection('my-games-section'); if (currentUser && typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); });
     if (navPoolsBtn) navPoolsBtn.addEventListener('click', () => setActiveSection('pools-section'));
 
-    if (mainDisplayLotterySelect) {
-        mainDisplayLotterySelect.addEventListener('change', (e) => {
-            const selectedLottery = e.target.value;
-            const selectedOption = e.target.options[e.target.selectedIndex];
-            const lotteryFriendlyName = selectedOption ? selectedOption.text : (LOTTERY_CONFIG_JS[selectedLottery] ? LOTTERY_CONFIG_JS[selectedLottery].name : selectedLottery.toUpperCase());
-            if (resultsLotteryNameSpan) resultsLotteryNameSpan.textContent = lotteryFriendlyName;
-            if(freqStatsLotteryNameSpan) freqStatsLotteryNameSpan.textContent = lotteryFriendlyName;
-            if(pairFreqStatsLotteryNameSpan) pairFreqStatsLotteryNameSpan.textContent = lotteryFriendlyName;
-            if(cityStatsLotteryNameSpan) cityStatsLotteryNameSpan.textContent = lotteryFriendlyName;
-            if(cityPrizeSumLotteryNameSpan) cityPrizeSumLotteryNameSpan.textContent = lotteryFriendlyName;
-            if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery);
-            if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery);
-            if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery);
-            if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery);
-            if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(selectedLottery);
+    if (mainLotterySelect) {
+        mainLotterySelect.addEventListener('change', (e) => {
+            updateAllDashboardData(e.target.value);
         });
     }
-    if (fetchResultsBtn && mainDisplayLotterySelect) {
-        fetchResultsBtn.addEventListener('click', () => {
-            const selectedLottery = mainDisplayLotterySelect.value;
-            if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery);
-            if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery);
-            if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery);
-            if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery);
-            if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(selectedLottery);
+    if (refreshAllDashboardDataBtn && mainLotterySelect) {
+        refreshAllDashboardDataBtn.addEventListener('click', () => {
+            updateAllDashboardData(mainLotterySelect.value);
         });
     }
+
     if (generateQuickHunchBtn) generateQuickHunchBtn.addEventListener('click', generateAndDisplayQuickHunch);
     if (generateEsotericHunchBtn) generateEsotericHunchBtn.addEventListener('click', generateAndDisplayEsotericHunch);
     if (generateHotNumbersHunchBtn) generateHotNumbersHunchBtn.addEventListener('click', generateAndDisplayHotNumbersHunch);
     if (generateColdNumbersHunchBtn) generateColdNumbersHunchBtn.addEventListener('click', generateAndDisplayColdNumbersHunch);
+
     if (typeof setupSaveHunchButtonListeners === "function") setupSaveHunchButtonListeners();
     if (typeof setupCheckHunchButtonListeners === "function") setupCheckHunchButtonListeners();
 
@@ -1242,36 +1266,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (filterLotteryMyGamesSelect) { filterLotteryMyGamesSelect.addEventListener('change', (e) => { if (currentUser && typeof loadUserGames === "function") loadUserGames(e.target.value); });}
 
-    if (manualProbUserNumbersInput && manualProbLotteryTypeSelect) {
+    if (manualProbUserNumbersInput && mainLotterySelect) {
         manualProbUserNumbersInput.addEventListener('input', updateManualProbNumbersFeedback);
-        manualProbLotteryTypeSelect.addEventListener('change', () => {
-            const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
-            if (!selectedOption || !selectedOption.dataset.count || !selectedOption.dataset.min || !selectedOption.dataset.max) return;
-            manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${selectedOption.dataset.count} de ${selectedOption.dataset.min}-${selectedOption.dataset.max})`;
-            manualProbUserNumbersInput.value = '';
-            if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback();
-            if(manualProbabilityResultDisplay) manualProbabilityResultDisplay.textContent = "Aguardando seu jogo...";
-        });
-        const initialSelectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
-         if (initialSelectedOption && initialSelectedOption.dataset.count && initialSelectedOption.dataset.min && initialSelectedOption.dataset.max){
-            manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${initialSelectedOption.dataset.count} de ${initialSelectedOption.dataset.min}-${initialSelectedOption.dataset.max})`;
-         }
-        if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback();
+        mainLotterySelect.addEventListener('change', updateManualProbNumbersFeedback);
     }
+
     if (manualCalculateProbBtn) {
         manualCalculateProbBtn.addEventListener('click', async () => {
-            if (!manualProbLotteryTypeSelect || !manualProbUserNumbersInput || !manualProbabilityResultDisplay || typeof fetchData !== 'function') return;
-            const lotteryType = manualProbLotteryTypeSelect.value;
+            if (!mainLotterySelect || !manualProbUserNumbersInput || !manualProbabilityResultDisplay || typeof fetchData !== 'function') return;
+            const lotteryType = mainLotterySelect.value;
+            const selectedLotteryConfig = LOTTERY_CONFIG_JS[lotteryType.toLowerCase()];
+            if(!selectedLotteryConfig) {
+                manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Configuração da loteria não encontrada.</p>`;
+                return;
+            }
+
             const numbersStr = manualProbUserNumbersInput.value;
             const userNumbersRaw = numbersStr.split(/[ ,;/\t\n]+/);
             const userNumbers = userNumbersRaw.map(n => n.trim()).filter(n => n !== "" && !isNaN(n)).map(n => parseInt(n,10));
-            const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
-            const expectedCount = parseInt(selectedOption.dataset.count, 10);
+
+            const expectedCount = selectedLotteryConfig.count_apostadas;
             if (userNumbers.length === 0) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Insira os números.</p>`; return; }
-            if (userNumbers.length !== expectedCount) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Forneça ${expectedCount} números.</p>`; return; }
+            if (userNumbers.length !== expectedCount) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Forneça ${expectedCount} números para ${selectedLotteryConfig.name}.</p>`; return; }
             if (new Set(userNumbers).size !== userNumbers.length) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Números repetidos.</p>`; return; }
-            const minNum = parseInt(selectedOption.dataset.min, 10); const maxNum = parseInt(selectedOption.dataset.max, 10);
-            for (const num of userNumbers) { if (num < minNum || num > maxNum) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Número ${num} fora do range.</p>`; return; } }
+
+            const minNum = selectedLotteryConfig.min; const maxNum = selectedLotteryConfig.max;
+            for (const num of userNumbers) { if (num < minNum || num > maxNum) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Número ${num} fora do range (${minNum}-${maxNum}).</p>`; return; } }
+
             manualProbabilityResultDisplay.innerHTML = '<div class="spinner small-spinner"></div> Calculando...';
             try {
                 const resultData = await fetchData(`api/main/jogo-manual/probabilidade`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lottery_type: lotteryType, numeros_usuario: userNumbers }) });
