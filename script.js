@@ -1005,7 +1005,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const expectedCount = selectedLotteryConfig.count_apostadas;
+        const expectedCount = selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count;
         const numbersStr = manualProbUserNumbersInput.value;
         const userNumbersCount = numbersStr.split(/[ ,;/\t\n]+/).filter(n => n.trim() !== "" && !isNaN(n)).length;
         manualProbNumbersCountFeedback.textContent = `Números: ${userNumbersCount} de ${expectedCount}.`;

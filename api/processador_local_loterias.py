@@ -1,18 +1,22 @@
-# processador_local_loterias.py
 import pandas as pd
 import os
 import json
 import re
 import requests
+import shutil
 
 # --- CONFIGURAÇÕES DE DIRETÓRIO ---
-DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS = "./arquivos_excel_caixa/"
-DIRETORIO_JSON_SAIDA = "./lottery_data_gerados/"
+# Assume que este script (processador_local_loterias.py) está DENTRO da pasta 'api'
+# E que a pasta 'lottery_data' está NO MESMO NÍVEL que este script, dentro de 'api'
+DIRETORIO_SCRIPT_ATUAL = os.path.dirname(os.path.abspath(__file__))
+
+DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS = os.path.join(DIRETORIO_SCRIPT_ATUAL, "arquivos_excel_caixa")
+DIRETORIO_JSON_SAIDA_API = os.path.join(DIRETORIO_SCRIPT_ATUAL, "lottery_data")
 
 if not os.path.exists(DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS):
     os.makedirs(DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS)
-if not os.path.exists(DIRETORIO_JSON_SAIDA):
-    os.makedirs(DIRETORIO_JSON_SAIDA)
+if not os.path.exists(DIRETORIO_JSON_SAIDA_API):
+    os.makedirs(DIRETORIO_JSON_SAIDA_API)
 
 # --- CONFIGURAÇÃO DAS LOTERIAS ---
 MASTER_FILES_LOCAL_NAMES = {
@@ -69,7 +73,6 @@ LOTTERY_CONFIG_PROCESSAMENTO = {
     }
 }
 
-# --- FUNÇÕES AUXILIARES DE PARSING ---
 def parse_currency_to_float(currency_str):
     if pd.isna(currency_str): return 0.0
     if not isinstance(currency_str, str): currency_str = str(currency_str)
@@ -113,7 +116,6 @@ def parse_ganhadores_cidades(cidade_uf_str, num_ganhadores_str):
     elif num_ganhadores > 0: cidades_parsed = ["Não especificada"] * num_ganhadores
     return cidades_parsed, num_ganhadores
 
-# --- FUNÇÃO DE DOWNLOAD ---
 def baixar_arquivo_loteria(loteria_key_func, config_loteria_func):
     modalidade_valor = config_loteria_func.get("modalidade_param_value")
     nome_arquivo_local_func = config_loteria_func.get("master_file_name_local")
@@ -150,10 +152,10 @@ def baixar_arquivo_loteria(loteria_key_func, config_loteria_func):
         print(f"ERRO inesperado ao salvar {loteria_key_func.upper()}: {e}")
     return False
 
-# --- FUNÇÃO DE PROCESSAMENTO (Modificada para ler CSV para Lotomania com sep=',') ---
 def processar_e_salvar_loteria_json(loteria_key_func, config_loteria_func):
     print(f"Iniciando processamento JSON para {loteria_key_func.upper()}")
-    processed_json_path = os.path.join(DIRETORIO_JSON_SAIDA, config_loteria_func["processed_json_name"])
+    
+    processed_json_path_api = os.path.join(DIRETORIO_JSON_SAIDA_API, config_loteria_func["processed_json_name"])
     df = None
 
     if loteria_key_func == 'lotomania':
@@ -166,7 +168,6 @@ def processar_e_salvar_loteria_json(loteria_key_func, config_loteria_func):
         print(f"INFO [{loteria_key_func.upper()}]: Tentando ler CSV salvo manually: {filepath_to_read}")
         if os.path.exists(filepath_to_read):
             try:
-                # TENTANDO COM VÍRGULA COMO SEPARADOR PADRÃO PARA LOTOMANIA CSV MANUAL
                 df = pd.read_csv(filepath_to_read, sep=',', dtype=str, na_values=['-'], keep_default_na=True, engine='python')
                 print(f"Sucesso ao ler CSV manual para {loteria_key_func.upper()} (usando sep=',').")
             except pd.errors.ParserError as pe:
@@ -185,7 +186,7 @@ def processar_e_salvar_loteria_json(loteria_key_func, config_loteria_func):
             print(f"AVISO [{loteria_key_func.upper()}]: Arquivo CSV manual '{manual_csv_filename}' não encontrado em '{DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS}'.")
             print(f"Por favor, baixe o XLSX da Lotomania, abra-o no Excel/Calc, salve como CSV com o nome '{manual_csv_filename}' nesta pasta.")
             return
-    else: # Para as outras loterias, lê o XLSX diretamente
+    else:
         master_filename_xlsx = config_loteria_func.get("master_file_name_local")
         filepath_to_read = os.path.join(DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS, master_filename_xlsx)
         if os.path.exists(filepath_to_read):
@@ -211,8 +212,6 @@ def processar_e_salvar_loteria_json(loteria_key_func, config_loteria_func):
         print(f"AVISO FINAL: DataFrame não foi carregado para {loteria_key_func.upper()}.")
         return
 
-    # --- O restante do processamento do DataFrame (results_list) continua aqui ---
-    # (Esta parte é idêntica à da resposta anterior)
     col_concurso = config_loteria_func["col_concurso"]
     col_data = config_loteria_func["col_data_sorteio"]
     cols_bolas_prefix = config_loteria_func["cols_bolas_prefix"]
@@ -246,8 +245,8 @@ def processar_e_salvar_loteria_json(loteria_key_func, config_loteria_func):
             dezenas_lidas = []
             for col_dezena_idx in range(1, num_bolas_a_ler + 1):
                 col_dezena_nome = f'{cols_bolas_prefix}{col_dezena_idx}'
-                if col_dezena_nome in df.columns: 
-                    dezena_val = row.get(col_dezena_nome) 
+                if col_dezena_nome in df.columns:
+                    dezena_val = row.get(col_dezena_nome)
                     if pd.isna(dezena_val): continue
                     dezena_str = str(dezena_val).strip()
                     if dezena_str.isdigit(): dezenas_lidas.append(int(dezena_str))
@@ -276,21 +275,19 @@ def processar_e_salvar_loteria_json(loteria_key_func, config_loteria_func):
     if results_list:
         results_list.sort(key=lambda x: x["concurso"], reverse=True)
         try:
-            with open(processed_json_path, 'w', encoding='utf-8') as f:
+            with open(processed_json_path_api, 'w', encoding='utf-8') as f:
                 json.dump(results_list, f, ensure_ascii=False, indent=4)
-            print(f"SUCESSO [{loteria_key_func.upper()}]: JSON salvo em {processed_json_path} com {len(results_list)} concursos.")
+            print(f"SUCESSO [{loteria_key_func.upper()}]: JSON salvo diretamente em {processed_json_path_api} com {len(results_list)} concursos.")
         except Exception as e_json:
-            print(f"ERRO ao salvar JSON {processed_json_path}: {e_json}")
+            print(f"ERRO ao salvar JSON em {processed_json_path_api}: {e_json}")
     else:
         print(f"AVISO FINAL [{loteria_key_func.upper()}]: Nenhum resultado válido processado.")
 
 
-# --- BLOCO PRINCIPAL DE EXECUÇÃO DO SCRIPT LOCAL ---
 if __name__ == '__main__':
-    print("Iniciando script de download e processamento local de dados das loterias...")
-    # ... (resto do bloco main como antes) ...
-    print(f"Salvando arquivos Excel baixados em: {os.path.abspath(DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS)}")
-    print(f"Salvando arquivos JSON processados em: {os.path.abspath(DIRETORIO_JSON_SAIDA)}")
+    print("Iniciando script de download e processamento de dados das loterias...")
+    print(f"Arquivos Excel baixados serão salvos em: {os.path.abspath(DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS)}")
+    print(f"Arquivos JSON processados serão salvos DIRETAMENTE em: {os.path.abspath(DIRETORIO_JSON_SAIDA_API)} para deploy.")
 
     baixar_novamente = input("Deseja tentar baixar novamente os arquivos Excel da Caixa? (s/N): ").strip().lower()
     fazer_download = baixar_novamente == 's'
@@ -311,5 +308,5 @@ if __name__ == '__main__':
         processar_e_salvar_loteria_json(loteria_key_loop, config_loop)
             
     print("\nProcessamento local concluído.")
-    print(f"Lembre-se de copiar os arquivos JSON de '{os.path.abspath(DIRETORIO_JSON_SAIDA)}' "
-          f"para a pasta 'lottery_data' (ou 'api/lottery_data/') do seu projeto Vercel antes de fazer o deploy.")
+    print(f"Os arquivos JSON foram salvos em '{os.path.abspath(DIRETORIO_JSON_SAIDA_API)}'. "
+          "Certifique-se de que esta pasta com os JSONs atualizados seja incluída no seu próximo deploy na Vercel.")
