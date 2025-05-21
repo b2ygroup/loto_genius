@@ -1,5 +1,6 @@
 Flask
 Flask-CORS
-pandas 
-# openpyxl # Não é necessário para a API se ela só lê JSONs e usa pandas para pd.isna
-# re # É uma biblioteca padrão do Python, não precisa listar aqui
+pandas
+openpyxl
+requests
+firebase-admin

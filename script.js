@@ -915,6 +915,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function triggerConfetti() {
         if (!confettiCanvas) return;
+        const parent = confettiCanvas.id === 'confetti-canvas-modal' ? confettiCanvas : document.body; // Use body if not modal
         for (let i = 0; i < 100; i++) {
             const confetti = document.createElement('div');
             confetti.classList.add('confetti');
@@ -924,9 +925,15 @@ document.addEventListener('DOMContentLoaded', () => {
             confetti.style.animationDuration = duration + 's';
             confetti.style.animationDelay = Math.random() * 0.5 + 's';
             confetti.addEventListener('animationend', () => { confetti.remove(); });
-            confettiCanvas.appendChild(confetti);
+            // Se for o canvas do modal, adiciona nele, senão no canvas geral
+            if (parent.id === 'confetti-canvas-modal' || parent.id === 'confetti-canvas') {
+                 parent.appendChild(confetti);
+            } else { // fallback se o confettiCanvas não for o certo, adiciona no body
+                 document.body.appendChild(confetti);
+            }
         }
     }
+
 
     function checkGame(userGameNumbers, officialResults) {
         if (!userGameNumbers || !officialResults || !officialResults.numeros || !Array.isArray(officialResults.numeros)) {
@@ -974,7 +981,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createGameCardElement(docId, gameData) {
-        const card = document.createElement('div'); card.classList.add('card', 'game-card'); card.dataset.id = docId;
+        const card = document.createElement('div'); card.classList.add('card', 'game-card-item'); card.dataset.id = docId; // Use uma classe diferente se necessário
         const lotteryName = LOTTERY_CONFIG_JS[gameData.lottery]?.name || gameData.lottery.toUpperCase();
         const gameNumbersDiv = document.createElement('div'); gameNumbersDiv.classList.add('game-numbers');
 
@@ -990,12 +997,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const verificationStatusP = document.createElement('p');
         verificationStatusP.classList.add('game-card-info', 'verification-status');
-        if (gameData.foiVerificado) { // Assumindo que este campo será adicionado via backend
-            if (gameData.premiado) {
-                verificationStatusP.innerHTML = `<i class="fas fa-trophy" style="color:gold;"></i> Premiado! ${gameData.acertos || '?'} acertos (${gameData.faixaPremio || 'Verifique detalhes'}). Verificado em: ${gameData.dataDaVerificacao ? new Date(gameData.dataDaVerificacao.toDate()).toLocaleDateString() : 'N/A'}`;
+        if (gameData.ultimoConcursoVerificado) { // Verifica se o campo existe
+            if (gameData.isPremiado) { // Usa isPremiado em vez de premiado
+                verificationStatusP.innerHTML = `<i class="fas fa-trophy" style="color:gold;"></i> Premiado! ${gameData.acertos || '?'} acertos (${gameData.faixaPremio || 'Verifique detalhes'}). Verificado: Concurso ${gameData.ultimoConcursoVerificado}`;
                 verificationStatusP.style.color = '#2ecc71';
             } else {
-                verificationStatusP.innerHTML = `<i class="fas fa-check-circle"></i> Verificado. ${gameData.acertos || '0'} acertos. Em: ${gameData.dataDaVerificacao ? new Date(gameData.dataDaVerificacao.toDate()).toLocaleDateString() : 'N/A'}`;
+                verificationStatusP.innerHTML = `<i class="fas fa-check-circle"></i> Verificado. ${gameData.acertos || '0'} acertos. Concurso: ${gameData.ultimoConcursoVerificado}`;
             }
         } else {
             verificationStatusP.textContent = "Aguardando verificação do resultado.";
@@ -1022,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const gamesRef = firestoreDB.collection('userGames');
             const querySnapshot = await gamesRef
                                     .where('userId', '==', userId)
-                                    .where('premiado', '==', true)
+                                    .where('isPremiado', '==', true) // Mudado para isPremiado
                                     .where('notificacaoPendente', '==', true)
                                     .get();
 
@@ -1030,6 +1037,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const prizeModal = document.getElementById('prize-notification-modal');
                 const prizeDetailsContainer = document.getElementById('prize-details-container');
                 const prizeMessage = document.getElementById('prize-message');
+                const confettiModalCanvas = document.getElementById('confetti-canvas-modal');
                 
                 if(!prizeModal || !prizeDetailsContainer || !prizeMessage) {
                     console.error("Elementos do modal de premiação não encontrados!");
@@ -1044,7 +1052,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const gameData = doc.data();
                     const gameDetail = document.createElement('p');
                     gameDetail.style.marginBottom = "0.5em";
-                    gameDetail.innerHTML = `Jogo da <strong>${LOTTERY_CONFIG_JS[gameData.lottery]?.name || gameData.lottery}</strong> (Concurso: ${gameData.concursoVerificado || 'N/A'}) - <strong>${gameData.acertos || '?'} acertos!</strong> Faixa: ${gameData.faixaPremio || 'Não especificada'}.`;
+                    gameDetail.innerHTML = `Jogo da <strong>${LOTTERY_CONFIG_JS[gameData.lottery]?.name || gameData.lottery}</strong> (Concurso: ${gameData.ultimoConcursoVerificado || 'N/A'}) - <strong>${gameData.acertos || '?'} acertos!</strong> Faixa: ${gameData.faixaPremio || 'Não especificada'}.`;
                     prizeDetailsContainer.appendChild(gameDetail);
                     gamesToUpdate.push(doc.id);
 
@@ -1055,7 +1063,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 openModal(prizeModal);
-                if(typeof triggerConfetti === 'function') triggerConfetti();
+                if(typeof triggerConfetti === 'function' && confettiModalCanvas) triggerConfetti(confettiModalCanvas); // Passa o canvas do modal
                 
                 const okBtn = document.getElementById('ok-prize-modal-btn');
                 const closeBtn = document.getElementById('close-prize-modal');
@@ -1105,7 +1113,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const expectedCount = selectedLotteryConfig.count_apostadas;
+        const expectedCount = selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count; // Ajustado para pegar count_apostadas
         const numbersStr = manualProbUserNumbersInput.value;
         const userNumbersCount = numbersStr.split(/[ ,;/\t\n]+/).filter(n => n.trim() !== "" && !isNaN(n)).length;
         manualProbNumbersCountFeedback.textContent = `Números: ${userNumbersCount} de ${expectedCount}.`;
@@ -1398,7 +1406,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const userNumbersRaw = numbersStr.split(/[ ,;/\t\n]+/);
             const userNumbers = userNumbersRaw.map(n => n.trim()).filter(n => n !== "" && !isNaN(n)).map(n => parseInt(n,10));
 
-            const expectedCount = selectedLotteryConfig.count_apostadas;
+            const expectedCount = selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count;
             if (userNumbers.length === 0) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Insira os números.</p>`; return; }
             if (userNumbers.length !== expectedCount) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Forneça ${expectedCount} números para ${selectedLotteryConfig.name}.</p>`; return; }
             if (new Set(userNumbers).size !== userNumbers.length) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Números repetidos.</p>`; return; }
