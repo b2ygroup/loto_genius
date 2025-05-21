@@ -1,10 +1,6 @@
-// script.js (Realmente, Realmente COMPLETO - v3 - Com todas as funções preenchidas)
-// ADICIONADO CONSOLE.LOG PARA DEBUG ABAIXO EM createGameCardElement
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("SCRIPT.JS: DOMContentLoaded - v3 - Funções Completas e Boas-Vindas Revisada.");
     const domContentLoadedTimestamp = Date.now();
 
-    // --- Constantes de Tempo da Splash Screen ---
     const SPLASH_LOGO_ANIM_MAX_DELAY = 1300;
     const SPLASH_LOGO_ANIM_DURATION = 600;
     const SPLASH_TEXT_ANIM_DELAY = 2200;
@@ -18,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     );
     const SPLASH_MINIMUM_VISIBLE_TIME = APPROX_TOTAL_CSS_ANIM_DURATION + 1000;
 
-    // --- Seletores de Elementos DOM ---
     const inclusiveWelcomeScreen = document.getElementById('inclusive-welcome-screen');
     const activateVoiceGuideBtn = document.getElementById('welcome-voice-yes-btn');
     const declineVoiceGuideBtn = document.getElementById('welcome-voice-no-btn');
@@ -131,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let splashProgressBarFill = mainSplashScreen ? mainSplashScreen.querySelector('.progress-bar-fill') : null;
     let splashProgressContainer = mainSplashScreen ? mainSplashScreen.querySelector('.progress-bar-container') : null;
 
-    // --- Variáveis Globais ---
     let splashHiddenTimestamp = 0;
     if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
     let BACKEND_URL_BASE;
@@ -167,10 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let voiceContext = { action: null, awaiting: null, data: {} };
     let welcomeScreenTimeout;
     let awaitingSpecificInput = false;
-
-    // ================================================================================================
-    // === DEFINIÇÕES DE FUNÇÕES COMPLETAS ===
-    // ================================================================================================
 
     function showGlobalError(message) { if (errorDiv) { errorDiv.textContent = message; errorDiv.style.display = 'block'; } else { console.error("SCRIPT.JS: Global error div não encontrado:", message); } }
     function disableFirebaseFeatures() { if (loginModalBtn) loginModalBtn.disabled = true; if (registerModalBtn) registerModalBtn.disabled = true; }
@@ -264,13 +254,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { topWinnersList.innerHTML = '<li>Erro ao carregar ranking.</li>'; console.error("SCRIPT.JS: Erro em fetchTopWinners:", error);}
     }
 
-    // Função para renderizar os números do jogo (ESSENCIAL!)
     function renderGameNumbers(container, gameNumbers, hitNumbers = [], almostNumbers = [], lotteryType = '') {
         if (!container) {
             console.error("SCRIPT.JS: renderGameNumbers - Container não fornecido.");
             return;
         }
-        container.innerHTML = ''; // Limpa o container antes de adicionar novos números
+        container.innerHTML = '';
 
         if (!gameNumbers || !Array.isArray(gameNumbers) || gameNumbers.length === 0) {
             container.innerHTML = '<p>Nenhum número gerado.</p>';
@@ -278,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const lotteryConfig = LOTTERY_CONFIG_JS[lotteryType.toLowerCase()] || {};
-        const defaultColor = '#47aeff'; // Uma cor padrão caso a loteria não esteja em LOTTERY_CONFIG_JS
+        const defaultColor = '#47aeff';
         const numberColor = lotteryConfig.color || defaultColor;
 
         gameNumbers.forEach(num => {
@@ -286,33 +275,28 @@ document.addEventListener('DOMContentLoaded', () => {
             numDiv.classList.add('game-number');
             numDiv.textContent = String(num).padStart(2, '0');
             numDiv.style.backgroundColor = numberColor;
-            numDiv.style.borderColor = numberColor; // Para consistência com o CSS
-            numDiv.style.color = '#1a1a2e'; // Cor do texto padrão, ajuste se necessário para contraste
+            numDiv.style.borderColor = numberColor;
+            numDiv.style.color = '#1a1a2e';
 
             if (hitNumbers.includes(num)) {
                 numDiv.classList.add('hit');
-                // As classes CSS 'hit' e 'almost' devem definir cores de fundo/texto apropriadas.
-                // Se precisar de override aqui, pode fazer, ex:
-                numDiv.style.backgroundColor = '#2ecc71'; // Verde para acerto
+                numDiv.style.backgroundColor = '#2ecc71';
                 numDiv.style.color = '#fff';
             } else if (almostNumbers.includes(num)) {
                 numDiv.classList.add('almost');
-                numDiv.style.backgroundColor = '#f1c40f'; // Amarelo para "quase"
+                numDiv.style.backgroundColor = '#f1c40f';
                 numDiv.style.color = '#333';
             }
-
-            // Animação de entrada (mantendo a sua lógica)
-            numDiv.style.opacity = '0'; // Começa invisível para animar
-            numDiv.style.transform = 'scale(0.8) translateY(10px)'; // Estado inicial da animação
+            numDiv.style.opacity = '0';
+            numDiv.style.transform = 'scale(0.8) translateY(10px)';
             setTimeout(() => {
                 numDiv.style.opacity = '1';
                 numDiv.style.transform = 'scale(1) translateY(0)';
-            }, Math.random() * 200 + 50); // Delay aleatório para efeito escalonado
+            }, Math.random() * 200 + 50);
 
             container.appendChild(numDiv);
         });
     }
-
 
     async function fetchAndDisplayStatsGeneric(lotteryName, statType, container, nameSpanInCard, endpointPrefix) {
         if (!container || !nameSpanInCard || !mainDisplayLotterySelect) { if(container) container.innerHTML = '<p class="error-message">Erro interno.</p>'; return; }
@@ -380,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
         apiResultsPre.innerHTML = '<div class="spinner small-spinner"></div> Carregando...';
         try {
             const data = await fetchData(`api/main/resultados/${lotteryName}`);
-            lastFetchedResults[lotteryName] = data; // Armazena para conferência
+            lastFetchedResults[lotteryName] = data;
             if (data.aviso) { apiResultsPre.textContent = data.aviso; return; }
             if (data.erro) { apiResultsPre.textContent = `Erro: ${data.erro}`; return; }
             let content = `Concurso: ${data.ultimo_concurso || 'N/A'}\n`;
@@ -467,7 +451,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ++ FUNÇÕES DE COMANDO DE VOZ ++
     function speak(text, options = {}) {
         if (!speechSynthesis || !text) { console.warn("Síntese de voz não disponível ou texto vazio."); return; }
         if (speechSynthesis.speaking) { speechSynthesis.cancel(); }
@@ -481,7 +464,6 @@ document.addEventListener('DOMContentLoaded', () => {
         utterance.onend = () => {
             if (options.onEndCallback && typeof options.onEndCallback === 'function') options.onEndCallback();
             if (options.shouldRelisten && voiceGuideActive && recognition && !isListening) {
-                console.log("Re-escutando automaticamente após a fala (speak).");
                 startListeningGeneralCommands(true);
             }
         };
@@ -507,7 +489,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
              console.warn("Botão de comando de voz principal não encontrado para atualizar estado.");
         }
-        console.log("Estado do Guia de Voz:", isActive);
     }
 
     function startListeningGeneralCommands(isContinuation = false) {
@@ -516,14 +497,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!isContinuation) { voiceContext = { action: null, awaiting: null, data: {} }; }
                 recognition.start(); isListening = true;
                 if(voiceCommandBtn) voiceCommandBtn.classList.add('listening');
-                console.log('Ouvindo comando geral...');
             } catch (e) { console.error("Erro ao iniciar escuta geral:", e); isListening = false; if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening'); }
         } else if (!voiceGuideActive) { speak("O guia de voz está desativado.");
         }
     }
 
     function processVoiceCommand(command) {
-        console.log("Processando comando de voz:", command);
         awaitingSpecificInput = false;
         if (command.includes('cancelar') || command.includes('parar')) {
             speak("Ação cancelada."); voiceContext = { action: null, awaiting: null, data: {} };
@@ -629,9 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         startListeningGeneralCommands();
                     } else {
                         setVoiceGuideState(true);
-                        speak("Guia de voz ativado. Clique novamente para comandar.");
-                        localStorage.removeItem('voiceGuideDeclined');
-                        localStorage.setItem('voiceGuideChoiceMade', 'true');
+                        speak("Guia de voz ativado. Clique novamente para comandar ou diga um comando.");
                     }
                 });
             }
@@ -672,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  renderGameNumbers(quickHunchNumbersDiv, data.jogo, [], [], lottery);
             } else {
                 console.error("generateAndDisplayQuickHunch: renderGameNumbers não está definida!");
-                quickHunchNumbersDiv.innerHTML = '<p class="error-message">Erro de renderização (renderGameNumbers não definida).</p>';
+                quickHunchNumbersDiv.innerHTML = '<p class="error-message">Erro de renderização (função não encontrada).</p>';
             }
             quickHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Aleatório'}`;
             lastGeneratedHunch = { type: 'quick', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Aleatório', outputDiv: quickHunchOutputDiv, numbersDiv: quickHunchNumbersDiv, checkResultDiv: quickHunchCheckResultDiv, saveButton: saveQuickHunchBtn, checkButton: checkQuickHunchBtn };
@@ -702,7 +679,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderGameNumbers(hotNumbersHunchNumbersDiv, data.jogo, [], [], lottery);
             } else {
                 console.error("generateAndDisplayHotNumbersHunch: renderGameNumbers não está definida!");
-                hotNumbersHunchNumbersDiv.innerHTML = '<p class="error-message">Erro de renderização (renderGameNumbers não definida).</p>';
+                hotNumbersHunchNumbersDiv.innerHTML = '<p class="error-message">Erro de renderização (função não encontrada).</p>';
             }
             hotNumbersHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Números Quentes'}`; if (data.aviso) { hotNumbersHunchStrategyP.textContent += ` (${data.aviso})`; }
             lastGeneratedHunch = { type: 'hot', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Números Quentes', outputDiv: hotNumbersHunchOutputDiv, numbersDiv: hotNumbersHunchNumbersDiv, checkResultDiv: hotHunchCheckResultDiv, saveButton: saveHotHunchBtn, checkButton: checkHotHunchBtn };
@@ -732,7 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderGameNumbers(esotericHunchNumbersDiv, data.palpite_gerado, [], [], lotteryName);
             } else {
                  console.error("generateAndDisplayEsotericHunch: renderGameNumbers não está definida!");
-                 esotericHunchNumbersDiv.innerHTML = '<p class="error-message">Erro de renderização (renderGameNumbers não definida).</p>';
+                 esotericHunchNumbersDiv.innerHTML = '<p class="error-message">Erro de renderização (função não encontrada).</p>';
             }
             esotericHunchMethodP.textContent = `Método: ${data.metodo_geracao || 'N/A'}`;
             let historyHtml = `<strong>Histórico:</strong><br>`;
@@ -867,7 +844,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(gameCard) savedGamesContainer.appendChild(gameCard);
             });
         } catch (error) {
-            console.error("Erro jogos salvos:", error); // O erro original já está sendo logado aqui.
+            console.error("Erro jogos salvos:", error);
             savedGamesContainer.innerHTML = `<p class="error-message">Erro ao carregar jogos salvos. Detalhe: ${error.message}</p>`;
         }
     }
@@ -876,9 +853,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('div'); card.classList.add('card', 'game-card'); card.dataset.id = docId;
         const lotteryName = LOTTERY_CONFIG_JS[gameData.lottery]?.name || gameData.lottery.toUpperCase();
         const gameNumbersDiv = document.createElement('div'); gameNumbersDiv.classList.add('game-numbers');
-
-        // ADICIONANDO LOG DE DEBUG AQUI:
-        console.log(`DEBUG: Em createGameCardElement, antes de chamar renderGameNumbers. typeof renderGameNumbers é: ${typeof renderGameNumbers}`);
 
         if (typeof renderGameNumbers === "function") {
             renderGameNumbers(gameNumbersDiv, gameData.game, [], [], gameData.lottery);
@@ -907,7 +881,6 @@ document.addEventListener('DOMContentLoaded', () => {
         manualProbNumbersCountFeedback.textContent = `Números: ${userNumbersCount} de ${expectedCount}.`;
     }
 
-    // --- INICIALIZAÇÃO E EVENT LISTENERS ---
     function setupAuthEventListeners() {
         if(loginSubmitBtn && loginEmailInput && loginPasswordInput && loginErrorP) {
             loginSubmitBtn.addEventListener('click', () => {
@@ -946,7 +919,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 firebaseAuth.onAuthStateChanged(user => {
                     currentUser = user;
                     if (typeof updateLoginUI === "function") updateLoginUI(user);
-                    if (localStorage.getItem('voiceGuideChoiceMade') === 'true') {
+                    if (localStorage.getItem('voiceGuideActive') === 'true' || !localStorage.getItem('voiceGuideActive')) { // Considera se o guia estava ativo ou se é a primeira vez (sem escolha ainda)
                         if (splashHiddenTimestamp > 0 || (mainSplashScreen && mainSplashScreen.classList.contains('hidden')) ) {
                             if (typeof effectivelyShowApp === "function") effectivelyShowApp();
                         }
@@ -1015,17 +988,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- LÓGICA DA TELA DE BOAS-VINDAS INCLUSIVA ---
     function handleWelcomeChoice(activate) {
         clearTimeout(welcomeScreenTimeout);
         setVoiceGuideState(activate);
-        localStorage.setItem('voiceGuideChoiceMade', 'true');
-        if (activate) {
-            speak("Guia de voz ativado. A interface principal será carregada.");
-            localStorage.removeItem('voiceGuideDeclined');
-        } else {
-            localStorage.setItem('voiceGuideDeclined', 'true');
-        }
+
         if (inclusiveWelcomeScreen) inclusiveWelcomeScreen.classList.add('hidden');
         if (mainSplashScreen) mainSplashScreen.style.display = 'flex';
 
@@ -1053,18 +1019,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeInclusiveWelcome() {
-        if (localStorage.getItem('voiceGuideChoiceMade') === 'true') {
-            const guideWasActive = localStorage.getItem('voiceGuideActive') === 'true';
-            handleWelcomeChoice(guideWasActive);
-            return;
-        }
-
         if (inclusiveWelcomeScreen) inclusiveWelcomeScreen.style.display = 'flex';
         if (mainSplashScreen) mainSplashScreen.style.display = 'none';
         if (voiceCommandBtn) voiceCommandBtn.style.display = 'none';
 
         const playInitialGreetingAndListen = () => {
             if (voiceGuideActive !== null || !inclusiveWelcomeScreen || inclusiveWelcomeScreen.classList.contains('hidden')) return;
+
             const greeting = "Bem-vindo ao Loto Genius AI. Esta plataforma é inclusiva. Deseja ativar o guia de voz? Diga 'Sim' ou 'Não', ou use os botões na tela.";
             speak(greeting, {
                 onEndCallback: () => {
@@ -1077,14 +1038,17 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (transcript.includes('sim')) { handleWelcomeChoice(true); }
                             else if (transcript.includes('não')) { handleWelcomeChoice(false); }
                         };
-                        recognition.onerror = (event) => {console.error("Erro welcome listen:", event.error); awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler; clearTimeout(welcomeScreenTimeout); if(voiceGuideActive === null) handleWelcomeChoice(false);};
+                        recognition.onerror = (event) => {
+                            console.error("Erro no reconhecimento de voz na tela de boas-vindas:", event.error);
+                            awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler;
+                        };
                         recognition.onend = () => {
                             isListening = false; awaitingSpecificInput = false; recognition.onresult = defaultRecognitionResultHandler;
-                            if (voiceGuideActive === null && welcomeScreenTimeout) {
-                                // O timeout vai pegar
-                            }
                         };
-                        try { recognition.start(); } catch (e) { console.error("Falha ao iniciar reconhecimento na saudação", e); isListening = false; awaitingSpecificInput = false;}
+                        try { recognition.start(); } catch (e) {
+                            console.error("Falha ao iniciar reconhecimento na saudação da tela de boas-vindas", e);
+                            isListening = false; awaitingSpecificInput = false;
+                        }
                     }
                 }
             });
@@ -1107,18 +1071,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('click', () => { clearTimeout(welcomeScreenTimeout); handleWelcomeChoice(false); });
 
         welcomeScreenTimeout = setTimeout(() => {
-            if (voiceGuideActive === null && inclusiveWelcomeScreen && inclusiveWelcomeScreen.style.display !== 'none') {
+            if (voiceGuideActive === null && inclusiveWelcomeScreen && inclusiveWelcomeScreen.style.display !== 'none' && !inclusiveWelcomeScreen.classList.contains('hidden')) {
                 handleWelcomeChoice(false);
             }
         }, 20000);
     }
 
-
-    // --- INICIALIZAÇÃO PRINCIPAL DO SCRIPT ---
     initializeVoiceCommands();
     initializeInclusiveWelcome();
 
-    // --- EVENT LISTENERS (Configurados após todas as funções estarem definidas) ---
     if(loginModalBtn) loginModalBtn.addEventListener('click', () => openModal(loginModal));
     if(registerModalBtn) registerModalBtn.addEventListener('click', () => openModal(registerModal));
     if(closeLoginModalBtn) closeLoginModalBtn.addEventListener('click', () => closeModal(loginModal));
@@ -1211,5 +1172,4 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Erro: ${error.message}</p>`; }
         });
     }
-    console.log("SCRIPT.JS: Final do script atingido.");
 });
