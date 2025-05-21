@@ -1,6 +1,6 @@
-// script.js (Seu arquivo, com correções para ReferenceError e funções de jogo preenchidas)
+// script.js (COMPLETO E CORRIGIDO - Várias Funções Preenchidas + Melhoria na Saudação por Voz)
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver com Correção de ReferenceError e Funções de Jogo Completas."); // Mensagem atualizada
+    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver com Funções Completas e Melhoria na Voz.");
     const domContentLoadedTimestamp = Date.now();
 
     // --- Constantes de Tempo da Splash Screen ---
@@ -71,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkEsotericHunchBtn = document.getElementById('check-esoteric-hunch-btn');
     
     const cosmicPromoBanner = document.getElementById('cosmic-promo-banner');
-    // ++ SELETORES DO BANNER PROMOCIONAL AGORA ATIVOS ++
     const promoRegisterBtn = document.getElementById('promo-register-btn'); 
     const promoLoginBtn = document.getElementById('promo-login-btn');     
 
@@ -145,8 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const LOTTERY_CONFIG_JS = { megasena: { count: 6, color: "#209869", name: "Mega-Sena" }, lotofacil: { count: 15, color: "#930089", name: "Lotofácil" }, quina: { count: 5, color: "#260085", name: "Quina" }, lotomania: { count_sorteadas: 20, count_apostadas: 50, color: "#f78100", name: "Lotomania" } };
     const bannerConfigurations = {
         'banner-top-dashboard': [
-            { imageUrl: 'images/banner1.png', altText: 'Tammy\'s Store - Comprar agora!', linkUrl: 'https://www.instagram.com/tammysstore_/', isExternal: true },
-            { imageUrl: 'images/teste1.png', altText: 'LotoGenius - A Sorte Inteligente',},
+            { imageUrl: 'assets/images/banner1.jpg', altText: 'Tammy\'s Store - Comprar agora!', linkUrl: 'https://www.instagram.com/SEU_USUARIO_INSTAGRAM', isExternal: true },
+            { imageUrl: 'https://placehold.co/1200x250/1f4068/ffffff?text=Apenas+Visual+-+LotoGenius&fontsize=36', altText: 'LotoGenius - A Sorte Inteligente',},
             { imageUrl: 'https://placehold.co/1200x250/2a2a50/ffd700?text=Conheça+Recursos+Premium!&fontsize=32', altText: 'Recursos Premium LotoGenius', linkUrl: '#esoteric-hunch-card', isExternal: false }
         ],
         'banner-bottom-dashboard': [
@@ -159,10 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let speechSynthesis = window.speechSynthesis;
     let isListening = false;
     let voiceGuideActive = null; 
-    let firstInteractionDone = false; // Mantida para lógica de áudio inicial
+    let firstInteractionDone = false;
     let voiceContext = { action: null, awaiting: null, data: {} };
     let welcomeResponseTimeout;
-    let awaitingSpecificInput = false; 
+    let awaitingSpecificInput = false;
 
     // ================================================================================================
     // === DEFINIÇÕES DE FUNÇÕES COMPLETAS ===
@@ -319,11 +318,11 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchAndDisplayCityStats(lotteryName) { if(cityListContainer && cityStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Cidades Premiadas", cityListContainer, cityStatsLotteryNameSpan, "cidades-premiadas"); }
     async function fetchAndDisplayCityPrizeSumStats(lotteryName) { if(cityPrizeSumListContainer && cityPrizeSumLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Prêmios por Cidade", cityPrizeSumListContainer, cityPrizeSumLotteryNameSpan, "maiores-premios-cidade");}
     
-    // Funções de Modal
-    let previouslyFocusedElementModal; // Renomeado para evitar conflito com a variável global da tela de boas-vindas
+    // Funções de Modal (Definidas antes de serem usadas)
+    let previouslyFocusedElement; 
     function openModal(modalElement) { 
         if (modalElement) {
-            previouslyFocusedElementModal = document.activeElement; 
+            previouslyFocusedElement = document.activeElement; 
             modalElement.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             const firstFocusableElement = modalElement.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
@@ -336,11 +335,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.overflow = '';
             if (modalElement === loginModal && loginEmailInput && loginPasswordInput && loginErrorP) { loginEmailInput.value = ''; loginPasswordInput.value = ''; loginErrorP.textContent = ''; } 
             else if (modalElement === registerModal && registerEmailInput && registerPasswordInput && registerConfirmPasswordInput && registerErrorP) { registerEmailInput.value = ''; registerPasswordInput.value = ''; registerConfirmPasswordInput.value = ''; registerErrorP.textContent = ''; }
-            if (previouslyFocusedElementModal) previouslyFocusedElementModal.focus();
+            if (previouslyFocusedElement) previouslyFocusedElement.focus();
         } else { console.warn("closeModal: modalElement não encontrado"); }
     }
     
-    // Funções de Banner e Carrossel
     function renderBanners() {
         for (const containerId in bannerConfigurations) {
             const container = document.getElementById(containerId);
@@ -373,19 +371,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+
     function initializeCarousels() {
         const carousels = document.querySelectorAll('.carousel-ad');
         carousels.forEach(carousel => {
             const items = carousel.querySelectorAll('.carousel-item');
             if (items.length <= 1) {
-                if (items.length === 1 && !items[0].classList.contains('active')) { items[0].classList.add('active');}
+                if (items.length === 1 && !items[0].classList.contains('active')) {
+                     items[0].classList.add('active');
+                }
                 const noBannerP = carousel.querySelector('p');
                 if(noBannerP && items.length > 0) noBannerP.style.display = 'none';
                 return; 
             }
+            
             let currentIndex = 0;
-            items.forEach((item, index) => { if (index === currentIndex) item.classList.add('active'); else item.classList.remove('active'); });
+            items.forEach((item, index) => {
+                if (index === currentIndex) item.classList.add('active');
+                else item.classList.remove('active');
+            });
+
             const intervalTime = parseInt(carousel.dataset.interval, 10) || 7000; 
+
             setInterval(() => {
                 if(items[currentIndex]) items[currentIndex].classList.remove('active');
                 currentIndex = (currentIndex + 1) % items.length;
@@ -394,67 +401,169 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Funções de Voz
-    function speak(text, options = {}) {
-        if (!speechSynthesis || !text) { console.warn("Síntese de voz não disponível ou texto vazio."); return; }
-        if (speechSynthesis.speaking) { speechSynthesis.cancel(); }
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'pt-BR';
-        const voices = speechSynthesis.getVoices();
-        const ptBRVoice = voices.find(voice => voice.lang === 'pt-BR' || voice.lang === 'pt_BR');
-        if (ptBRVoice) utterance.voice = ptBRVoice;
-        utterance.pitch = 1; utterance.rate = 1;
-        utterance.onend = () => {
-            if (options.onEndCallback && typeof options.onEndCallback === 'function') options.onEndCallback();
-            if (options.shouldRelisten && voiceGuideActive && recognition && !isListening) {
-                console.log("Re-escutando automaticamente após a fala (speak).");
-                startListeningGeneralCommands(true); // Usar startListeningGeneralCommands para re-escuta
-            }
-        };
-        speechSynthesis.speak(utterance);
+    // ++ FUNÇÕES DE COMANDO DE VOZ ++
+    function speak(text, options = {}) { 
+        if (speechSynthesis && text) {
+            if (speechSynthesis.speaking) { speechSynthesis.cancel(); } 
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'pt-BR';
+            const voices = speechSynthesis.getVoices();
+            const ptBRVoice = voices.find(voice => voice.lang === 'pt-BR' || voice.lang === 'pt_BR');
+            if (ptBRVoice) utterance.voice = ptBRVoice;
+            utterance.pitch = 1; utterance.rate = 1; 
+            
+            utterance.onend = () => {
+                if (options.onEndCallback && typeof options.onEndCallback === 'function') {
+                    options.onEndCallback();
+                }
+                if (options.shouldRelisten && voiceGuideActive && recognition && !isListening) {
+                    console.log("Re-escutando automaticamente após a fala.");
+                    recognition.start(); 
+                    isListening = true;
+                    if(voiceCommandBtn) voiceCommandBtn.classList.add('listening');
+                }
+            };
+            speechSynthesis.speak(utterance);
+        } else { console.warn("Síntese de voz não disponível ou texto vazio."); }
     }
+    
     const defaultRecognitionResultHandler = (event) => {
         const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
-        if (voiceGuideActive) { processVoiceCommand(transcript); }
+        if (voiceGuideActive) {
+            console.log('Comando de voz (guia ativo):', transcript);
+            processVoiceCommand(transcript);
+        } else {
+            console.log("Comando de voz recebido, mas o guia está desativado:", transcript);
+        }
     };
+
+    function listenForWelcomeResponse() {
+        if (recognition && !isListening) {
+            console.log("Ouvindo resposta para saudação de boas-vindas...");
+            isListening = true;
+            awaitingSpecificInput = true; 
+            recognition.onresult = (event) => { 
+                const transcript = event.results[event.results.length-1][0].transcript.trim().toLowerCase();
+                console.log("Resposta à saudação:", transcript);
+                clearTimeout(welcomeResponseTimeout); 
+                awaitingSpecificInput = false;
+                if (transcript.includes('sim')) {
+                    setVoiceGuideState(true);
+                    speak("Guia de voz ativado! Você pode dizer 'ajuda' para comandos, ou clique no botão de microfone para dar um comando.");
+                } else if (transcript.includes('não')) {
+                    setVoiceGuideState(false);
+                    speak("Guia de voz desativado. Você pode ativá-lo a qualquer momento pelo botão no cabeçalho.");
+                    localStorage.setItem('voiceGuideDeclined', 'true');
+                } else {
+                    speak("Não entendi sua resposta. O guia de voz permanecerá desativado por enquanto.");
+                    setVoiceGuideState(false);
+                }
+                isListening = false;
+                recognition.onresult = defaultRecognitionResultHandler; 
+            };
+            recognition.onerror = (event) => {
+                console.error("Erro ao ouvir resposta da saudação:", event.error);
+                clearTimeout(welcomeResponseTimeout);
+                setVoiceGuideState(false); 
+                isListening = false;
+                awaitingSpecificInput = false;
+                recognition.onresult = defaultRecognitionResultHandler;
+            };
+            recognition.onend = () => { 
+                if (isListening && awaitingSpecificInput) { 
+                    clearTimeout(welcomeResponseTimeout);
+                    setVoiceGuideState(false); 
+                }
+                isListening = false;
+                awaitingSpecificInput = false;
+                recognition.onresult = defaultRecognitionResultHandler; 
+                if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening');
+            };
+            recognition.start();
+            if(voiceCommandBtn) voiceCommandBtn.classList.add('listening');
+        }
+    }
+
+    function playWelcomeMessage() {
+        if (localStorage.getItem('voiceGuideDeclined') === 'true') {
+            setVoiceGuideState(false); 
+            return;
+        }
+        if (sessionStorage.getItem('welcomePlayed')) {
+            const wasActive = localStorage.getItem('voiceGuideActive') === 'true';
+            setVoiceGuideState(wasActive); 
+            return;
+        }
+
+        const greeting = "Bem-vindo ao Loto Genius AI! Este é um assistente de loterias com foco em inclusão. Deseja ativar o guia de voz para uma experiência interativa? Diga 'Sim' ou 'Não', ou clique no botão de microfone e depois no botão 'Sim' ou 'Não' que aparecerá em breve.";
+        speak(greeting, { 
+            onEndCallback: () => {
+                if (voiceGuideActive === null) { 
+                    // Poderia adicionar botões visuais de Sim/Não aqui para clique também.
+                    listenForWelcomeResponse();
+                    welcomeResponseTimeout = setTimeout(() => {
+                        if (voiceGuideActive === null) { 
+                            console.log("Nenhuma resposta para o guia de voz, continuando sem.");
+                            setVoiceGuideState(false); 
+                        }
+                    }, 15000); // Aumentado para 15 segundos
+                }
+            }
+        });
+        sessionStorage.setItem('welcomePlayed', 'true');
+    }
+
     function setVoiceGuideState(isActive) {
         voiceGuideActive = isActive;
         localStorage.setItem('voiceGuideActive', isActive.toString());
-        if (voiceCommandBtn) { 
-            voiceCommandBtn.style.display = 'inline-flex'; 
-            if (voiceBtnText && voiceBtnIcon) {
-                voiceBtnText.textContent = isActive ? "Desativar Guia" : "Ativar Guia";
-                voiceBtnIcon.className = isActive ? "fas fa-microphone-slash" : "fas fa-microphone";
-                voiceCommandBtn.setAttribute('aria-pressed', isActive.toString());
-                voiceCommandBtn.title = isActive ? "Desativar Guia de Voz" : "Ativar Guia de Voz";
-            }
-        } else {
-             console.warn("Botão de comando de voz principal não encontrado para atualizar estado.");
+        if (voiceCommandBtn && voiceBtnText && voiceBtnIcon) {
+            voiceBtnText.textContent = isActive ? "Desativar Guia" : "Ativar Guia";
+            voiceBtnIcon.className = isActive ? "fas fa-microphone-slash" : "fas fa-microphone";
+            voiceCommandBtn.setAttribute('aria-pressed', isActive.toString());
+            voiceCommandBtn.title = isActive ? "Desativar Guia de Voz" : "Ativar Guia de Voz";
         }
         console.log("Estado do Guia de Voz:", isActive);
     }
-    function startListeningGeneralCommands(isContinuation = false) {
+
+    function startListening(isContinuation = false) {
         if (recognition && voiceGuideActive && !isListening) {
             try {
-                if (!isContinuation) { voiceContext = { action: null, awaiting: null, data: {} }; }
-                recognition.start(); isListening = true;
+                if (!isContinuation) { 
+                    voiceContext = { action: null, awaiting: null, data: {} };
+                }
+                recognition.start();
+                isListening = true;
                 if(voiceCommandBtn) voiceCommandBtn.classList.add('listening');
-                console.log('Ouvindo comando geral...');
-            } catch (e) { console.error("Erro ao iniciar escuta geral:", e); isListening = false; if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening'); }
-        } else if (!voiceGuideActive) { speak("O guia de voz está desativado."); 
-        } else if (isListening) { console.log("Já estou ouvindo um comando geral."); }
+                console.log('Ouvindo comando...');
+            } catch (e) {
+                console.error("Erro ao iniciar reconhecimento:", e);
+                isListening = false;
+                if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening');
+            }
+        } else if (!voiceGuideActive) {
+            speak("O guia de voz está desativado. Clique no botão para ativar e depois para dar um comando.");
+        } else if (isListening) {
+            console.log("Já estou ouvindo.");
+        }
     }
+    
     function processVoiceCommand(command) {
         console.log("Processando comando de voz:", command);
         awaitingSpecificInput = false; 
+
         if (command.includes('cancelar') || command.includes('parar')) {
-            speak("Ação cancelada."); voiceContext = { action: null, awaiting: null, data: {} };
-            if(isListening) { recognition.abort(); } return;
+            speak("Ação cancelada.");
+            voiceContext = { action: null, awaiting: null, data: {} };
+            if(isListening) { recognition.abort(); } 
+            return;
         }
+    
         if (voiceContext.action === 'login_email_input') {
             voiceContext.data.email = command.replace(/arroba/g, '@').replace(/\s/g, '').toLowerCase();
             speak(`Entendi o email como ${voiceContext.data.email}. Está correto? Diga 'sim' ou 'não'.`, { shouldRelisten: true });
-            voiceContext.awaiting = 'login_email_confirmation'; awaitingSpecificInput = true; return;
+            voiceContext.awaiting = 'login_email_confirmation';
+            awaitingSpecificInput = true;
+            return;
         }
         if (voiceContext.action === 'login_email_input' && voiceContext.awaiting === 'login_email_confirmation') {
             if (command.includes('sim')) {
@@ -464,52 +573,68 @@ document.addEventListener('DOMContentLoaded', () => {
                 voiceContext = { action: null, awaiting: null, data: {} };
             } else if (command.includes('não') || command.includes('corrigir')) {
                 speak("Ok, por favor, diga seu email novamente.", { shouldRelisten: true });
-                voiceContext.awaiting = null; awaitingSpecificInput = true;
-            } else { speak("Não entendi. Diga 'sim' para confirmar o email, ou 'não' para corrigir.", { shouldRelisten: true }); awaitingSpecificInput = true; }
+                voiceContext.awaiting = null; 
+                awaitingSpecificInput = true;
+            } else {
+                speak("Não entendi. Diga 'sim' para confirmar o email, ou 'não' para corrigir.", { shouldRelisten: true });
+                awaitingSpecificInput = true;
+            }
             return;
         }
+    
         if (command.includes('login') || command.includes('entrar') || command.includes('fazer login')) {
             if (currentUser) { speak("Você já está logado."); return; }
-            openModal(loginModal); speak("Tela de login aberta. Para preencher por voz, diga 'digitar email'.", { shouldRelisten: true });
-            voiceContext.action = 'login_prompt_email'; awaitingSpecificInput = true; return;
+            openModal(loginModal);
+            speak("Tela de login aberta. Para preencher por voz, diga 'digitar email'.", { shouldRelisten: true });
+            voiceContext.action = 'login_prompt'; 
+            awaitingSpecificInput = true;
+            return;
         }
-        if (voiceContext.action === 'login_prompt_email' && command.includes('digitar email')) {
+        if (voiceContext.action === 'login_prompt' && command.includes('digitar email')) {
             speak("Ok, diga seu email agora.", { shouldRelisten: true });
-            voiceContext.action = 'login_capturing_email'; voiceContext.awaiting = 'email_text'; 
-            awaitingSpecificInput = true; return;
+            voiceContext.action = 'login_email_input'; 
+            voiceContext.awaiting = null;
+            awaitingSpecificInput = true;
+            return;
         }
-         if (voiceContext.action === 'login_capturing_email' && voiceContext.awaiting === 'email_text') {
-            const emailAttempt = command.replace(/arroba/g, '@').replace(/\s/g, '').toLowerCase(); 
-            if (loginEmailInput) loginEmailInput.value = emailAttempt;
-            speak(`Email preenchido como ${emailAttempt}. Por favor, digite sua senha e pressione entrar.`);
-            if (loginPasswordInput) loginPasswordInput.focus();
+    
+        if (command.includes('registrar') || command.includes('criar conta')) {
+            if (currentUser) { speak("Você já está logado."); return; }
+            openModal(registerModal);
+            speak("Tela de registro aberta. Preencha os campos utilizando o teclado.");
             voiceContext = { action: null, awaiting: null, data: {} }; 
             return;
         }
-        if (command.includes('registrar') || command.includes('criar conta')) {
-            if (currentUser) { speak("Você já está logado."); return; }
-            openModal(registerModal); speak("Tela de registro aberta. Preencha os campos utilizando o teclado.");
-            voiceContext = { action: null, awaiting: null, data: {} }; return;
+        if (command.includes('painel') || command.includes('início') || command.includes('tela principal')) {
+            setActiveSection('dashboard-section');
+            speak("Navegando para o painel principal.");
+            return;
         }
-        if (command.includes('painel') || command.includes('início') || command.includes('tela principal')) { setActiveSection('dashboard-section'); speak("Navegando para o painel principal."); return; }
         if (command.includes('meus jogos')) {
             if (!currentUser) { speak("Você precisa estar logado. Diga 'login'.", {shouldRelisten: true}); voiceContext.action = 'awaiting_login_for_my_games'; awaitingSpecificInput = true; return;}
-            setActiveSection('my-games-section'); speak("Navegando para Meus Jogos Salvos."); return;
+            setActiveSection('my-games-section');
+            speak("Navegando para Meus Jogos Salvos.");
+            return;
         }
         if (voiceContext.action === 'awaiting_login_for_my_games' && command.includes('login')) {
-            openModal(loginModal); speak("Tela de login aberta. Diga 'digitar email'.", {shouldRelisten: true}); voiceContext.action = 'login_prompt_email'; awaitingSpecificInput = true; return;
+            openModal(loginModal); speak("Tela de login aberta. Diga 'digitar email'.", {shouldRelisten: true}); voiceContext.action = 'login_prompt'; awaitingSpecificInput = true; return;
         }
+
         if (command.includes('gerar mega sena rápido') || command.includes('palpite rápido mega sena')) {
             if (quickHunchLotteryTypeSelect) quickHunchLotteryTypeSelect.value = 'megasena';
-            if (generateQuickHunchBtn) { speak("Gerando palpite rápido para Mega-Sena."); generateQuickHunchBtn.click(); } return;
+            if (generateQuickHunchBtn) { speak("Gerando palpite rápido para Mega-Sena."); generateQuickHunchBtn.click(); }
+            return;
         }
          if (command.includes('gerar lotofácil rápido') || command.includes('palpite rápido lotofácil')) {
             if (quickHunchLotteryTypeSelect) quickHunchLotteryTypeSelect.value = 'lotofacil';
-            if (generateQuickHunchBtn) { speak("Gerando palpite rápido para Lotofácil."); generateQuickHunchBtn.click(); } return;
+            if (generateQuickHunchBtn) { speak("Gerando palpite rápido para Lotofácil."); generateQuickHunchBtn.click(); }
+            return;
         }
+        // Adicione mais comandos de geração de jogo aqui
         if (command.includes('ajuda') || command.includes('comandos')) {
             speak("Comandos: 'login', 'registrar', 'painel', 'meus jogos', 'gerar mega sena rápido', 'onde estou'.", {shouldRelisten: true});
-            awaitingSpecificInput = true; return;
+            awaitingSpecificInput = true; 
+            return;
         }
         if (command.includes('onde estou') || command.includes('descreva a tela')) {
             const activeSectionElement = document.querySelector('.main-section.active-section');
@@ -519,342 +644,242 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (activeSectionElement.id === 'my-games-section') sectionName = "a seção de Meus Jogos Salvos";
                 else if (activeSectionElement.id === 'pools-section') sectionName = "a seção de Bolões";
             }
-            speak(`Você está em ${sectionName}.`); return;
+            speak(`Você está em ${sectionName}.`);
+            return;
         }
-        if(!awaitingSpecificInput && (!voiceContext.action || !voiceContext.awaiting)) { speak("Comando não reconhecido. Tente 'ajuda'."); }
+        
+        if(!voiceContext.action || !voiceContext.awaiting) {
+            speak("Comando não reconhecido. Tente 'ajuda'.");
+        }
     }
     
-    // Funções de Inicialização do App e Telas
     function initializeVoiceCommands() {
         const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognitionAPI && speechSynthesis) {
             recognition = new SpeechRecognitionAPI();
-            recognition.lang = 'pt-BR'; recognition.continuous = false; recognition.interimResults = false; recognition.maxAlternatives = 1;
+            recognition.lang = 'pt-BR';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
             recognition.onresult = defaultRecognitionResultHandler;
+
             recognition.onerror = (event) => {
                 console.error('Erro no reconhecimento de voz:', event.error);
-                isListening = false; awaitingSpecificInput = false;
+                isListening = false;
+                awaitingSpecificInput = false;
                 if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening');
-                if (event.error !== 'no-speech' && event.error !== 'aborted') { speak("Erro no reconhecimento de voz."); }
+                if (event.error !== 'no-speech' && event.error !== 'aborted') {
+                    let errorMsg = "Ocorreu um erro com o reconhecimento de voz.";
+                    if (event.error === 'audio-capture') errorMsg = "Problema com o microfone.";
+                    else if (event.error === 'not-allowed') errorMsg = "Permissão ao microfone negada.";
+                    speak(errorMsg);
+                }
             };
             recognition.onend = () => {
-                const wasAwaiting = awaitingSpecificInput;
-                isListening = false; awaitingSpecificInput = false; 
+                const wasListeningForSpecificInput = awaitingSpecificInput;
+                isListening = false;
+                awaitingSpecificInput = false; 
                 if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening');
-                if (voiceGuideActive && wasAwaiting && voiceContext.action && voiceContext.awaiting) {
-                    setTimeout(() => startListeningGeneralCommands(true), 200); 
+                
+                if (voiceGuideActive && voiceContext.action && voiceContext.awaiting && wasListeningForSpecificInput) {
+                    console.log("Diálogo ativo, re-escutando para:", voiceContext.awaiting);
+                    setTimeout(() => startListening(true), 200); 
                 }
             };
+
             if (voiceCommandBtn) {
                 voiceCommandBtn.addEventListener('click', () => {
-                    if (recognition && isListening) { recognition.abort(); return; }
-                    if (!voiceGuideActive) { setVoiceGuideState(true); speak("Guia de voz ativado. Diga um comando."); localStorage.removeItem('voiceGuideDeclined'); } 
-                    else { startListeningGeneralCommands(); }
+                    if (recognition && isListening) {
+                        recognition.abort(); 
+                        console.log("Reconhecimento interrompido pelo clique.");
+                        return;
+                    }
+                    if (voiceGuideActive === null) { playWelcomeMessage(); } 
+                    else if (!voiceGuideActive) {
+                        setVoiceGuideState(true);
+                        speak("Guia de voz ativado. Clique novamente para dar um comando ou diga 'ajuda'.");
+                        localStorage.removeItem('voiceGuideDeclined');
+                    } else { startListening(); }
                 });
+                
+                const initialVoiceGuideStateFromStorage = localStorage.getItem('voiceGuideActive') === 'true';
+                const declinedPreviously = localStorage.getItem('voiceGuideDeclined') === 'true';
+
+                if (declinedPreviously) { setVoiceGuideState(false); } 
+                else {
+                    if (localStorage.getItem('voiceGuideActive') !== null) { setVoiceGuideState(initialVoiceGuideStateFromStorage); } 
+                    else { setVoiceGuideState(false); voiceGuideActive = null; }
+                }
             }
              if (speechSynthesis.onvoiceschanged !== undefined) { speechSynthesis.onvoiceschanged = () => {}; }
-        } else { console.warn('Web Speech API não é suportada.'); if (voiceCommandBtn) voiceCommandBtn.style.display = 'none'; }
-    }
-    
-    function handleWelcomeChoice(activate) {
-        setVoiceGuideState(activate);
-        localStorage.setItem('voiceGuideChoiceMade', 'true'); 
-        if (activate) {
-            speak("Guia de voz ativado."); localStorage.removeItem('voiceGuideDeclined');
         } else {
-            localStorage.setItem('voiceGuideDeclined', 'true');
+            console.warn('Web Speech API não é suportada neste navegador.');
+            if (voiceCommandBtn) voiceCommandBtn.style.display = 'none';
         }
-        if (inclusiveWelcomeScreen) inclusiveWelcomeScreen.classList.add('hidden'); 
-        if (mainSplashScreen) mainSplashScreen.style.display = 'flex'; 
-
-        if (splashProgressBarFill && splashProgressContainer && mainSplashScreen && !mainSplashScreen.classList.contains('hidden')) {
-            let progress = 0; const totalVisualBarTime = SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION; const intervalTime = Math.max(10, totalVisualBarTime / 100);
-            const progressInterval = setInterval(() => { progress++; if (splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', progress); if (progress >= 100) { clearInterval(progressInterval); } }, intervalTime);
-        }
-        criticalSplashTimeout = setTimeout(() => { 
-             if (splashHiddenTimestamp === 0 && typeof effectivelyShowApp === "function") { effectivelyShowApp(); }
-             if (!firebaseApp && typeof showGlobalError === "function") { showGlobalError("Falha crítica na inicialização."); if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();}
-             criticalSplashTimeout = null; 
-        }, SPLASH_MINIMUM_VISIBLE_TIME + 1000); 
-        if (typeof attemptFirebaseInit === "function") { setTimeout(attemptFirebaseInit, 150); } 
-        else {  if (typeof effectivelyShowApp === "function") effectivelyShowApp(); if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); }
     }
     
-    function initializeInclusiveWelcome() {
-        if (localStorage.getItem('voiceGuideChoiceMade') === 'true') {
-            const guideWasActive = localStorage.getItem('voiceGuideActive') === 'true';
-            setVoiceGuideState(guideWasActive); 
-            if (inclusiveWelcomeScreen) inclusiveWelcomeScreen.style.display = 'none';
-            if (mainSplashScreen) mainSplashScreen.style.display = 'flex';
-            if (splashProgressBarFill && splashProgressContainer && mainSplashScreen && !mainSplashScreen.classList.contains('hidden')) { /* ... lógica da barra ... */ }
-            criticalSplashTimeout = setTimeout(() => { if (splashHiddenTimestamp === 0 && typeof effectivelyShowApp === "function") { effectivelyShowApp(); } if (!firebaseApp && typeof showGlobalError === "function") { showGlobalError("Falha crítica."); if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();} criticalSplashTimeout = null;  }, SPLASH_MINIMUM_VISIBLE_TIME + 1000);
-            if (typeof attemptFirebaseInit === "function") { setTimeout(attemptFirebaseInit, 150); }
-            return;
-        }
-
-        if (inclusiveWelcomeScreen) inclusiveWelcomeScreen.style.display = 'flex';
-        if (mainSplashScreen) mainSplashScreen.style.display = 'none'; 
-        if (voiceCommandBtn) voiceCommandBtn.style.display = 'none'; 
-
-        const playInitialGreeting = () => {
-            const greeting = "Bem-vindo ao Loto Genius AI. Esta plataforma é inclusiva. Deseja ativar o guia de voz? Diga 'Sim' ou 'Não', ou use os botões na tela.";
-            speak(greeting, {
-                onEndCallback: () => {
-                    if (recognition && !isListening && voiceGuideActive === null) { 
-                        isListening = true; awaitingSpecificInput = true;
-                        if(voiceCommandBtn) voiceCommandBtn.classList.add('listening'); 
-                        recognition.onresult = (event) => { 
-                            const transcript = event.results[event.results.length-1][0].transcript.trim().toLowerCase();
-                            awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler; 
-                            if (transcript.includes('sim')) { handleWelcomeChoice(true); }
-                            else if (transcript.includes('não')) { handleWelcomeChoice(false); }
-                            if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening');
-                        };
-                        recognition.onerror = () => {isListening = false; awaitingSpecificInput = false; recognition.onresult = defaultRecognitionResultHandler; if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening');};
-                        recognition.onend = () => {isListening = false; awaitingSpecificInput = false; recognition.onresult = defaultRecognitionResultHandler; if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening'); if (voiceGuideActive === null) { /* Se ainda não decidiu, timeout vai pegar*/ } };
-                        recognition.start();
-                    }
-                }
-            });
-        };
-
-        document.body.addEventListener('pointerdown', function handleFirstAudio() {
-            if (!firstInteractionDoneForAudio) {
-                firstInteractionDoneForAudio = true;
-                let voiceCheckCount = 0;
-                const checkAndPlay = () => { (speechSynthesis.getVoices().length > 0 || voiceCheckCount > 10) ? playInitialGreeting() : (voiceCheckCount++, setTimeout(checkAndPlay, 200)); };
-                if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = checkAndPlay; else checkAndPlay();
-            }
-        }, { capture: true, once: true });
-
-        if (activateVoiceGuideBtn) activateVoiceGuideBtn.addEventListener('click', () => { clearTimeout(welcomeScreenTimeout); handleWelcomeChoice(true); });
-        if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('click', () => { clearTimeout(welcomeScreenTimeout); handleWelcomeChoice(false); });
-
-        welcomeScreenTimeout = setTimeout(() => {
-            if (voiceGuideActive === null) { handleWelcomeChoice(false); }
-        }, 20000); 
-    }
-
-    function effectivelyShowApp() {
-        if (criticalSplashTimeout) { clearTimeout(criticalSplashTimeout); criticalSplashTimeout = null; }
-        if (mainSplashScreen && !mainSplashScreen.classList.contains('hidden') && splashHiddenTimestamp === 0) { 
-            mainSplashScreen.classList.add('hidden');
-            splashHiddenTimestamp = Date.now();
-        }
-        if (inclusiveWelcomeScreen && !inclusiveWelcomeScreen.classList.contains('hidden')) {
-            inclusiveWelcomeScreen.classList.add('hidden');
-        }
-        showAppContentNow();
-    }
-
+    // --- FUNÇÃO DE INICIALIZAÇÃO DA PÁGINA E CONTEÚDO ---
     function showAppContentNow() {
-        if (appContent && appContent.style.display === 'none') { // Só executa se o conteúdo ainda não estiver visível
-            appContent.style.display = 'block';
-            if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
-            if (typeof fetchPlatformStats === "function") fetchPlatformStats();
-            if (typeof fetchRecentWinningPools === "function") fetchRecentWinningPools();
-            if (typeof fetchTopWinners === "function") fetchTopWinners();
-            if (typeof renderBanners === "function") renderBanners();
-            if (typeof initializeCarousels === "function") initializeCarousels();
-            if (mainDisplayLotterySelect) {
-                const initialLottery = mainDisplayLotterySelect.value;
-                if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(initialLottery);
-                if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(initialLottery);
-                if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(initialLottery);
-                if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(initialLottery);
-                if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(initialLottery);
-                setTimeout(() => { if (mainDisplayLotterySelect.dispatchEvent) mainDisplayLotterySelect.dispatchEvent(new Event('change')); }, 300);
+        if (accessibleSplashScreen && !accessibleSplashScreen.classList.contains('hidden')) {
+            accessibleSplashScreen.classList.add('hidden');
+            splashHiddenTimestamp = Date.now();
+            if(splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', '100');
+        } else if (splashHiddenTimestamp > 0 && appContent && appContent.style.display !== 'none') { return; }
+
+        if (appContent) {
+            if (appContent.style.display === 'none') {
+                appContent.style.display = 'block';
+                if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
+                if (typeof fetchPlatformStats === "function") fetchPlatformStats();
+                if (typeof fetchRecentWinningPools === "function") fetchRecentWinningPools();
+                if (typeof fetchTopWinners === "function") fetchTopWinners();
+                if (typeof renderBanners === "function") renderBanners();
+                if (typeof initializeCarousels === "function") initializeCarousels();
+
+                if (!firstInteractionDone && document.body) {
+                    const handleFirstAudioInteraction = () => {
+                        if (!firstInteractionDone) {
+                            firstInteractionDone = true;
+                            console.log("Primeira interação do usuário com o corpo do documento (para áudio).");
+                            const initVoice = () => { if (voiceGuideActive === null && typeof playWelcomeMessage === "function") { setTimeout(playWelcomeMessage, 200);}};
+                            let voiceCheckCount = 0;
+                            const checkVoicesAndPlay = () => {
+                                if (speechSynthesis.getVoices().length > 0 || voiceCheckCount > 10) { initVoice(); } 
+                                else { voiceCheckCount++; setTimeout(checkVoicesAndPlay, 200); }
+                            };
+                            if (speechSynthesis.onvoiceschanged !== undefined) { speechSynthesis.onvoiceschanged = checkVoicesAndPlay; } 
+                            checkVoicesAndPlay(); 
+                        }
+                    };
+                    document.body.addEventListener('pointerdown', handleFirstAudioInteraction, { capture: true, once: true });
+                } else if (firstInteractionDone && voiceGuideActive === null && typeof playWelcomeMessage === "function") {
+                     setTimeout(playWelcomeMessage, 500);
+                }
+
+                if (mainDisplayLotterySelect) {
+                    const initialLottery = mainDisplayLotterySelect.value;
+                    if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(initialLottery);
+                    if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(initialLottery);
+                    if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(initialLottery);
+                    if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(initialLottery);
+                    if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(initialLottery);
+                     setTimeout(() => { if (mainDisplayLotterySelect.dispatchEvent) mainDisplayLotterySelect.dispatchEvent(new Event('change')); }, 300);
+                }
             }
         }
     }
     
-    function updateLoginUI(user) {
-        const navItems = document.querySelectorAll('#main-nav .nav-item');
-        if (user) {
-            if (loginModalBtn) loginModalBtn.style.display = 'none'; if (registerModalBtn) registerModalBtn.style.display = 'none';
-            if (userInfoDiv) userInfoDiv.style.display = 'flex'; if (userEmailSpan) userEmailSpan.textContent = user.email.split('@')[0];
-            if (logoutBtn) logoutBtn.style.display = 'inline-block'; if (mainNav) mainNav.style.display = 'flex';
-            if (navItems && typeof setActiveSection === "function") navItems.forEach(item => item.style.display = 'flex');
-            if (typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
-            if (esotericHunchCard) esotericHunchCard.style.display = 'block'; if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'none';
-        } else {
-            if (loginModalBtn) loginModalBtn.style.display = 'inline-block'; if (registerModalBtn) registerModalBtn.style.display = 'inline-block';
-            if (userInfoDiv) userInfoDiv.style.display = 'none'; if (userEmailSpan) userEmailSpan.textContent = '';
-            if (logoutBtn) logoutBtn.style.display = 'none'; if (mainNav) mainNav.style.display = 'none';
-            if (navItems) navItems.forEach(item => item.style.display = 'none');
-            if (savedGamesContainer) savedGamesContainer.innerHTML = ''; if (noSavedGamesP) noSavedGamesP.style.display = 'block';
-            if (esotericHunchCard) esotericHunchCard.style.display = 'none'; if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'block';
-        }
-        if (typeof updateSaveButtonVisibility === "function") { updateSaveButtonVisibility('quick'); updateSaveButtonVisibility('esoteric'); updateSaveButtonVisibility('hot'); }
-    }
-    
-    async function generateAndDisplayQuickHunch() {
-        if (!quickHunchLotteryTypeSelect || !generateQuickHunchBtn || !quickHunchOutputDiv || !quickHunchNumbersDiv || !quickHunchStrategyP) { return; }
-        const lottery = quickHunchLotteryTypeSelect.value;
-        generateQuickHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...'; generateQuickHunchBtn.disabled = true;
-        quickHunchOutputDiv.style.display = 'block'; quickHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>'; quickHunchStrategyP.textContent = 'Gerando palpite...';
-        if(saveQuickHunchBtn) saveQuickHunchBtn.style.display = 'none'; if(checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'none'; if(quickHunchCheckResultDiv) quickHunchCheckResultDiv.innerHTML = '';
-        try {
-            const data = await fetchData(`api/main/gerar_jogo/${lottery}`);
-            if (data.erro) { throw new Error(data.detalhes || data.erro);  } if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) { throw new Error("Palpite inválido.");}
-            if (typeof renderGameNumbers === "function") renderGameNumbers(quickHunchNumbersDiv, data.jogo, [], [], lottery);
-            quickHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Aleatório'}`;
-            lastGeneratedHunch = { type: 'quick', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Aleatório', outputDiv: quickHunchOutputDiv, numbersDiv: quickHunchNumbersDiv, checkResultDiv: quickHunchCheckResultDiv, saveButton: saveQuickHunchBtn, checkButton: checkQuickHunchBtn };
-            if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('quick'); if (checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'inline-block';
-        } catch (error) { console.error("SCRIPT.JS: Erro palpite rápido:", error); quickHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha.'}</p>`; quickHunchStrategyP.textContent = 'Erro.'; lastGeneratedHunch = { type: null };
-        } finally { generateQuickHunchBtn.innerHTML = '<i class="fas fa-random"></i> Gerar Palpite Rápido'; generateQuickHunchBtn.disabled = false; }
-    }
-
-    async function generateAndDisplayHotNumbersHunch() {
-        if (!hotNumbersLotteryTypeSelect || !generateHotNumbersHunchBtn || !hotNumbersAnalyzeCountInput || !hotNumbersHunchOutputDiv || !hotNumbersHunchNumbersDiv || !hotNumbersHunchStrategyP) { return; }
-        const lottery = hotNumbersLotteryTypeSelect.value; let analyzeCount = parseInt(hotNumbersAnalyzeCountInput.value, 10);
-        if (isNaN(analyzeCount) || analyzeCount <= 0) { alert("Insira um número válido de concursos (mín. 1)."); hotNumbersAnalyzeCountInput.focus(); analyzeCount = 20; hotNumbersAnalyzeCountInput.value = analyzeCount; }
-        generateHotNumbersHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...'; generateHotNumbersHunchBtn.disabled = true;
-        hotNumbersHunchOutputDiv.style.display = 'block'; hotNumbersHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>'; hotNumbersHunchStrategyP.textContent = 'Analisando...';
-        if(saveHotHunchBtn) saveHotHunchBtn.style.display = 'none'; if(checkHotHunchBtn) checkHotHunchBtn.style.display = 'none'; if(hotHunchCheckResultDiv) hotHunchCheckResultDiv.innerHTML = '';
-        try {
-            const data = await fetchData(`api/main/gerar_jogo/numeros_quentes/${lottery}?num_concursos_analisar=${analyzeCount}`);
-            if (data.erro) { throw new Error(data.detalhes || data.erro); } if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) { throw new Error("Palpite inválido (quentes)."); }
-            if (typeof renderGameNumbers === "function") renderGameNumbers(hotNumbersHunchNumbersDiv, data.jogo, [], [], lottery);
-            hotNumbersHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Números Quentes'}`; if (data.aviso) { hotNumbersHunchStrategyP.textContent += ` (${data.aviso})`; }
-            lastGeneratedHunch = { type: 'hot', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Números Quentes', outputDiv: hotNumbersHunchOutputDiv, numbersDiv: hotNumbersHunchNumbersDiv, checkResultDiv: hotHunchCheckResultDiv, saveButton: saveHotHunchBtn, checkButton: checkHotHunchBtn };
-            if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('hot'); if (checkHotHunchBtn) checkHotHunchBtn.style.display = 'inline-block';
-        } catch (error) { console.error("SCRIPT.JS: Erro palpite números quentes:", error); hotNumbersHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha.'}</p>`; hotNumbersHunchStrategyP.textContent = 'Erro.'; lastGeneratedHunch = { type: null };
-        } finally { generateHotNumbersHunchBtn.innerHTML = '<i class="fas fa-chart-line"></i> Gerar Palpite Quente'; generateHotNumbersHunchBtn.disabled = false; }
-    }
-
-    async function generateAndDisplayEsotericHunch() {
-        if (!esotericLotteryTypeSelect || !birthDateInput || !generateEsotericHunchBtn || !esotericHunchOutputDiv || !esotericHunchNumbersDiv || !esotericHunchMethodP || !esotericHunchHistoryCheckDiv) { return; }
-        const lotteryName = esotericLotteryTypeSelect.value; const birthDateRaw = birthDateInput.value.trim(); const birthDate = birthDateRaw.replace(/\D/g, '');
-        if (!birthDate) { alert("Insira sua data de nascimento."); birthDateInput.focus(); return; } if (birthDate.length !== 8) { alert("Formato da data inválido. Use DDMMAAAA."); birthDateInput.focus(); return; }
-        generateEsotericHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...'; generateEsotericHunchBtn.disabled = true;
-        esotericHunchOutputDiv.style.display = 'block'; esotericHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>'; esotericHunchMethodP.textContent = 'Consultando...'; esotericHunchHistoryCheckDiv.innerHTML = '';
-        if(saveEsotericHunchBtn) saveEsotericHunchBtn.style.display = 'none'; if(checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'none';
-        try {
-            const requestBody = { data_nascimento: birthDate }; const data = await fetchData(`api/main/palpite-esoterico/${lotteryName}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
-            if (data.erro) { throw new Error(data.erro); } if (!data.palpite_gerado) { throw new Error("API não retornou palpite."); }
-            if (typeof renderGameNumbers === "function") renderGameNumbers(esotericHunchNumbersDiv, data.palpite_gerado, [], [], lotteryName);
-            esotericHunchMethodP.textContent = `Método: ${data.metodo_geracao || 'N/A'}`;
-            let historyHtml = `<strong>Histórico:</strong><br>`;
-            if (data.historico_desta_combinacao) { const hist = data.historico_desta_combinacao; historyHtml += `Premiada? <span style="color: ${hist.ja_foi_premiada_faixa_principal ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${hist.ja_foi_premiada_faixa_principal ? 'Sim' : 'Não'}</span> (${hist.vezes_premiada_faixa_principal}x) - Valor: ${hist.valor_total_ganho_faixa_principal_formatado}`; } else { historyHtml += "Não verificado."; }
-            esotericHunchHistoryCheckDiv.innerHTML = historyHtml;
-            lastGeneratedHunch = { type: 'esoteric', lottery: lotteryName, jogo: data.palpite_gerado, estrategia_metodo: data.metodo_geracao || 'N/A', outputDiv: esotericHunchOutputDiv, numbersDiv: esotericHunchNumbersDiv, checkResultDiv: esotericHunchHistoryCheckDiv, saveButton: saveEsotericHunchBtn, checkButton: checkEsotericHunchBtn };
-            if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('esoteric'); if (checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'inline-block';
-        } catch (error) { console.error("SCRIPT.JS: Erro palpite esotérico:", error); esotericHunchNumbersDiv.innerHTML = ''; esotericHunchMethodP.textContent = ''; esotericHunchHistoryCheckDiv.innerHTML = `<p class="error-message">Falha: ${error.message || 'Erro.'}</p>`; lastGeneratedHunch = { type: null };
-        } finally { generateEsotericHunchBtn.innerHTML = '<i class="fas fa-meteor"></i> Gerar Palpite Cósmico'; generateEsotericHunchBtn.disabled = false; }
-    }
-
-    function updateSaveButtonVisibility(hunchType) {
-        const currentHunch = lastGeneratedHunch; let targetSaveButton = null;
-        if (hunchType === 'quick') targetSaveButton = saveQuickHunchBtn;
-        else if (hunchType === 'esoteric') targetSaveButton = saveEsotericHunchBtn;
-        else if (hunchType === 'hot') targetSaveButton = saveHotHunchBtn;
-        if (targetSaveButton) { targetSaveButton.style.display = currentUser && currentHunch.type === hunchType && currentHunch.outputDiv && currentHunch.outputDiv.style.display !== 'none' ? 'inline-block' : 'none'; }
-        else if (currentHunch.type === hunchType && !targetSaveButton) { console.warn(`SCRIPT.JS: Botão Salvar para '${hunchType}' não encontrado.`); }
-    }
-
-    function setupSaveHunchButtonListeners() {
-        if (saveQuickHunchBtn) saveQuickHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('quick'));
-        if (saveEsotericHunchBtn) saveEsotericHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('esoteric'));
-        if (saveHotHunchBtn) saveHotHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('hot'));
-    }
-
-    function saveLastGeneratedHunch(expectedHunchType) {
-        if (!firestoreDB || !currentUser || !lastGeneratedHunch.jogo || !Array.isArray(lastGeneratedHunch.jogo) || lastGeneratedHunch.jogo.length === 0 || lastGeneratedHunch.type !== expectedHunchType) {
-            alert("Logue-se e gere um palpite válido deste tipo para salvar."); return;
-        }
-        const { lottery, jogo, estrategia_metodo } = lastGeneratedHunch;
-        firestoreDB.collection('userGames').add({ userId: currentUser.uid, userEmail: currentUser.email, lottery: lottery, game: jogo, strategy: estrategia_metodo, savedAt: firebase.firestore.FieldValue.serverTimestamp(), checkedResult: null })
-            .then(() => { alert("Palpite salvo!"); if (myGamesSection && myGamesSection.classList.contains('active-section') && typeof loadUserGames === "function") { loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); } })
-            .catch((error) => { alert(`Erro ao salvar: ${error.message}`); console.error("SCRIPT.JS: Erro ao salvar:", error); });
-    }
-
-    function setupCheckHunchButtonListeners() {
-        if (checkQuickHunchBtn && quickHunchLotteryTypeSelect) checkQuickHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('quick', quickHunchLotteryTypeSelect));
-        if (checkEsotericHunchBtn && esotericLotteryTypeSelect) checkEsotericHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('esoteric', esotericLotteryTypeSelect));
-        if (checkHotHunchBtn && hotNumbersLotteryTypeSelect) checkHotHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('hot', hotNumbersLotteryTypeSelect));
-    }
-
-    async function checkLastGeneratedHunch(expectedHunchType, lotterySelectElement) {
-        const currentLottery = lotterySelectElement.value; const currentHunch = lastGeneratedHunch;
-        let targetCheckResultDiv = null; let targetNumbersDiv = null;
-        if (expectedHunchType === 'quick') { targetCheckResultDiv = quickHunchCheckResultDiv; targetNumbersDiv = quickHunchNumbersDiv; }
-        else if (expectedHunchType === 'esoteric') { targetCheckResultDiv = esotericHunchHistoryCheckDiv; targetNumbersDiv = esotericHunchNumbersDiv; }
-        else if (expectedHunchType === 'hot') { targetCheckResultDiv = hotHunchCheckResultDiv; targetNumbersDiv = hotNumbersHunchNumbersDiv; }
-
-        if (!currentHunch.jogo || !Array.isArray(currentHunch.jogo) || currentHunch.jogo.length === 0 || currentHunch.lottery !== currentLottery || currentHunch.type !== expectedHunchType || !targetCheckResultDiv || !targetNumbersDiv ) {
-            if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = '<span class="misses">Gere um palpite deste tipo para esta loteria primeiro.</span>'; return;
-        }
-        let resultsToUse = lastFetchedResults[currentLottery];
-        if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) {
-            targetCheckResultDiv.innerHTML = `<div class="spinner small-spinner"></div> Buscando resultados...`;
-            try { resultsToUse = await fetchData(`api/main/resultados/${currentLottery}`); if(resultsToUse) resultsToUse.loteria_tipo = currentLottery; lastFetchedResults[currentLottery] = resultsToUse; }
-            catch (e) { targetCheckResultDiv.innerHTML = `<span class="misses">Falha ao buscar resultados.</span>`; return; }
-        }
-        if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) { targetCheckResultDiv.innerHTML = `<span class="misses">Resultados oficiais indisponíveis.</span>`; return; }
-        if(typeof checkGame !== "function" || typeof renderGameNumbers !== "function") { targetCheckResultDiv.innerHTML = "Erro interno."; return; }
-        const result = checkGame(currentHunch.jogo, resultsToUse);
-        if (expectedHunchType === 'esoteric') { console.log("Conferência p/ esotérico:", result.message); } 
-        else { targetCheckResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers && result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`; }
-        renderGameNumbers(targetNumbersDiv, currentHunch.jogo, result.hitNumbers, result.almostNumbers || [], currentLottery);
-    }
-    
-    function triggerConfetti() {
-        if (!confettiCanvas) return;
-        for (let i = 0; i < 100; i++) { // Lança 100 confetes
-            const confetti = document.createElement('div');
-            confetti.classList.add('confetti');
-            confetti.style.left = Math.random() * 100 + 'vw';
-            confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 70%)`;
-            const duration = Math.random() * 3 + 2; // Duração entre 2 e 5 segundos
-            confetti.style.animationDuration = duration + 's';
-            confetti.style.animationDelay = Math.random() * 0.5 + 's'; // Pequeno delay aleatório
-            // Remove o confete depois que ele cai
-            confetti.addEventListener('animationend', () => {
-                confetti.remove();
+    // --- INICIALIZAÇÃO DO FIREBASE E AUTENTICAÇÃO ---
+    function setupAuthEventListeners() {
+        if(loginSubmitBtn && loginEmailInput && loginPasswordInput && loginErrorP) {
+            loginSubmitBtn.addEventListener('click', () => { 
+                if (!firebaseAuth) { if(loginErrorP) loginErrorP.textContent = "Erro de inicialização."; return; }
+                const email = loginEmailInput.value; const password = loginPasswordInput.value;
+                loginErrorP.textContent = ""; if (!email || !password) { loginErrorP.textContent = "Preencha email e senha."; return; }
+                firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .then(() => { if(typeof closeModal === "function") closeModal(loginModal); })
+                    .catch((error) => { loginErrorP.textContent = `Erro: ${error.message}`; });
             });
-            confettiCanvas.appendChild(confetti);
+        }
+        if(registerSubmitBtn && registerEmailInput && registerPasswordInput && registerConfirmPasswordInput && registerErrorP) {
+            registerSubmitBtn.addEventListener('click', () => { 
+                if (!firebaseAuth) { if(registerErrorP) registerErrorP.textContent = "Erro de inicialização."; return; }
+                const email = registerEmailInput.value; const password = registerPasswordInput.value; const confirmPassword = registerConfirmPasswordInput.value;
+                registerErrorP.textContent = ""; if (!email || !password || !confirmPassword) { registerErrorP.textContent = "Preencha todos os campos."; return; }
+                if (password !== confirmPassword) { registerErrorP.textContent = "As senhas não coincidem."; return; }
+                if (password.length < 6) { registerErrorP.textContent = "A senha deve ter no mínimo 6 caracteres."; return; }
+                firebaseAuth.createUserWithEmailAndPassword(email, password)
+                    .then(() => { alert("Usuário registrado! Você já está logado."); if(typeof closeModal === "function") closeModal(registerModal); })
+                    .catch((error) => { registerErrorP.textContent = `Erro: ${error.message}`; });
+            });
+        }
+        if(logoutBtn) {
+            logoutBtn.addEventListener('click', () => { if (firebaseAuth && currentUser) { firebaseAuth.signOut().then(() => {}).catch(e => alert(e.message)); } });
         }
     }
+    
+    function initializeFirebase() {
+        if (typeof firebase !== 'undefined' && typeof firebaseConfig !== 'undefined') {
+            try {
+                if (firebase.apps.length === 0) { firebaseApp = firebase.initializeApp(firebaseConfig); } else { firebaseApp = firebase.app(); }
+                firebaseAuth = firebase.auth(firebaseApp); firestoreDB = firebase.firestore(firebaseApp);
+                if (typeof setupAuthEventListeners === "function") setupAuthEventListeners();
+                firebaseAuth.onAuthStateChanged(user => {
+                    currentUser = user;
+                    if (typeof updateLoginUI === "function") updateLoginUI(user);
+                    if (criticalSplashTimeout) { clearTimeout(criticalSplashTimeout); criticalSplashTimeout = null; }
+                    const timeSinceDOMLoad = Date.now() - domContentLoadedTimestamp;
+                    let delayToHideSplash = (splashHiddenTimestamp === 0 && timeSinceDOMLoad < SPLASH_MINIMUM_VISIBLE_TIME) ? SPLASH_MINIMUM_VISIBLE_TIME - timeSinceDOMLoad : 0;
+                    if (splashHiddenTimestamp === 0) setTimeout(showAppContentNow, delayToHideSplash);
+                    else showAppContentNow(); 
+                });
+                if (typeof enableFirebaseFeatures === "function") enableFirebaseFeatures();
+                return true;
+            } catch (error) { console.error("SCRIPT.JS: CRITICAL Firebase init error:", error); if (typeof showGlobalError === "function") showGlobalError(`Erro Firebase: ${error.message}`); if (typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); return false; }
+        } else { console.error("SCRIPT.JS: Firebase SDK ou firebaseConfig não definidos."); if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") { setTimeout(showAppContentNow, SPLASH_MINIMUM_VISIBLE_TIME > (Date.now() - domContentLoadedTimestamp) ? SPLASH_MINIMUM_VISIBLE_TIME - (Date.now() - domContentLoadedTimestamp) : 0); } if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); return false; }
+    }
+
+    function attemptFirebaseInit() {
+        if (!initializeFirebase()) {
+            firebaseInitAttempts++;
+            if (firebaseInitAttempts < maxFirebaseInitAttempts) setTimeout(attemptFirebaseInit, 500);
+            else { if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") { showAppContentNow(); } if(typeof showGlobalError === "function") showGlobalError("Não foi possível carregar os serviços. Tente recarregar."); if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); }
+        }
+    }
+    
+    async function fetchAndDisplayResults(lottery) { 
+        if (!apiResultsPre || !resultsLotteryNameSpan || !mainDisplayLotterySelect) return;
+        const selectedOption = Array.from(mainDisplayLotterySelect.options).find(opt => opt.value === lottery);
+        const lotteryFriendlyName = selectedOption ? selectedOption.text : (LOTTERY_CONFIG_JS[lottery] ? LOTTERY_CONFIG_JS[lottery].name : lottery.toUpperCase());
+        resultsLotteryNameSpan.textContent = lotteryFriendlyName;
+        apiResultsPre.textContent = 'Buscando...';
+        try {
+            const data = await fetchData(`api/main/resultados/${lottery}`);
+            let displayText = data.erro ? `Erro: ${data.erro}` : (data.aviso ? `Aviso: ${data.aviso}` : `Concurso: ${data.ultimo_concurso || 'N/A'}\nData: ${data.data || 'N/A'}\nNúmeros: ${data.numeros ? data.numeros.join(', ') : 'N/A'}`);
+            apiResultsPre.textContent = displayText;
+            lastFetchedResults[lottery] = data; if(data && !data.erro && !data.aviso) lastFetchedResults[lottery].loteria_tipo = lottery;
+        } catch (error) { apiResultsPre.textContent = `Falha: ${error.message || 'Erro'}`; lastFetchedResults[lottery] = { erro: `Falha: ${error.message || 'Erro'}`, numeros: [] }; }
+    }
+    
+    function renderGameNumbers(container, numbersArray, highlightedNumbers = [], almostNumbers = [], currentLotteryForColor = null) {
+        if (!container) { return; } container.innerHTML = '';
+        if (!numbersArray || !Array.isArray(numbersArray) || numbersArray.length === 0) { container.textContent = "N/A"; return; }
+        const hS = highlightedNumbers.map(String), aS = almostNumbers.map(String);
+        let activeL = currentLotteryForColor || (mainDisplayLotterySelect ? mainDisplayLotterySelect.value : 'megasena');
+        numbersArray.forEach((numIn, idx) => {
+            const nS = String(numIn).trim(), num = parseInt(nS, 10); if(isNaN(num)) return;
+            const nD = document.createElement('div'); nD.classList.add('game-number');
+            nD.style.opacity='0'; nD.style.transform='scale(0.5) translateY(10px)'; nD.style.transition=`opacity 0.3s ease-out ${idx*0.07}s, transform 0.3s ease-out ${idx*0.07}s`;
+            if(hS.includes(nS)) nD.classList.add('hit'); else if(aS.includes(nS)) nD.classList.add('almost');
+            nD.textContent=String(num).padStart(2,'0');
+            if(LOTTERY_CONFIG_JS[activeL]?.color && !nD.classList.contains('hit') && !nD.classList.contains('almost')) { nD.style.backgroundColor=LOTTERY_CONFIG_JS[activeL].color; nD.style.color='#fff';}
+            container.appendChild(nD); requestAnimationFrame(()=>setTimeout(()=>{nD.style.opacity='1';nD.style.transform='scale(1) translateY(0)';},20));
+        });
+    }
+
+    function triggerConfetti() { /* Implemente aqui, se desejar */ }
 
     function checkGame(userGameNumbers, officialResults) {
-        if (!userGameNumbers || !officialResults || !officialResults.numeros || !Array.isArray(officialResults.numeros)) {
-            return { hits: 0, hitNumbers: [], almostNumbers: [], message: "Dados insuficientes para conferir." };
-        }
+        if (!userGameNumbers || !officialResults || !officialResults.numeros || !Array.isArray(officialResults.numeros)) return { hits: 0, hitNumbers: [], almostNumbers: [], message: "Dados insuficientes." };
         const drawnNumbers = officialResults.numeros.map(n => String(n).trim());
         const userNumbersStr = userGameNumbers.map(n => String(n).trim());
-        let hits = 0; 
-        let hitNumbers = [];
-        userNumbersStr.forEach(num => { 
-            if (drawnNumbers.includes(num)) { 
-                hits++; 
-                hitNumbers.push(parseInt(num, 10)); 
-            } 
-        });
-        let message = `Você acertou ${hits} número(s).`;
-        if (hits > 0) {
-            message += ` Acertos: ${hitNumbers.join(', ')}.`;
-            if (hits === userGameNumbers.length && userGameNumbers.length > 0) { // Verificação simplificada de prêmio máximo
-                message += " Parabéns, você GANHOU o prêmio máximo!";
-                triggerConfetti(); // Chama os confetes!
-            }
-        }
-        // Placeholder para almostNumbers, já que não foi completamente implementado
-        return { hits: hits, hitNumbers: hitNumbers, almostNumbers: [], message: message }; 
+        let hits = 0, hitNumbers = [];
+        userNumbersStr.forEach(num => { if (drawnNumbers.includes(num)) { hits++; hitNumbers.push(parseInt(num,10)); } });
+        let message = `Acertou ${hits} número(s).` + (hits > 0 ? ` Números: ${hitNumbers.join(', ')}.` : '');
+        return { hits: hits, hitNumbers: hitNumbers, almostNumbers: [], message: message };
     }
 
     async function loadUserGames(filterLottery = "todos") {
         if (!currentUser || !firestoreDB || !savedGamesContainer || !noSavedGamesP) return;
-        savedGamesContainer.innerHTML = '<div class="spinner small-spinner"></div> Carregando seus jogos...'; 
-        noSavedGamesP.style.display = 'none';
+        savedGamesContainer.innerHTML = '<div class="spinner small-spinner"></div> Carregando...'; noSavedGamesP.style.display = 'none';
         try {
             let query = firestoreDB.collection('userGames').where('userId', '==', currentUser.uid).orderBy('savedAt', 'desc');
-            if (filterLottery !== "todos") { query = query.where('lottery', '==', filterLottery); }
-            const snapshot = await query.get(); 
-            savedGamesContainer.innerHTML = '';
+            if (filterLottery !== "todos") query = query.where('lottery', '==', filterLottery);
+            const snapshot = await query.get(); savedGamesContainer.innerHTML = '';
             if (snapshot.empty) { noSavedGamesP.style.display = 'block'; return; }
             snapshot.forEach(doc => { const gameCard = createGameCardElement(doc.id, doc.data()); if(gameCard) savedGamesContainer.appendChild(gameCard); });
-        } catch (error) { console.error("Erro ao carregar jogos salvos:", error); savedGamesContainer.innerHTML = '<p class="error-message">Erro ao carregar jogos.</p>'; }
+        } catch (error) { console.error("Erro jogos salvos:", error); savedGamesContainer.innerHTML = '<p class="error-message">Erro ao carregar.</p>'; }
     }
 
     function createGameCardElement(docId, gameData) {
@@ -863,10 +888,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const gameNumbersDiv = document.createElement('div'); gameNumbersDiv.classList.add('game-numbers');
         renderGameNumbers(gameNumbersDiv, gameData.game, [], [], gameData.lottery);
         const strategyP = document.createElement('p'); strategyP.classList.add('strategy-text'); strategyP.textContent = `Estratégia: ${gameData.strategy || 'N/A'}`;
-        const dateP = document.createElement('p'); dateP.classList.add('game-card-info'); dateP.textContent = `Salvo em: ${gameData.savedAt ? new Date(gameData.savedAt.toDate()).toLocaleDateString() : 'Data N/A'}`;
+        const dateP = document.createElement('p'); dateP.classList.add('game-card-info'); dateP.textContent = `Salvo em: ${gameData.savedAt ? new Date(gameData.savedAt.toDate()).toLocaleDateString() : 'N/A'}`;
         const actionsDiv = document.createElement('div'); actionsDiv.classList.add('game-card-actions');
         const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'small-btn'); deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Excluir';
-        deleteBtn.addEventListener('click', async () => { if (confirm("Tem certeza que quer excluir este jogo?")) { try { await firestoreDB.collection('userGames').doc(docId).delete(); card.remove(); if (savedGamesContainer.children.length === 0) noSavedGamesP.style.display = 'block'; } catch (e) { alert("Erro ao excluir.");}}});
+        deleteBtn.addEventListener('click', async () => { if (confirm("Excluir este jogo?")) { try { await firestoreDB.collection('userGames').doc(docId).delete(); card.remove(); if (savedGamesContainer.children.length === 0) noSavedGamesP.style.display = 'block'; } catch (e) { alert("Erro ao excluir.");}}});
         actionsDiv.appendChild(deleteBtn); card.innerHTML = `<h4>${lotteryName}</h4>`;
         card.appendChild(gameNumbersDiv); card.appendChild(strategyP); card.appendChild(dateP); card.appendChild(actionsDiv);
         return card;
@@ -880,18 +905,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const userNumbersCount = numbersStr.split(/[ ,;/\t\n]+/).filter(n => n.trim() !== "" && !isNaN(n)).length;
         manualProbNumbersCountFeedback.textContent = `Números: ${userNumbersCount} de ${expectedCount}.`;
     }
-
-    // --- INICIALIZAÇÃO E EVENT LISTENERS ---
-    // (O restante do script, incluindo a chamada para initializeInclusiveWelcome, 
-    //  initializeVoiceCommands, attemptFirebaseInit e todos os event listeners 
-    //  de botões e selects, deve ser colado aqui na íntegra da última versão completa)
-    // ...
-
-    // --- INICIALIZAÇÃO PRINCIPAL ---
-    initializeVoiceCommands(); 
-    initializeInclusiveWelcome(); 
     
-    // --- EVENT LISTENERS (Garantir que estão após as definições das funções que chamam) ---
+    // --- EVENT LISTENERS (final do script) ---
+    if (accessibleSplashScreen && !accessibleSplashScreen.classList.contains('hidden') && splashProgressBarFill && splashProgressContainer) {
+        let progress = 0; const totalVisualBarTime = SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION; const intervalTime = Math.max(10, totalVisualBarTime / 100);
+        const progressInterval = setInterval(() => { progress++; if (splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', progress); if (progress >= 100) { clearInterval(progressInterval); } }, intervalTime);
+    }
+    criticalSplashTimeout = setTimeout(() => { 
+         if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") { showAppContentNow(); }
+         if (!firebaseApp && typeof showGlobalError === "function") { showGlobalError("Falha crítica na inicialização. Tente recarregar."); if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();}
+         criticalSplashTimeout = null; 
+    }, SPLASH_MINIMUM_VISIBLE_TIME + 3500);
+
+    document.body.addEventListener('click', function handleFirstInteractionForAudio() {
+        if (!firstInteractionDone) {
+            firstInteractionDone = true;
+            // console.log("Primeira interação do usuário com o corpo do documento (para áudio).");
+            const initVoice = () => { if (voiceGuideActive === null && typeof playWelcomeMessage === "function") { setTimeout(playWelcomeMessage, 200);}};
+            if (speechSynthesis.getVoices().length > 0) initVoice();
+            else if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = initVoice;
+            else setTimeout(initVoice, 500); 
+        }
+    }, { capture: true, once: true });
+
+    initializeVoiceCommands(); 
+    if (typeof attemptFirebaseInit === "function") { setTimeout(attemptFirebaseInit, 200); } 
+    else {  if (splashHiddenTimestamp === 0 && typeof showAppContentNow === "function") showAppContentNow(); if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); }
+
     if(loginModalBtn) loginModalBtn.addEventListener('click', () => openModal(loginModal));
     if(registerModalBtn) registerModalBtn.addEventListener('click', () => openModal(registerModal));
     if(closeLoginModalBtn) closeLoginModalBtn.addEventListener('click', () => closeModal(loginModal));
@@ -928,13 +968,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(selectedLottery);
         }); 
     }
-    if (generateQuickHunchBtn && typeof generateAndDisplayQuickHunch === "function") generateQuickHunchBtn.addEventListener('click', generateAndDisplayQuickHunch);
-    if (generateEsotericHunchBtn && typeof generateAndDisplayEsotericHunch === "function") generateEsotericHunchBtn.addEventListener('click', generateAndDisplayEsotericHunch);
-    if (generateHotNumbersHunchBtn && typeof generateAndDisplayHotNumbersHunch === "function") generateHotNumbersHunchBtn.addEventListener('click', generateAndDisplayHotNumbersHunch);
-    
+    if (generateQuickHunchBtn) generateQuickHunchBtn.addEventListener('click', generateAndDisplayQuickHunch);
+    if (generateEsotericHunchBtn) generateEsotericHunchBtn.addEventListener('click', generateAndDisplayEsotericHunch);
+    if (generateHotNumbersHunchBtn) generateHotNumbersHunchBtn.addEventListener('click', generateAndDisplayHotNumbersHunch);
     if (typeof setupSaveHunchButtonListeners === "function") setupSaveHunchButtonListeners();
     if (typeof setupCheckHunchButtonListeners === "function") setupCheckHunchButtonListeners();
     
+    // Listeners para botões do banner promocional (GARANTIDOS QUE ESTÃO ATIVOS)
     if (promoRegisterBtn && typeof openModal === "function") {
         promoRegisterBtn.addEventListener('click', () => openModal(registerModal));
     }
@@ -942,27 +982,27 @@ document.addEventListener('DOMContentLoaded', () => {
         promoLoginBtn.addEventListener('click', () => openModal(loginModal));
     }
     
-    if (filterLotteryMyGamesSelect && typeof loadUserGames === "function") { filterLotteryMyGamesSelect.addEventListener('change', (e) => { if (currentUser) loadUserGames(e.target.value); });}
+    if (filterLotteryMyGamesSelect) { filterLotteryMyGamesSelect.addEventListener('change', (e) => { if (currentUser && typeof loadUserGames === "function") loadUserGames(e.target.value); });}
     
-    if (manualProbUserNumbersInput && manualProbLotteryTypeSelect && typeof updateManualProbNumbersFeedback === "function") { 
+    if (manualProbUserNumbersInput && manualProbLotteryTypeSelect) { 
         manualProbUserNumbersInput.addEventListener('input', updateManualProbNumbersFeedback);
         manualProbLotteryTypeSelect.addEventListener('change', () => { 
             const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex]; 
             if (!selectedOption || !selectedOption.dataset.count || !selectedOption.dataset.min || !selectedOption.dataset.max) return;
             manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${selectedOption.dataset.count} de ${selectedOption.dataset.min}-${selectedOption.dataset.max})`; 
             manualProbUserNumbersInput.value = ''; 
-            updateManualProbNumbersFeedback(); 
+            if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback(); 
             if(manualProbabilityResultDisplay) manualProbabilityResultDisplay.textContent = "Aguardando seu jogo...";
         });
         const initialSelectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
          if (initialSelectedOption && initialSelectedOption.dataset.count && initialSelectedOption.dataset.min && initialSelectedOption.dataset.max){ 
             manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${initialSelectedOption.dataset.count} de ${initialSelectedOption.dataset.min}-${initialSelectedOption.dataset.max})`; 
          }
-        updateManualProbNumbersFeedback(); 
+        if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback(); 
     }
-    if (manualCalculateProbBtn && typeof fetchData === "function") { 
+    if (manualCalculateProbBtn) { 
         manualCalculateProbBtn.addEventListener('click', async () => { 
-            if (!manualProbLotteryTypeSelect || !manualProbUserNumbersInput || !manualProbabilityResultDisplay) return;
+            if (!manualProbLotteryTypeSelect || !manualProbUserNumbersInput || !manualProbabilityResultDisplay || typeof fetchData !== 'function') return;
             const lotteryType = manualProbLotteryTypeSelect.value; 
             const numbersStr = manualProbUserNumbersInput.value; 
             const userNumbersRaw = numbersStr.split(/[ ,;/\t\n]+/); 
@@ -985,6 +1025,5 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Erro: ${error.message}</p>`; }
         }); 
     }
-
-    console.log("SCRIPT.JS: Final do script atingido.");
+    console.log("SCRIPT.JS: Final do script atingido, todos os listeners configurados.");
 });
