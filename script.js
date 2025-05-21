@@ -159,8 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let voiceGuideActive = null;
     let firstInteractionDoneForAudio = false;
     let voiceContext = { action: null, awaiting: null, data: {} };
-    let welcomeScreenTimeout;
-    let awaitingSpecificInput = false;
 
     function showGlobalError(message) { if (errorDiv) { errorDiv.textContent = message; errorDiv.style.display = 'block'; } else { console.error("SCRIPT.JS: Global error div não encontrado:", message); } }
     function disableFirebaseFeatures() { if (loginModalBtn) loginModalBtn.disabled = true; if (registerModalBtn) registerModalBtn.disabled = true; }
@@ -871,7 +869,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return card;
     }
 
-
     function updateManualProbNumbersFeedback() {
         if (!manualProbLotteryTypeSelect || !manualProbUserNumbersInput || !manualProbNumbersCountFeedback) return;
         const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
@@ -919,14 +916,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 firebaseAuth.onAuthStateChanged(user => {
                     currentUser = user;
                     if (typeof updateLoginUI === "function") updateLoginUI(user);
-                    if (localStorage.getItem('voiceGuideActive') === 'true' || !localStorage.getItem('voiceGuideActive')) { // Considera se o guia estava ativo ou se é a primeira vez (sem escolha ainda)
+                    if (inclusiveWelcomeScreen && inclusiveWelcomeScreen.classList.contains('hidden')) { // Se a tela de boas vindas já passou
                         if (splashHiddenTimestamp > 0 || (mainSplashScreen && mainSplashScreen.classList.contains('hidden')) ) {
-                            if (typeof effectivelyShowApp === "function") effectivelyShowApp();
+                             if (typeof effectivelyShowApp === "function") effectivelyShowApp();
                         }
-                    } else if (typeof effectivelyShowApp === "function" && (!inclusiveWelcomeScreen || inclusiveWelcomeScreen.classList.contains('hidden'))) {
-                        const timeSinceDOMLoad = Date.now() - domContentLoadedTimestamp;
-                        let delayToHideMainSplash = (mainSplashScreen && !mainSplashScreen.classList.contains('hidden') && splashHiddenTimestamp === 0 && timeSinceDOMLoad < SPLASH_MINIMUM_VISIBLE_TIME) ? SPLASH_MINIMUM_VISIBLE_TIME - timeSinceDOMLoad : 0;
-                        setTimeout(effectivelyShowApp, delayToHideMainSplash);
                     }
                 });
                 if (typeof enableFirebaseFeatures === "function") enableFirebaseFeatures();
@@ -934,9 +927,11 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) { console.error("SCRIPT.JS: CRITICAL Firebase init error:", error); if (typeof showGlobalError === "function") showGlobalError(`Erro Firebase: ${error.message}`); if (typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); return false; }
         } else {
             console.error("SCRIPT.JS: Firebase SDK ou firebaseConfig não definidos.");
-            if (typeof effectivelyShowApp === "function") {
-                const timeSinceDOMLoad = Date.now() - domContentLoadedTimestamp;
-                setTimeout(effectivelyShowApp, SPLASH_MINIMUM_VISIBLE_TIME > timeSinceDOMLoad ? SPLASH_MINIMUM_VISIBLE_TIME - timeSinceDOMLoad : 0);
+             if (inclusiveWelcomeScreen && inclusiveWelcomeScreen.classList.contains('hidden')) { // Se a tela de boas vindas já passou (ex: não ativada)
+                if (typeof effectivelyShowApp === "function") {
+                    const timeSinceDOMLoad = Date.now() - domContentLoadedTimestamp;
+                    setTimeout(effectivelyShowApp, SPLASH_MINIMUM_VISIBLE_TIME > timeSinceDOMLoad ? SPLASH_MINIMUM_VISIBLE_TIME - timeSinceDOMLoad : 0);
+                }
             }
             if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
             return false;
@@ -989,7 +984,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleWelcomeChoice(activate) {
-        clearTimeout(welcomeScreenTimeout);
         setVoiceGuideState(activate);
 
         if (inclusiveWelcomeScreen) inclusiveWelcomeScreen.classList.add('hidden');
@@ -1025,56 +1019,86 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const playInitialGreetingAndListen = () => {
             if (voiceGuideActive !== null || !inclusiveWelcomeScreen || inclusiveWelcomeScreen.classList.contains('hidden')) return;
-
             const greeting = "Bem-vindo ao Loto Genius AI. Esta plataforma é inclusiva. Deseja ativar o guia de voz? Diga 'Sim' ou 'Não', ou use os botões na tela.";
-            speak(greeting, {
-                onEndCallback: () => {
-                    if (recognition && !isListening && voiceGuideActive === null) {
-                        isListening = true; awaitingSpecificInput = true;
-                        recognition.onresult = (event) => {
-                            const transcript = event.results[event.results.length-1][0].transcript.trim().toLowerCase();
-                            awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler;
-                            clearTimeout(welcomeScreenTimeout);
-                            if (transcript.includes('sim')) { handleWelcomeChoice(true); }
-                            else if (transcript.includes('não')) { handleWelcomeChoice(false); }
+
+            const attemptToSpeak = () => {
+                speak(greeting, {
+                    onEndCallback: () => {
+                        if (recognition && !isListening && voiceGuideActive === null) {
+                            isListening = true; awaitingSpecificInput = true;
+                            recognition.onresult = (event) => {
+                                const transcript = event.results[event.results.length-1][0].transcript.trim().toLowerCase();
+                                awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler;
+                                if (transcript.includes('sim')) { handleWelcomeChoice(true); }
+                                else if (transcript.includes('não')) { handleWelcomeChoice(false); }
+                            };
+                            recognition.onerror = (event) => {
+                                console.error("Erro no reconhecimento de voz na tela de boas-vindas:", event.error);
+                                awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler;
+                            };
+                            recognition.onend = () => {
+                                isListening = false; awaitingSpecificInput = false; recognition.onresult = defaultRecognitionResultHandler;
+                            };
+                            try { recognition.start(); } catch (e) {
+                                console.error("Falha ao iniciar reconhecimento na saudação da tela de boas-vindas", e);
+                                isListening = false; awaitingSpecificInput = false;
+                            }
+                        }
+                    }
+                });
+            };
+
+            let voiceCheckCount = 0;
+            const checkVoicesAndSpeak = () => {
+                if (speechSynthesis.getVoices().length > 0 || voiceCheckCount > 25) {
+                    if (!firstInteractionDoneForAudio) {
+                        attemptToSpeak();
+                    }
+                } else {
+                    voiceCheckCount++;
+                    setTimeout(checkVoicesAndSpeak, 200);
+                }
+            };
+
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = () => {
+                    speechSynthesis.onvoiceschanged = null;
+                    setTimeout(checkVoicesAndSpeak, 100);
+                };
+            } else {
+                setTimeout(checkVoicesAndSpeak, 250);
+            }
+
+            document.body.addEventListener('pointerdown', function handleFirstAudioInteraction() {
+                if (!firstInteractionDoneForAudio) {
+                    firstInteractionDoneForAudio = true;
+                    if (speechSynthesis.speaking === false && (voiceGuideActive === null && inclusiveWelcomeScreen && !inclusiveWelcomeScreen.classList.contains('hidden'))) {
+                        let interactionVoiceCheckCount = 0;
+                        const checkVoicesAndSpeakAfterInteraction = () => {
+                            if (speechSynthesis.getVoices().length > 0 || interactionVoiceCheckCount > 15) {
+                                attemptToSpeak();
+                            } else {
+                                interactionVoiceCheckCount++;
+                                setTimeout(checkVoicesAndSpeakAfterInteraction, 200);
+                            }
                         };
-                        recognition.onerror = (event) => {
-                            console.error("Erro no reconhecimento de voz na tela de boas-vindas:", event.error);
-                            awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler;
-                        };
-                        recognition.onend = () => {
-                            isListening = false; awaitingSpecificInput = false; recognition.onresult = defaultRecognitionResultHandler;
-                        };
-                        try { recognition.start(); } catch (e) {
-                            console.error("Falha ao iniciar reconhecimento na saudação da tela de boas-vindas", e);
-                            isListening = false; awaitingSpecificInput = false;
+                        if (speechSynthesis.onvoiceschanged !== undefined && speechSynthesis.getVoices().length === 0) {
+                            speechSynthesis.onvoiceschanged = () => {
+                                speechSynthesis.onvoiceschanged = null;
+                                setTimeout(checkVoicesAndSpeakAfterInteraction, 100);
+                            };
+                        } else {
+                             setTimeout(checkVoicesAndSpeakAfterInteraction, 100);
                         }
                     }
                 }
-            });
+            }, { capture: true, once: true });
         };
 
-        document.body.addEventListener('pointerdown', function handleFirstAudio() {
-            if (!firstInteractionDoneForAudio) {
-                firstInteractionDoneForAudio = true;
-                let voiceCheckCount = 0;
-                const checkAndPlay = () => { (speechSynthesis.getVoices().length > 0 || voiceCheckCount > 15) ? playInitialGreetingAndListen() : (voiceCheckCount++, setTimeout(checkAndPlay, 200)); };
-                if (speechSynthesis.onvoiceschanged !== undefined && speechSynthesis.getVoices().length === 0) {
-                    speechSynthesis.onvoiceschanged = () => { setTimeout(checkAndPlay, 100); speechSynthesis.onvoiceschanged = null; };
-                } else {
-                    checkAndPlay();
-                }
-            }
-        }, { capture: true, once: true });
+        if (activateVoiceGuideBtn) activateVoiceGuideBtn.addEventListener('click', () => { handleWelcomeChoice(true); });
+        if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('click', () => { handleWelcomeChoice(false); });
 
-        if (activateVoiceGuideBtn) activateVoiceGuideBtn.addEventListener('click', () => { clearTimeout(welcomeScreenTimeout); handleWelcomeChoice(true); });
-        if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('click', () => { clearTimeout(welcomeScreenTimeout); handleWelcomeChoice(false); });
-
-        welcomeScreenTimeout = setTimeout(() => {
-            if (voiceGuideActive === null && inclusiveWelcomeScreen && inclusiveWelcomeScreen.style.display !== 'none' && !inclusiveWelcomeScreen.classList.contains('hidden')) {
-                handleWelcomeChoice(false);
-            }
-        }, 20000);
+        playInitialGreetingAndListen(); // Tenta iniciar a saudação e escuta. Não há mais timeout para prosseguir automaticamente.
     }
 
     initializeVoiceCommands();
