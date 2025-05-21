@@ -7,8 +7,8 @@ import json
 from collections import Counter
 from itertools import combinations
 import math
-import pandas as pd # Importado e deve estar no api/requirements.txt
-import re           # Importado e é built-in
+import pandas as pd
+import re
 import logging
 
 app = Flask(__name__)
@@ -89,7 +89,7 @@ def load_processed_lottery_data(lottery_key):
     abs_json_path = os.path.join(APP_ROOT, 'lottery_data', os.path.basename(processed_json_path))
     app.logger.info(f"[load_data] Tentando caminho absoluto: {abs_json_path}")
 
-    if not os.path.exists(abs_json_path): 
+    if not os.path.exists(abs_json_path):
         app.logger.error(f"[load_data] ARQUIVO JSON NÃO ENCONTRADO em: {abs_json_path}")
         try:
             app.logger.info(f"[load_data] Conteúdo de DATA_DIR ({DATA_DIR}): {os.listdir(DATA_DIR)}")
@@ -113,25 +113,25 @@ def get_data_for_stats(lottery_name_lower):
         app.logger.warning(f"[get_data_for_stats] Dados indisponíveis para {lottery_name_lower}")
         return None, {"erro": f"Dados de {lottery_name_lower.upper()} indisponíveis. Verifique se os arquivos JSON existem em 'api/lottery_data/' e foram incluídos no deploy."}, 404
     return all_results, None, None
-    
+
 def combinations_count(n, k):
     if k < 0 or k > n: return 0
     if k == 0 or k == n: return 1
     if k > n // 2: k = n - k
-    res = 1; 
+    res = 1;
     for i in range(k): res = res * (n - i) // (i + 1)
     return res
 
 # --- ROTAS DA API ---
-@app.route('/') 
+@app.route('/')
 def api_base_root():
     app.logger.info(f"Rota / acessada (raiz da função em api/main.py). Path: {request.path}")
     return jsonify({"message": "API Loto Genius Python (api/main.py).", "note": "Endpoints em /api/main/..." })
 
-@app.route('/api/main/') 
+@app.route('/api/main/')
 def api_main_home():
     app.logger.info(f"Rota /api/main/ acessada. Path: {request.path}")
-    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.2.0"}) # Versão atualizada
+    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.3.0"})
 
 @app.route('/api/main/platform-stats', methods=['GET'])
 def get_platform_stats():
@@ -314,19 +314,19 @@ def gerar_jogo_api(lottery_name):
     return jsonify(resultado_geracao)
 
 # ++ NOVA ESTRATÉGIA: NÚMEROS QUENTES ++
-def get_hot_numbers_strategy(all_results, num_concursos_analisar, num_numeros_gerar, lottery_min, lottery_max):
-    app.logger.info(f"[get_hot_numbers_strategy] Analisando {num_concursos_analisar} concursos para gerar {num_numeros_gerar} números.")
+def get_hot_numbers_strategy(all_results, num_concursos_analisar, num_numeros_gerar, lottery_min, lottery_max, lottery_name_for_log=""):
+    app.logger.info(f"[get_hot_numbers_strategy] Para {lottery_name_for_log.upper()}: Analisando {num_concursos_analisar} concursos para gerar {num_numeros_gerar} números quentes.")
     
     if not all_results:
-        app.logger.warning("[get_hot_numbers_strategy] Não há resultados históricos para analisar.")
-        return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar)) # Fallback
+        app.logger.warning(f"[get_hot_numbers_strategy] {lottery_name_for_log.upper()}: Não há resultados históricos. Gerando aleatoriamente.")
+        return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
 
     recent_results = all_results[:num_concursos_analisar]
     if not recent_results:
-        app.logger.warning(f"[get_hot_numbers_strategy] Não há resultados suficientes ({len(all_results)}) para analisar os últimos {num_concursos_analisar} concursos. Usando todos disponíveis se houver.")
-        recent_results = all_results if len(all_results) > 0 else [] # Usar todos se a fatia for vazia mas all_results não
-        if not recent_results: # Ainda sem resultados para analisar
-             return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar)) # Fallback
+        app.logger.warning(f"[get_hot_numbers_strategy] {lottery_name_for_log.upper()}: Não há resultados suficientes ({len(all_results)}) para analisar os últimos {num_concursos_analisar}. Usando todos ou gerando aleatoriamente.")
+        recent_results = all_results if len(all_results) > 0 else []
+        if not recent_results:
+             return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
 
     all_drawn_numbers_in_slice = []
     for result in recent_results:
@@ -334,7 +334,7 @@ def get_hot_numbers_strategy(all_results, num_concursos_analisar, num_numeros_ge
             all_drawn_numbers_in_slice.extend(result["numeros"])
     
     if not all_drawn_numbers_in_slice:
-        app.logger.warning("[get_hot_numbers_strategy] Nenhum número encontrado nos resultados recentes para contagem.")
+        app.logger.warning(f"[get_hot_numbers_strategy] {lottery_name_for_log.upper()}: Nenhum número encontrado nos resultados recentes. Gerando aleatoriamente.")
         return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
 
     number_counts = Counter(all_drawn_numbers_in_slice)
@@ -347,10 +347,10 @@ def get_hot_numbers_strategy(all_results, num_concursos_analisar, num_numeros_ge
         else:
             break
             
-    app.logger.info(f"[get_hot_numbers_strategy] Números quentes preliminares: {generated_game}")
+    app.logger.info(f"[get_hot_numbers_strategy] {lottery_name_for_log.upper()}: Números quentes preliminares: {generated_game}")
 
     if len(generated_game) < num_numeros_gerar:
-        app.logger.info(f"[get_hot_numbers_strategy] Completando com números aleatórios pois só foram encontrados {len(generated_game)} quentes.")
+        app.logger.info(f"[get_hot_numbers_strategy] {lottery_name_for_log.upper()}: Completando com números aleatórios pois só foram encontrados {len(generated_game)} quentes.")
         possible_numbers = list(range(lottery_min, lottery_max + 1))
         random.shuffle(possible_numbers)
         for num in possible_numbers:
@@ -363,8 +363,8 @@ def get_hot_numbers_strategy(all_results, num_concursos_analisar, num_numeros_ge
 
 @app.route('/api/main/gerar_jogo/numeros_quentes/<lottery_name>', methods=['GET'])
 def gerar_jogo_numeros_quentes_api(lottery_name):
-    app.logger.info(f"Endpoint /api/main/gerar_jogo/numeros_quentes/{lottery_name} acessado. Args: {request.args}")
     lottery_name_lower = lottery_name.lower()
+    app.logger.info(f"Endpoint /api/main/gerar_jogo/numeros_quentes/{lottery_name_lower} acessado. Args: {request.args}")
 
     config = LOTTERY_CONFIG.get(lottery_name_lower)
     if not config:
@@ -381,21 +381,20 @@ def gerar_jogo_numeros_quentes_api(lottery_name):
 
     try:
         num_concursos_analisar = int(request.args.get('num_concursos_analisar', 20))
-        if num_concursos_analisar <= 0 or num_concursos_analisar > len(all_results): # Limitar ao total de resultados
+        if num_concursos_analisar <= 0 or num_concursos_analisar > len(all_results):
             num_concursos_analisar = min(20, len(all_results)) if len(all_results) > 0 else 1
     except ValueError:
         num_concursos_analisar = min(20, len(all_results)) if len(all_results) > 0 else 1
-
 
     numeros_a_gerar = config.get("count_apostadas", config.get("count"))
     lottery_min = config["min"]
     lottery_max = config["max"]
 
-    jogo_final = get_hot_numbers_strategy(all_results, num_concursos_analisar, numeros_a_gerar, lottery_min, lottery_max)
+    jogo_final = get_hot_numbers_strategy(all_results, num_concursos_analisar, numeros_a_gerar, lottery_min, lottery_max, lottery_name_lower)
 
     if not jogo_final or len(jogo_final) != numeros_a_gerar:
         app.logger.error(f"Falha na geração de jogo 'Números Quentes' para {lottery_name}. Resultado: {jogo_final}. Usando fallback.")
-        fallback_result = gerar_jogo_ia_aleatorio_rapido(lottery_name_lower) # Usar o aleatório rápido como fallback
+        fallback_result = gerar_jogo_ia_aleatorio_rapido(lottery_name_lower)
         return jsonify({
             "jogo": fallback_result.get("jogo", []),
             "estrategia_usada": f"{config.get('nome_exibicao', lottery_name.capitalize())}: Números Quentes (Fallback para Aleatório) - Analisados: {num_concursos_analisar} concursos",
@@ -405,9 +404,113 @@ def gerar_jogo_numeros_quentes_api(lottery_name):
     estrategia_aplicada = f"{config.get('nome_exibicao', lottery_name.capitalize())}: Números Quentes (Analisados: {num_concursos_analisar} concursos)"
     
     if jogo_final: platform_stats_data["jogos_gerados_total"] += 1
-    app.logger.info(f"Jogo 'Números Quentes' gerado para {lottery_name}: {jogo_final}")
+    app.logger.info(f"Jogo 'Números Quentes' gerado para {lottery_name_lower}: {jogo_final}")
     return jsonify({"jogo": jogo_final, "estrategia_usada": estrategia_aplicada})
-# ++ FIM DA NOVA ESTRATÉGIA ++
+
+# ++ NOVA ESTRATÉGIA: NÚMEROS FRIOS ++
+def get_cold_numbers_strategy(all_results, num_concursos_analisar, num_numeros_gerar, lottery_min, lottery_max, lottery_name_for_log=""):
+    app.logger.info(f"[get_cold_numbers_strategy] Para {lottery_name_for_log.upper()}: Analisando {num_concursos_analisar} concursos para gerar {num_numeros_gerar} números frios.")
+
+    if not all_results:
+        app.logger.warning(f"[get_cold_numbers_strategy] {lottery_name_for_log.upper()}: Não há resultados históricos. Gerando aleatoriamente.")
+        return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
+
+    recent_results_slice = all_results[:num_concursos_analisar]
+    if not recent_results_slice:
+        app.logger.warning(f"[get_cold_numbers_strategy] {lottery_name_for_log.upper()}: Não há resultados suficientes ({len(all_results)}) para analisar os últimos {num_concursos_analisar}. Usando todos ou gerando aleatoriamente.")
+        recent_results_slice = all_results if len(all_results) > 0 else []
+        if not recent_results_slice:
+            return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
+
+    drawn_numbers_in_slice = []
+    for result in recent_results_slice:
+        if "numeros" in result and isinstance(result["numeros"], list):
+            drawn_numbers_in_slice.extend(result["numeros"])
+
+    frequency_counts = Counter(drawn_numbers_in_slice)
+    all_possible_numbers = list(range(lottery_min, lottery_max + 1))
+    
+    cold_numbers_candidates = []
+    for num in all_possible_numbers:
+        cold_numbers_candidates.append({'numero': num, 'frequencia': frequency_counts.get(num, 0)})
+        
+    cold_numbers_candidates.sort(key=lambda x: (x['frequencia'], x['numero']))
+    
+    generated_game = [candidate['numero'] for candidate in cold_numbers_candidates]
+    
+    # Selecionar os primeiros 'num_numeros_gerar' da lista ordenada (os mais frios)
+    # Se a lista for menor que o necessário (altamente improvável, pois contém todos os números do universo),
+    # a seleção abaixo pegará todos disponíveis.
+    final_cold_selection = generated_game[:num_numeros_gerar]
+    
+    app.logger.info(f"[get_cold_numbers_strategy] {lottery_name_for_log.upper()}: Seleção inicial de números frios ({len(final_cold_selection)}): {final_cold_selection}")
+
+    if len(final_cold_selection) < num_numeros_gerar:
+        app.logger.warning(f"[get_cold_numbers_strategy] {lottery_name_for_log.upper()}: Não foram encontrados {num_numeros_gerar} frios distintos (encontrados: {len(final_cold_selection)}). Completando aleatoriamente com números não selecionados.")
+        
+        remaining_possible = [num for num in all_possible_numbers if num not in final_cold_selection]
+        random.shuffle(remaining_possible)
+        
+        needed_to_complete = num_numeros_gerar - len(final_cold_selection)
+        final_cold_selection.extend(remaining_possible[:needed_to_complete])
+
+    # Garantir ordenação final
+    final_game = sorted(final_cold_selection)
+
+    # Verificação final de tamanho, embora a lógica acima deva garantir isso
+    if len(final_game) != num_numeros_gerar:
+        app.logger.error(f"[get_cold_numbers_strategy] {lottery_name_for_log.upper()}: Falha ao gerar a quantidade correta de números. Solicitados: {num_numeros_gerar}, Gerados: {len(final_game)}. Usando fallback aleatório total.")
+        return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
+
+    app.logger.info(f"[get_cold_numbers_strategy] {lottery_name_for_log.upper()}: Jogo final de números frios: {final_game}")
+    return final_game
+
+# ++ Endpoint para Números Frios ++
+@app.route('/api/main/gerar_jogo/numeros_frios/<lottery_name>', methods=['GET'])
+def gerar_jogo_numeros_frios_api(lottery_name):
+    lottery_name_lower = lottery_name.lower()
+    app.logger.info(f"Endpoint /api/main/gerar_jogo/numeros_frios/{lottery_name_lower} acessado. Args: {request.args}")
+
+    config = LOTTERY_CONFIG.get(lottery_name_lower)
+    if not config:
+        app.logger.warning(f"Loteria inválida solicitada para gerar_jogo_numeros_frios: {lottery_name_lower}")
+        return jsonify({"erro": f"Loteria '{lottery_name}' não configurada."}), 404
+
+    all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
+    if error_response:
+        return jsonify(error_response), status_code
+    
+    if not all_results:
+        app.logger.error(f"Não foi possível carregar dados históricos para {lottery_name_lower} para a estratégia de números frios.")
+        return jsonify({"erro": f"Dados históricos para {lottery_name.upper()} indisponíveis."}), 500
+
+    try:
+        num_concursos_analisar = int(request.args.get('num_concursos_analisar', 20)) # Default 20
+        if num_concursos_analisar <= 0 or num_concursos_analisar > len(all_results):
+            num_concursos_analisar = min(20, len(all_results)) if len(all_results) > 0 else 1
+    except ValueError:
+        num_concursos_analisar = min(20, len(all_results)) if len(all_results) > 0 else 1
+    
+    numeros_a_gerar = config.get("count_apostadas", config.get("count"))
+    lottery_min = config["min"]
+    lottery_max = config["max"]
+
+    jogo_final = get_cold_numbers_strategy(all_results, num_concursos_analisar, numeros_a_gerar, lottery_min, lottery_max, lottery_name_lower)
+
+    if not jogo_final or len(jogo_final) != numeros_a_gerar:
+        app.logger.error(f"Falha na geração de jogo 'Números Frios' para {lottery_name}. Resultado: {jogo_final}. Usando fallback.")
+        fallback_result = gerar_jogo_ia_aleatorio_rapido(lottery_name_lower) # Usar o aleatório rápido como fallback
+        return jsonify({
+            "jogo": fallback_result.get("jogo", []),
+            "estrategia_usada": f"{config.get('nome_exibicao', lottery_name.capitalize())}: Números Frios (Fallback para Aleatório) - Analisados: {num_concursos_analisar} concursos",
+            "aviso": "Estratégia de números frios não produziu resultado esperado, usando fallback."
+        }), 200
+
+    estrategia_aplicada = f"{config.get('nome_exibicao', lottery_name.capitalize())}: Números Frios (Analisados: {num_concursos_analisar} concursos)"
+    
+    if jogo_final: platform_stats_data["jogos_gerados_total"] += 1
+    app.logger.info(f"Jogo 'Números Frios' gerado para {lottery_name_lower}: {jogo_final}")
+    return jsonify({"jogo": jogo_final, "estrategia_usada": estrategia_aplicada})
 
 
 # --- PALPITE ESOTÉRICO ---
@@ -446,7 +549,7 @@ def verificar_historico_combinacao(lottery_name_lower, combinacao_palpite):
                 if numeros_sorteados_formatados == palpite_formatado:
                     ocorrencias += 1
                     valor_total_ganho += float(sorteio.get("rateio_principal_valor", 0.0))
-            except (ValueError, TypeError): continue 
+            except (ValueError, TypeError): continue
     app.logger.info(f"[verificar_historico] Palpite {palpite_formatado} para {lottery_name_lower}: {ocorrencias} ocorrências, R${valor_total_ganho:.2f} ganhos.")
     return ocorrencias, valor_total_ganho
 
@@ -481,7 +584,3 @@ def gerar_palpite_esoterico_route(lottery_name):
         }}
     app.logger.info(f"Retornando palpite esotérico para {lottery_name}: {response_data}")
     return jsonify(response_data), 200
-
-# Para Vercel
-# if __name__ == '__main__':
-#     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -108,6 +108,32 @@
                     <div class="button-group">
                         <button id="generate-quick-hunch-btn" class="action-btn primary-action"><i class="fas fa-random" aria-hidden="true"></i> Gerar Palpite Rápido</button>
                     </div>
+                    <div class="card large-card" id="cold-numbers-hunch-card" aria-labelledby="cold-numbers-hunch-title">
+                    <h2 id="cold-numbers-hunch-title"><i class="fas fa-snowflake" aria-hidden="true"></i> Palpite Números Frios</h2>
+                    <label for="cold-numbers-lottery-type">Selecione a Loteria:</label>
+                    <select id="cold-numbers-lottery-type" aria-label="Selecionar loteria para palpite de números frios">
+                        <option value="megasena">Mega-Sena</option>
+                        <option value="lotofacil">Lotofácil</option>
+                        <option value="lotomania">Lotomania</option>
+                        <option value="quina">Quina</option>
+                    </select>
+                    <label for="cold-numbers-analyze-count">Analisar os últimos quantos concursos?</label>
+                    <input type="number" id="cold-numbers-analyze-count" value="20" min="1" max="100" style="width: 100px; margin-bottom: 1rem;" aria-label="Número de concursos para analisar para números frios">
+                    
+                    <div class="button-group">
+                        <button id="generate-cold-numbers-hunch-btn" class="action-btn primary-action"><i class="fas fa-icicles" aria-hidden="true"></i> Gerar Palpite Frio</button>
+                    </div>
+                    <div id="cold-numbers-hunch-output" class="game-card" style="display:none; margin-top: 1rem;" aria-live="polite" aria-atomic="true">
+                        <h4><i class="far fa-snowflake" aria-hidden="true"></i> Seu Palpite Frio:</h4>
+                        <div id="cold-numbers-hunch-numbers" class="game-numbers"></div>
+                        <p id="cold-numbers-hunch-strategy" class="strategy-text"></p>
+                        <div class="game-card-actions">
+                            <button id="save-cold-hunch-btn" class="action-btn small-btn" title="Salvar este jogo" style="display:none;"><i class="fas fa-save"></i> Salvar</button>
+                            <button id="check-cold-hunch-btn" class="action-btn small-btn" title="Conferir este jogo" style="display:none;"><i class="fas fa-check-circle"></i> Conferir</button>
+                        </div>
+                        <div id="cold-hunch-check-result" class="check-result-display" aria-live="polite"></div>
+                    </div>
+                </div>
                     <div id="quick-hunch-output" class="game-card" style="display:none;" aria-live="polite" aria-atomic="true">
                         <h4><i class="fas fa-lightbulb" aria-hidden="true"></i> Seu Palpite Rápido:</h4>
                         <div id="quick-hunch-numbers" class="game-numbers"></div>

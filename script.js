@@ -49,6 +49,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkQuickHunchBtn = document.getElementById('check-quick-hunch-btn');
     const quickHunchCheckResultDiv = document.getElementById('quick-hunch-check-result');
 
+    const coldNumbersLotteryTypeSelect = document.getElementById('cold-numbers-lottery-type');
+    const coldNumbersAnalyzeCountInput = document.getElementById('cold-numbers-analyze-count');
+    const generateColdNumbersHunchBtn = document.getElementById('generate-cold-numbers-hunch-btn');
+    const coldNumbersHunchOutputDiv = document.getElementById('cold-numbers-hunch-output');
+    const coldNumbersHunchNumbersDiv = document.getElementById('cold-numbers-hunch-numbers');
+    const coldNumbersHunchStrategyP = document.getElementById('cold-numbers-hunch-strategy');
+    const saveColdHunchBtn = document.getElementById('save-cold-hunch-btn');
+    const checkColdHunchBtn = document.getElementById('check-cold-hunch-btn');
+    const coldHunchCheckResultDiv = document.getElementById('cold-hunch-check-result');
+
     const hotNumbersLotteryTypeSelect = document.getElementById('hot-numbers-lottery-type');
     const hotNumbersAnalyzeCountInput = document.getElementById('hot-numbers-analyze-count');
     const generateHotNumbersHunchBtn = document.getElementById('generate-hot-numbers-hunch-btn');
@@ -693,6 +703,78 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ... (depois da função generateAndDisplayHotNumbersHunch, por exemplo) ...
+
+    async function generateAndDisplayColdNumbersHunch() {
+        if (!coldNumbersLotteryTypeSelect || !generateColdNumbersHunchBtn || !coldNumbersAnalyzeCountInput || !coldNumbersHunchOutputDiv || !coldNumbersHunchNumbersDiv || !coldNumbersHunchStrategyP) {
+            console.error("Elementos da UI para Números Frios não encontrados.");
+            return;
+        }
+        const lottery = coldNumbersLotteryTypeSelect.value;
+        let analyzeCount = parseInt(coldNumbersAnalyzeCountInput.value, 10);
+        if (isNaN(analyzeCount) || analyzeCount <= 0) {
+            alert("Insira um número válido de concursos para análise (mínimo 1).");
+            coldNumbersAnalyzeCountInput.focus();
+            analyzeCount = 20; // Valor padrão
+            coldNumbersAnalyzeCountInput.value = analyzeCount;
+        }
+
+        generateColdNumbersHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
+        generateColdNumbersHunchBtn.disabled = true;
+        coldNumbersHunchOutputDiv.style.display = 'block';
+        coldNumbersHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>';
+        coldNumbersHunchStrategyP.textContent = 'Analisando números frios...';
+
+        if(saveColdHunchBtn) saveColdHunchBtn.style.display = 'none';
+        if(checkColdHunchBtn) checkColdHunchBtn.style.display = 'none';
+        if(coldHunchCheckResultDiv) coldHunchCheckResultDiv.innerHTML = '';
+
+        try {
+            const data = await fetchData(`api/main/gerar_jogo/numeros_frios/${lottery}?num_concursos_analisar=${analyzeCount}`);
+            if (data.erro) {
+                throw new Error(data.detalhes || data.erro);
+            }
+            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) {
+                throw new Error("Palpite inválido (frios). A API não retornou um jogo válido.");
+            }
+
+            if (typeof renderGameNumbers === "function") {
+                renderGameNumbers(coldNumbersHunchNumbersDiv, data.jogo, [], [], lottery);
+            } else {
+                console.error("generateAndDisplayColdNumbersHunch: renderGameNumbers não está definida!");
+                coldNumbersHunchNumbersDiv.innerHTML = '<p class="error-message">Erro de renderização (função não encontrada).</p>';
+            }
+            coldNumbersHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Números Frios'}`;
+            if (data.aviso) {
+                coldNumbersHunchStrategyP.textContent += ` (${data.aviso})`;
+            }
+
+            lastGeneratedHunch = {
+                type: 'cold',
+                lottery: lottery,
+                jogo: data.jogo,
+                estrategia_metodo: data.estrategia_usada || 'Números Frios',
+                outputDiv: coldNumbersHunchOutputDiv,
+                numbersDiv: coldNumbersHunchNumbersDiv,
+                checkResultDiv: coldHunchCheckResultDiv,
+                saveButton: saveColdHunchBtn,
+                checkButton: checkColdHunchBtn
+            };
+
+            if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('cold');
+            if (checkColdHunchBtn) checkColdHunchBtn.style.display = 'inline-block';
+
+        } catch (error) {
+            console.error("SCRIPT.JS: Erro ao gerar palpite de números frios:", error);
+            coldNumbersHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha ao gerar palpite de números frios.'}</p>`;
+            coldNumbersHunchStrategyP.textContent = 'Erro ao gerar.';
+            lastGeneratedHunch = { type: null };
+        } finally {
+            generateColdNumbersHunchBtn.innerHTML = '<i class="fas fa-icicles"></i> Gerar Palpite Frio';
+            generateColdNumbersHunchBtn.disabled = false;
+        }
+    }
+
     async function generateAndDisplayEsotericHunch() {
         if (!esotericLotteryTypeSelect || !birthDateInput || !generateEsotericHunchBtn || !esotericHunchOutputDiv || !esotericHunchNumbersDiv || !esotericHunchMethodP || !esotericHunchHistoryCheckDiv) { return; }
         const lotteryName = esotericLotteryTypeSelect.value; const birthDateRaw = birthDateInput.value.trim(); const birthDate = birthDateRaw.replace(/\D/g, '');
@@ -732,6 +814,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hunchType === 'quick') targetSaveButton = saveQuickHunchBtn;
         else if (hunchType === 'esoteric') targetSaveButton = saveEsotericHunchBtn;
         else if (hunchType === 'hot') targetSaveButton = saveHotHunchBtn;
+        else if (hunchType === 'cold') targetSaveButton = saveColdHunchBtn;
         if (targetSaveButton) { targetSaveButton.style.display = currentUser && currentHunch.type === hunchType && currentHunch.outputDiv && currentHunch.outputDiv.style.display !== 'none' ? 'inline-block' : 'none'; }
         else if (currentHunch.type === hunchType && !targetSaveButton) { console.warn(`SCRIPT.JS: Botão Salvar para '${hunchType}' não encontrado.`); }
     }
@@ -740,6 +823,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (saveQuickHunchBtn) saveQuickHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('quick'));
         if (saveEsotericHunchBtn) saveEsotericHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('esoteric'));
         if (saveHotHunchBtn) saveHotHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('hot'));
+        if (saveColdHunchBtn) saveColdHunchBtn.addEventListener('click', () => saveLastGeneratedHunch('cold'));
     }
 
     function saveLastGeneratedHunch(expectedHunchType) {
@@ -756,6 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (checkQuickHunchBtn && quickHunchLotteryTypeSelect) checkQuickHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('quick', quickHunchLotteryTypeSelect));
         if (checkEsotericHunchBtn && esotericLotteryTypeSelect) checkEsotericHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('esoteric', esotericLotteryTypeSelect));
         if (checkHotHunchBtn && hotNumbersLotteryTypeSelect) checkHotHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('hot', hotNumbersLotteryTypeSelect));
+        if (checkColdHunchBtn && coldNumbersLotteryTypeSelect) checkColdHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('cold', coldNumbersLotteryTypeSelect));
     }
 
     async function checkLastGeneratedHunch(expectedHunchType, lotterySelectElement) {
@@ -764,6 +849,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (expectedHunchType === 'quick') { targetCheckResultDiv = quickHunchCheckResultDiv; targetNumbersDiv = quickHunchNumbersDiv; }
         else if (expectedHunchType === 'esoteric') { targetCheckResultDiv = esotericHunchHistoryCheckDiv; targetNumbersDiv = esotericHunchNumbersDiv; }
         else if (expectedHunchType === 'hot') { targetCheckResultDiv = hotHunchCheckResultDiv; targetNumbersDiv = hotNumbersHunchNumbersDiv; }
+        else if (expectedHunchType === 'cold') { targetCheckResultDiv = coldHunchCheckResultDiv; targetNumbersDiv = coldNumbersHunchNumbersDiv; }
 
         if (!currentHunch.jogo || !Array.isArray(currentHunch.jogo) || currentHunch.jogo.length === 0 || currentHunch.lottery !== currentLottery || currentHunch.type !== expectedHunchType || !targetCheckResultDiv || !targetNumbersDiv ) {
             if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = '<span class="misses">Gere um palpite deste tipo para esta loteria primeiro.</span>'; return;
@@ -1143,6 +1229,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (generateQuickHunchBtn) generateQuickHunchBtn.addEventListener('click', generateAndDisplayQuickHunch);
     if (generateEsotericHunchBtn) generateEsotericHunchBtn.addEventListener('click', generateAndDisplayEsotericHunch);
     if (generateHotNumbersHunchBtn) generateHotNumbersHunchBtn.addEventListener('click', generateAndDisplayHotNumbersHunch);
+    if (generateColdNumbersHunchBtn) generateColdNumbersHunchBtn.addEventListener('click', generateAndDisplayColdNumbersHunch);
     if (typeof setupSaveHunchButtonListeners === "function") setupSaveHunchButtonListeners();
     if (typeof setupCheckHunchButtonListeners === "function") setupCheckHunchButtonListeners();
 
