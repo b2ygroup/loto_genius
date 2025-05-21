@@ -1,10 +1,11 @@
 // script.js (Realmente, Realmente COMPLETO - v3 - Com todas as funções preenchidas)
+// ADICIONADO CONSOLE.LOG PARA DEBUG ABAIXO EM createGameCardElement
 document.addEventListener('DOMContentLoaded', () => {
     console.log("SCRIPT.JS: DOMContentLoaded - v3 - Funções Completas e Boas-Vindas Revisada.");
     const domContentLoadedTimestamp = Date.now();
 
     // --- Constantes de Tempo da Splash Screen ---
-    const SPLASH_LOGO_ANIM_MAX_DELAY = 1300; 
+    const SPLASH_LOGO_ANIM_MAX_DELAY = 1300;
     const SPLASH_LOGO_ANIM_DURATION = 600;
     const SPLASH_TEXT_ANIM_DELAY = 2200;
     const SPLASH_TEXT_ANIM_DURATION = 1000;
@@ -21,14 +22,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const inclusiveWelcomeScreen = document.getElementById('inclusive-welcome-screen');
     const activateVoiceGuideBtn = document.getElementById('welcome-voice-yes-btn');
     const declineVoiceGuideBtn = document.getElementById('welcome-voice-no-btn');
-    const mainSplashScreen = document.getElementById('accessible-splash-screen'); 
+    const mainSplashScreen = document.getElementById('accessible-splash-screen');
 
     const appContent = document.getElementById('app-content');
     const currentYearSpan = document.getElementById('current-year');
     const voiceCommandBtn = document.getElementById('voice-command-btn');
     const voiceBtnText = voiceCommandBtn ? voiceCommandBtn.querySelector('.voice-btn-text') : null;
     const voiceBtnIcon = voiceCommandBtn ? voiceCommandBtn.querySelector('i') : null;
-    
+
     const navDashboardBtn = document.getElementById('nav-dashboard-btn');
     const navMyGamesBtn = document.getElementById('nav-my-games-btn');
     const navPoolsBtn = document.getElementById('nav-pools-btn');
@@ -37,13 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const myGamesSection = document.getElementById('my-games-section');
     const poolsSection = document.getElementById('pools-section');
     const mainSections = document.querySelectorAll('.main-section');
-    
+
     const statsJogosGeradosSpan = document.getElementById('stats-jogos-gerados');
     const statsJogosPremiadosSpan = document.getElementById('stats-jogos-premiados');
     const statsValorPremiosSpan = document.getElementById('stats-valor-premios');
     const recentPoolsList = document.getElementById('recent-pools-list');
     const topWinnersList = document.getElementById('top-winners-list');
-    
+
     const quickHunchLotteryTypeSelect = document.getElementById('quick-hunch-lottery-type');
     const generateQuickHunchBtn = document.getElementById('generate-quick-hunch-btn');
     const quickHunchOutputDiv = document.getElementById('quick-hunch-output');
@@ -52,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveQuickHunchBtn = document.getElementById('save-quick-hunch-btn');
     const checkQuickHunchBtn = document.getElementById('check-quick-hunch-btn');
     const quickHunchCheckResultDiv = document.getElementById('quick-hunch-check-result');
-    
+
     const hotNumbersLotteryTypeSelect = document.getElementById('hot-numbers-lottery-type');
     const hotNumbersAnalyzeCountInput = document.getElementById('hot-numbers-analyze-count');
     const generateHotNumbersHunchBtn = document.getElementById('generate-hot-numbers-hunch-btn');
@@ -62,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveHotHunchBtn = document.getElementById('save-hot-hunch-btn');
     const checkHotHunchBtn = document.getElementById('check-hot-hunch-btn');
     const hotHunchCheckResultDiv = document.getElementById('hot-hunch-check-result');
-    
+
     const esotericLotteryTypeSelect = document.getElementById('esoteric-lottery-type');
     const birthDateInput = document.getElementById('birth-date-input');
     const generateEsotericHunchBtn = document.getElementById('generate-esoteric-hunch-btn');
@@ -73,39 +74,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const esotericHunchHistoryCheckDiv = document.getElementById('esoteric-hunch-history-check');
     const saveEsotericHunchBtn = document.getElementById('save-esoteric-hunch-btn');
     const checkEsotericHunchBtn = document.getElementById('check-esoteric-hunch-btn');
-    
-    const cosmicPromoBanner = document.getElementById('cosmic-promo-banner');
-    const promoRegisterBtn = document.getElementById('promo-register-btn'); 
-    const promoLoginBtn = document.getElementById('promo-login-btn');     
 
-    const mainDisplayLotterySelect = quickHunchLotteryTypeSelect; 
-    const apiResultsPre = document.getElementById('api-results'); 
+    const cosmicPromoBanner = document.getElementById('cosmic-promo-banner');
+    const promoRegisterBtn = document.getElementById('promo-register-btn');
+    const promoLoginBtn = document.getElementById('promo-login-btn');
+
+    const mainDisplayLotterySelect = quickHunchLotteryTypeSelect;
+    const apiResultsPre = document.getElementById('api-results');
     const resultsLotteryNameSpan = document.getElementById('results-lottery-name');
     const fetchResultsBtn = document.getElementById('fetch-results-btn');
-    
+
     const loginModalBtn = document.getElementById('login-modal-btn');
     const registerModalBtn = document.getElementById('register-modal-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const userInfoDiv = document.getElementById('user-info');
     const userEmailSpan = document.getElementById('user-email');
-    
+
     const loginModal = document.getElementById('login-modal');
     const registerModal = document.getElementById('register-modal');
     const closeLoginModalBtn = document.getElementById('close-login-modal');
     const closeRegisterModalBtn = document.getElementById('close-register-modal');
-    
+
     const loginEmailInput = document.getElementById('login-email');
     const loginPasswordInput = document.getElementById('login-password');
     const loginSubmitBtn = document.getElementById('login-submit-btn');
     const loginErrorP = document.getElementById('login-error');
-    
+
     const registerEmailInput = document.getElementById('register-email');
     const registerPasswordInput = document.getElementById('register-password');
     const registerConfirmPasswordInput = document.getElementById('register-confirm-password');
     const registerSubmitBtn = document.getElementById('register-submit-btn');
     const registerErrorP = document.getElementById('register-error');
-    
-    const errorDiv = document.getElementById('global-error-msg'); 
+
+    const errorDiv = document.getElementById('global-error-msg');
     const confettiCanvas = document.getElementById('confetti-canvas');
 
     const freqStatsLotteryNameSpan = document.getElementById('freq-stats-lottery-name');
@@ -161,27 +162,27 @@ document.addEventListener('DOMContentLoaded', () => {
     let recognition;
     let speechSynthesis = window.speechSynthesis;
     let isListening = false;
-    let voiceGuideActive = null; 
-    let firstInteractionDoneForAudio = false; 
+    let voiceGuideActive = null;
+    let firstInteractionDoneForAudio = false;
     let voiceContext = { action: null, awaiting: null, data: {} };
-    let welcomeScreenTimeout; 
+    let welcomeScreenTimeout;
     let awaitingSpecificInput = false;
 
     // ================================================================================================
     // === DEFINIÇÕES DE FUNÇÕES COMPLETAS ===
     // ================================================================================================
-    
+
     function showGlobalError(message) { if (errorDiv) { errorDiv.textContent = message; errorDiv.style.display = 'block'; } else { console.error("SCRIPT.JS: Global error div não encontrado:", message); } }
     function disableFirebaseFeatures() { if (loginModalBtn) loginModalBtn.disabled = true; if (registerModalBtn) registerModalBtn.disabled = true; }
     function enableFirebaseFeatures() { if (loginModalBtn) loginModalBtn.disabled = false; if (registerModalBtn) registerModalBtn.disabled = false; if(document.getElementById('global-error-msg')) document.getElementById('global-error-msg').style.display = 'none';}
-    
-    function setActiveSection(sectionId) { 
-        if (!mainSections || mainSections.length === 0) { console.warn("SCRIPT.JS: setActiveSection - mainSections não encontrado."); return; } 
-        mainSections.forEach(section => { section.classList.remove('active-section'); if (section.id === sectionId) section.classList.add('active-section'); }); 
-        if (mainNav) { 
-            const navButtons = mainNav.querySelectorAll('.nav-item'); 
-            navButtons.forEach(btn => { btn.classList.remove('active'); if (btn.id === `nav-${sectionId.replace('-section', '')}-btn`) btn.classList.add('active'); }); 
-        } 
+
+    function setActiveSection(sectionId) {
+        if (!mainSections || mainSections.length === 0) { console.warn("SCRIPT.JS: setActiveSection - mainSections não encontrado."); return; }
+        mainSections.forEach(section => { section.classList.remove('active-section'); if (section.id === sectionId) section.classList.add('active-section'); });
+        if (mainNav) {
+            const navButtons = mainNav.querySelectorAll('.nav-item');
+            navButtons.forEach(btn => { btn.classList.remove('active'); if (btn.id === `nav-${sectionId.replace('-section', '')}-btn`) btn.classList.add('active'); });
+        }
     }
 
     async function fetchData(endpoint, options = {}) {
@@ -200,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             if (error.status && error.message) { throw error; }
             console.error(`SCRIPT.JS: Erro geral em fetchData para ${url}:`, error);
-            throw { status: error.status || 503, message: error.message || "Erro de comunicação.", data: {} }; 
+            throw { status: error.status || 503, message: error.message || "Erro de comunicação.", data: {} };
         }
     }
 
@@ -263,6 +264,56 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { topWinnersList.innerHTML = '<li>Erro ao carregar ranking.</li>'; console.error("SCRIPT.JS: Erro em fetchTopWinners:", error);}
     }
 
+    // Função para renderizar os números do jogo (ESSENCIAL!)
+    function renderGameNumbers(container, gameNumbers, hitNumbers = [], almostNumbers = [], lotteryType = '') {
+        if (!container) {
+            console.error("SCRIPT.JS: renderGameNumbers - Container não fornecido.");
+            return;
+        }
+        container.innerHTML = ''; // Limpa o container antes de adicionar novos números
+
+        if (!gameNumbers || !Array.isArray(gameNumbers) || gameNumbers.length === 0) {
+            container.innerHTML = '<p>Nenhum número gerado.</p>';
+            return;
+        }
+
+        const lotteryConfig = LOTTERY_CONFIG_JS[lotteryType.toLowerCase()] || {};
+        const defaultColor = '#47aeff'; // Uma cor padrão caso a loteria não esteja em LOTTERY_CONFIG_JS
+        const numberColor = lotteryConfig.color || defaultColor;
+
+        gameNumbers.forEach(num => {
+            const numDiv = document.createElement('div');
+            numDiv.classList.add('game-number');
+            numDiv.textContent = String(num).padStart(2, '0');
+            numDiv.style.backgroundColor = numberColor;
+            numDiv.style.borderColor = numberColor; // Para consistência com o CSS
+            numDiv.style.color = '#1a1a2e'; // Cor do texto padrão, ajuste se necessário para contraste
+
+            if (hitNumbers.includes(num)) {
+                numDiv.classList.add('hit');
+                // As classes CSS 'hit' e 'almost' devem definir cores de fundo/texto apropriadas.
+                // Se precisar de override aqui, pode fazer, ex:
+                numDiv.style.backgroundColor = '#2ecc71'; // Verde para acerto
+                numDiv.style.color = '#fff';
+            } else if (almostNumbers.includes(num)) {
+                numDiv.classList.add('almost');
+                numDiv.style.backgroundColor = '#f1c40f'; // Amarelo para "quase"
+                numDiv.style.color = '#333';
+            }
+
+            // Animação de entrada (mantendo a sua lógica)
+            numDiv.style.opacity = '0'; // Começa invisível para animar
+            numDiv.style.transform = 'scale(0.8) translateY(10px)'; // Estado inicial da animação
+            setTimeout(() => {
+                numDiv.style.opacity = '1';
+                numDiv.style.transform = 'scale(1) translateY(0)';
+            }, Math.random() * 200 + 50); // Delay aleatório para efeito escalonado
+
+            container.appendChild(numDiv);
+        });
+    }
+
+
     async function fetchAndDisplayStatsGeneric(lotteryName, statType, container, nameSpanInCard, endpointPrefix) {
         if (!container || !nameSpanInCard || !mainDisplayLotterySelect) { if(container) container.innerHTML = '<p class="error-message">Erro interno.</p>'; return; }
         const lotteryConfigEntry = Object.values(LOTTERY_CONFIG_JS).find(config => mainDisplayLotterySelect.options[mainDisplayLotterySelect.selectedIndex]?.text.includes(config.name));
@@ -321,32 +372,52 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchAndDisplayPairFrequencyStats(lotteryName) { if(pairFrequencyListContainer && pairFreqStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Pares Frequentes", pairFrequencyListContainer, pairFreqStatsLotteryNameSpan, "pares-frequentes"); }
     async function fetchAndDisplayCityStats(lotteryName) { if(cityListContainer && cityStatsLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Cidades Premiadas", cityListContainer, cityStatsLotteryNameSpan, "cidades-premiadas"); }
     async function fetchAndDisplayCityPrizeSumStats(lotteryName) { if(cityPrizeSumListContainer && cityPrizeSumLotteryNameSpan) fetchAndDisplayStatsGeneric(lotteryName, "Prêmios por Cidade", cityPrizeSumListContainer, cityPrizeSumLotteryNameSpan, "maiores-premios-cidade");}
-    
-    let previouslyFocusedElementModal; 
-    function openModal(modalElement) { 
+
+    async function fetchAndDisplayResults(lotteryName) {
+        if (!apiResultsPre || !resultsLotteryNameSpan) { return; }
+        const lotteryConfigEntry = Object.values(LOTTERY_CONFIG_JS).find(config => mainDisplayLotterySelect.options[mainDisplayLotterySelect.selectedIndex]?.text.includes(config.name));
+        resultsLotteryNameSpan.textContent = lotteryConfigEntry ? lotteryConfigEntry.name : lotteryName.toUpperCase();
+        apiResultsPre.innerHTML = '<div class="spinner small-spinner"></div> Carregando...';
+        try {
+            const data = await fetchData(`api/main/resultados/${lotteryName}`);
+            lastFetchedResults[lotteryName] = data; // Armazena para conferência
+            if (data.aviso) { apiResultsPre.textContent = data.aviso; return; }
+            if (data.erro) { apiResultsPre.textContent = `Erro: ${data.erro}`; return; }
+            let content = `Concurso: ${data.ultimo_concurso || 'N/A'}\n`;
+            content += `Data: ${data.data || 'N/A'}\n`;
+            content += `Números: ${data.numeros ? data.numeros.join(', ') : 'N/A'}\n`;
+            if (data.ganhadores_principal_contagem !== undefined) { content += `Ganhadores: ${data.ganhadores_principal_contagem}\n`; }
+            if (data.cidades_ganhadoras_principal && data.cidades_ganhadoras_principal.length > 0) { content += `Cidades: ${data.cidades_ganhadoras_principal.join('; ')}\n`; }
+            if (data.rateio_principal_valor !== undefined) { content += `Rateio: R$ ${parseFloat(data.rateio_principal_valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;}
+            apiResultsPre.textContent = content;
+        } catch (error) { apiResultsPre.textContent = `Falha ao buscar resultados. ${error.message || ''}`; console.error("SCRIPT.JS: Erro fetchAndDisplayResults:", error); }
+    }
+
+    let previouslyFocusedElementModal;
+    function openModal(modalElement) {
         if (modalElement) {
-            previouslyFocusedElementModal = document.activeElement; 
+            previouslyFocusedElementModal = document.activeElement;
             modalElement.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             const firstFocusableElement = modalElement.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
             if (firstFocusableElement) firstFocusableElement.focus();
         } else { console.warn("openModal: modalElement não encontrado"); }
     }
-    function closeModal(modalElement) { 
+    function closeModal(modalElement) {
         if (modalElement) {
             modalElement.style.display = 'none';
             document.body.style.overflow = '';
-            if (modalElement === loginModal && loginEmailInput && loginPasswordInput && loginErrorP) { loginEmailInput.value = ''; loginPasswordInput.value = ''; loginErrorP.textContent = ''; } 
+            if (modalElement === loginModal && loginEmailInput && loginPasswordInput && loginErrorP) { loginEmailInput.value = ''; loginPasswordInput.value = ''; loginErrorP.textContent = ''; }
             else if (modalElement === registerModal && registerEmailInput && registerPasswordInput && registerConfirmPasswordInput && registerErrorP) { registerEmailInput.value = ''; registerPasswordInput.value = ''; registerConfirmPasswordInput.value = ''; registerErrorP.textContent = ''; }
             if (previouslyFocusedElementModal) previouslyFocusedElementModal.focus();
         } else { console.warn("closeModal: modalElement não encontrado"); }
     }
-    
+
     function renderBanners() {
         for (const containerId in bannerConfigurations) {
             const container = document.getElementById(containerId);
             if (container) {
-                container.innerHTML = ''; 
+                container.innerHTML = '';
                 const banners = bannerConfigurations[containerId];
                 banners.forEach((bannerData, index) => {
                     const imgElement = document.createElement('img');
@@ -383,11 +454,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (items.length === 1 && !items[0].classList.contains('active')) { items[0].classList.add('active');}
                 const noBannerP = carousel.querySelector('p');
                 if(noBannerP && items.length > 0) noBannerP.style.display = 'none';
-                return; 
+                return;
             }
             let currentIndex = 0;
             items.forEach((item, index) => { if (index === currentIndex) item.classList.add('active'); else item.classList.remove('active'); });
-            const intervalTime = parseInt(carousel.dataset.interval, 10) || 7000; 
+            const intervalTime = parseInt(carousel.dataset.interval, 10) || 7000;
             setInterval(() => {
                 if(items[currentIndex]) items[currentIndex].classList.remove('active');
                 currentIndex = (currentIndex + 1) % items.length;
@@ -395,28 +466,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }, intervalTime);
         });
     }
-    
+
     // ++ FUNÇÕES DE COMANDO DE VOZ ++
-    function speak(text, options = {}) { 
+    function speak(text, options = {}) {
         if (!speechSynthesis || !text) { console.warn("Síntese de voz não disponível ou texto vazio."); return; }
-        if (speechSynthesis.speaking) { speechSynthesis.cancel(); } 
+        if (speechSynthesis.speaking) { speechSynthesis.cancel(); }
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'pt-BR';
         const voices = speechSynthesis.getVoices();
         const ptBRVoice = voices.find(voice => voice.lang === 'pt-BR' || voice.lang === 'pt_BR');
         if (ptBRVoice) utterance.voice = ptBRVoice;
-        utterance.pitch = 1; utterance.rate = 1; 
-        
+        utterance.pitch = 1; utterance.rate = 1;
+
         utterance.onend = () => {
             if (options.onEndCallback && typeof options.onEndCallback === 'function') options.onEndCallback();
             if (options.shouldRelisten && voiceGuideActive && recognition && !isListening) {
                 console.log("Re-escutando automaticamente após a fala (speak).");
-                startListeningGeneralCommands(true); 
+                startListeningGeneralCommands(true);
             }
         };
         speechSynthesis.speak(utterance);
     }
-    
+
     const defaultRecognitionResultHandler = (event) => {
         const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
         if (voiceGuideActive) { processVoiceCommand(transcript); }
@@ -425,8 +496,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function setVoiceGuideState(isActive) {
         voiceGuideActive = isActive;
         localStorage.setItem('voiceGuideActive', isActive.toString());
-        if (voiceCommandBtn) { 
-            voiceCommandBtn.style.display = 'inline-flex'; 
+        if (voiceCommandBtn) {
+            voiceCommandBtn.style.display = 'inline-flex';
             if (voiceBtnText && voiceBtnIcon) {
                 voiceBtnText.textContent = isActive ? "Desativar Guia" : "Ativar Guia";
                 voiceBtnIcon.className = isActive ? "fas fa-microphone-slash" : "fas fa-microphone";
@@ -447,13 +518,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(voiceCommandBtn) voiceCommandBtn.classList.add('listening');
                 console.log('Ouvindo comando geral...');
             } catch (e) { console.error("Erro ao iniciar escuta geral:", e); isListening = false; if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening'); }
-        } else if (!voiceGuideActive) { speak("O guia de voz está desativado."); 
+        } else if (!voiceGuideActive) { speak("O guia de voz está desativado.");
         }
     }
-    
+
     function processVoiceCommand(command) {
         console.log("Processando comando de voz:", command);
-        awaitingSpecificInput = false; 
+        awaitingSpecificInput = false;
         if (command.includes('cancelar') || command.includes('parar')) {
             speak("Ação cancelada."); voiceContext = { action: null, awaiting: null, data: {} };
             if(isListening) { recognition.abort(); } return;
@@ -482,15 +553,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (voiceContext.action === 'login_prompt_email' && command.includes('digitar email')) {
             speak("Ok, diga seu email agora.", { shouldRelisten: true });
-            voiceContext.action = 'login_capturing_email'; voiceContext.awaiting = 'email_text'; 
+            voiceContext.action = 'login_capturing_email'; voiceContext.awaiting = 'email_text';
             awaitingSpecificInput = true; return;
         }
          if (voiceContext.action === 'login_capturing_email' && voiceContext.awaiting === 'email_text') {
-            const emailAttempt = command.replace(/arroba/g, '@').replace(/\s/g, '').toLowerCase(); 
+            const emailAttempt = command.replace(/arroba/g, '@').replace(/\s/g, '').toLowerCase();
             if (loginEmailInput) loginEmailInput.value = emailAttempt;
             speak(`Email preenchido como ${emailAttempt}. Por favor, digite sua senha e pressione entrar.`);
             if (loginPasswordInput) loginPasswordInput.focus();
-            voiceContext = { action: null, awaiting: null, data: {} }; 
+            voiceContext = { action: null, awaiting: null, data: {} };
             return;
         }
         if (command.includes('registrar') || command.includes('criar conta')) {
@@ -530,7 +601,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if(!awaitingSpecificInput && (!voiceContext.action || !voiceContext.awaiting)) { speak("Comando não reconhecido. Tente 'ajuda'."); }
     }
-    
+
     function initializeVoiceCommands() {
         const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognitionAPI && speechSynthesis) {
@@ -545,24 +616,22 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             recognition.onend = () => {
                 const wasAwaiting = awaitingSpecificInput;
-                isListening = false; awaitingSpecificInput = false; 
+                isListening = false; awaitingSpecificInput = false;
                 if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening');
                 if (voiceGuideActive && wasAwaiting && voiceContext.action && voiceContext.awaiting) {
-                    setTimeout(() => startListeningGeneralCommands(true), 200); 
+                    setTimeout(() => startListeningGeneralCommands(true), 200);
                 }
             };
             if (voiceCommandBtn) {
                 voiceCommandBtn.addEventListener('click', () => {
                     if (recognition && isListening) { recognition.abort(); return; }
-                     // A lógica de ativar/desativar o guia agora é feita na tela de boas-vindas
-                     // ou se o usuário clicar no botão depois da escolha inicial.
                     if (voiceGuideActive) {
                         startListeningGeneralCommands();
                     } else {
-                        setVoiceGuideState(true); // Ativa se estava desativado
+                        setVoiceGuideState(true);
                         speak("Guia de voz ativado. Clique novamente para comandar.");
                         localStorage.removeItem('voiceGuideDeclined');
-                        localStorage.setItem('voiceGuideChoiceMade', 'true'); // Assume que a escolha foi feita
+                        localStorage.setItem('voiceGuideChoiceMade', 'true');
                     }
                 });
             }
@@ -570,123 +639,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else { console.warn('Web Speech API não é suportada.'); if (voiceCommandBtn) voiceCommandBtn.style.display = 'none'; }
     }
 
-    function handleWelcomeChoice(activate) {
-        clearTimeout(welcomeScreenTimeout); 
-        setVoiceGuideState(activate);
-        localStorage.setItem('voiceGuideChoiceMade', 'true'); 
-        if (activate) {
-            // speak("Guia de voz ativado."); // A fala já ocorre em setVoiceGuideState ou após a escolha
-            localStorage.removeItem('voiceGuideDeclined');
-        } else {
-            localStorage.setItem('voiceGuideDeclined', 'true');
-        }
-        if (inclusiveWelcomeScreen) inclusiveWelcomeScreen.classList.add('hidden'); 
-        if (mainSplashScreen) mainSplashScreen.style.display = 'flex'; 
-
-        if (splashProgressBarFill && splashProgressContainer && mainSplashScreen && !mainSplashScreen.classList.contains('hidden')) {
-            let progress = 0; const totalVisualBarTime = SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION; const intervalTime = Math.max(10, totalVisualBarTime / 100);
-            const progressInterval = setInterval(() => { progress++; if (splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', progress); if (progress >= 100) { clearInterval(progressInterval); } }, intervalTime);
-        }
-        
-        criticalSplashTimeout = setTimeout(() => { 
-             if (splashHiddenTimestamp === 0 && typeof effectivelyShowApp === "function") { effectivelyShowApp(); }
-             if (!firebaseApp && typeof showGlobalError === "function") { showGlobalError("Falha crítica na inicialização."); if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();}
-             criticalSplashTimeout = null; 
-        }, SPLASH_MINIMUM_VISIBLE_TIME + 1000); 
-
-        if (typeof attemptFirebaseInit === "function") { setTimeout(attemptFirebaseInit, 150); } 
-        else {  if (typeof effectivelyShowApp === "function") effectivelyShowApp(); if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); }
-    }
-    
-    function initializeInclusiveWelcome() {
-        if (localStorage.getItem('voiceGuideChoiceMade') === 'true') {
-            const guideWasActive = localStorage.getItem('voiceGuideActive') === 'true';
-            handleWelcomeChoice(guideWasActive); 
-            return;
-        }
-
-        if (inclusiveWelcomeScreen) inclusiveWelcomeScreen.style.display = 'flex';
-        if (mainSplashScreen) mainSplashScreen.style.display = 'none'; 
-        if (voiceCommandBtn) voiceCommandBtn.style.display = 'none'; 
-
-        const playInitialGreetingAndListen = () => {
-            if (voiceGuideActive !== null || !inclusiveWelcomeScreen || inclusiveWelcomeScreen.classList.contains('hidden')) return;
-            const greeting = "Bem-vindo ao Loto Genius AI. Esta plataforma é inclusiva. Deseja ativar o guia de voz? Diga 'Sim' ou 'Não', ou use os botões na tela.";
-            speak(greeting, {
-                onEndCallback: () => {
-                    if (recognition && !isListening && voiceGuideActive === null) { 
-                        isListening = true; awaitingSpecificInput = true;
-                        recognition.onresult = (event) => { 
-                            const transcript = event.results[event.results.length-1][0].transcript.trim().toLowerCase();
-                            awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler; 
-                            clearTimeout(welcomeScreenTimeout); 
-                            if (transcript.includes('sim')) { handleWelcomeChoice(true); }
-                            else if (transcript.includes('não')) { handleWelcomeChoice(false); }
-                        };
-                        recognition.onerror = (event) => {console.error("Erro welcome listen:", event.error); awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler; clearTimeout(welcomeScreenTimeout); if(voiceGuideActive === null) handleWelcomeChoice(false);};
-                        recognition.onend = () => {awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler; if (voiceGuideActive === null && welcomeScreenTimeout && typeof welcomeScreenTimeout !== 'undefined' && welcomeScreenTimeout._destroyed === false) {} };
-                        try { recognition.start(); } catch (e) { console.error("Falha ao iniciar reconhecimento na saudação", e); isListening = false; awaitingSpecificInput = false;}
-                    }
-                }
-            });
-        };
-
-        document.body.addEventListener('pointerdown', function handleFirstAudio() {
-            if (!firstInteractionDoneForAudio) {
-                firstInteractionDoneForAudio = true;
-                let voiceCheckCount = 0;
-                const checkAndPlay = () => { (speechSynthesis.getVoices().length > 0 || voiceCheckCount > 15) ? playInitialGreetingAndListen() : (voiceCheckCount++, setTimeout(checkAndPlay, 200)); };
-                if (speechSynthesis.onvoiceschanged !== undefined && speechSynthesis.getVoices().length === 0) { 
-                    speechSynthesis.onvoiceschanged = () => { setTimeout(checkAndPlay, 100); speechSynthesis.onvoiceschanged = null; }; 
-                } else {
-                    checkAndPlay(); 
-                }
-            }
-        }, { capture: true, once: true });
-
-        if (activateVoiceGuideBtn) activateVoiceGuideBtn.addEventListener('click', () => { clearTimeout(welcomeScreenTimeout); handleWelcomeChoice(true); });
-        if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('click', () => { clearTimeout(welcomeScreenTimeout); handleWelcomeChoice(false); });
-
-        welcomeScreenTimeout = setTimeout(() => {
-            if (voiceGuideActive === null && inclusiveWelcomeScreen && inclusiveWelcomeScreen.style.display !== 'none') { 
-                handleWelcomeChoice(false); 
-            }
-        }, 20000); 
-    }
-
-    function effectivelyShowApp() {
-        if (criticalSplashTimeout) { clearTimeout(criticalSplashTimeout); criticalSplashTimeout = null; }
-        if (mainSplashScreen && !mainSplashScreen.classList.contains('hidden') && splashHiddenTimestamp === 0) { 
-            mainSplashScreen.classList.add('hidden');
-            splashHiddenTimestamp = Date.now();
-        }
-        if (inclusiveWelcomeScreen && !inclusiveWelcomeScreen.classList.contains('hidden')) {
-            inclusiveWelcomeScreen.classList.add('hidden'); 
-        }
-        showAppContentNow();
-    }
-    
-    function showAppContentNow() {
-        if (appContent && appContent.style.display === 'none') { 
-            appContent.style.display = 'block';
-            if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
-            if (typeof fetchPlatformStats === "function") fetchPlatformStats();
-            if (typeof fetchRecentWinningPools === "function") fetchRecentWinningPools();
-            if (typeof fetchTopWinners === "function") fetchTopWinners();
-            if (typeof renderBanners === "function") renderBanners();
-            if (typeof initializeCarousels === "function") initializeCarousels();
-            if (mainDisplayLotterySelect) {
-                const initialLottery = mainDisplayLotterySelect.value;
-                if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(initialLottery);
-                if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(initialLottery);
-                if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(initialLottery);
-                if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(initialLottery);
-                if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(initialLottery);
-                setTimeout(() => { if (mainDisplayLotterySelect.dispatchEvent) mainDisplayLotterySelect.dispatchEvent(new Event('change')); }, 300);
-            }
-        }
-    }
-    
     function updateLoginUI(user) {
         const navItems = document.querySelectorAll('#main-nav .nav-item');
         if (user) {
@@ -706,7 +658,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (typeof updateSaveButtonVisibility === "function") { updateSaveButtonVisibility('quick'); updateSaveButtonVisibility('esoteric'); updateSaveButtonVisibility('hot'); }
     }
-    
+
     async function generateAndDisplayQuickHunch() {
         if (!quickHunchLotteryTypeSelect || !generateQuickHunchBtn || !quickHunchOutputDiv || !quickHunchNumbersDiv || !quickHunchStrategyP) { return; }
         const lottery = quickHunchLotteryTypeSelect.value;
@@ -716,12 +668,24 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await fetchData(`api/main/gerar_jogo/${lottery}`);
             if (data.erro) { throw new Error(data.detalhes || data.erro);  } if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) { throw new Error("Palpite inválido.");}
-            if (typeof renderGameNumbers === "function") renderGameNumbers(quickHunchNumbersDiv, data.jogo, [], [], lottery);
+            if (typeof renderGameNumbers === "function") {
+                 renderGameNumbers(quickHunchNumbersDiv, data.jogo, [], [], lottery);
+            } else {
+                console.error("generateAndDisplayQuickHunch: renderGameNumbers não está definida!");
+                quickHunchNumbersDiv.innerHTML = '<p class="error-message">Erro de renderização (renderGameNumbers não definida).</p>';
+            }
             quickHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Aleatório'}`;
             lastGeneratedHunch = { type: 'quick', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Aleatório', outputDiv: quickHunchOutputDiv, numbersDiv: quickHunchNumbersDiv, checkResultDiv: quickHunchCheckResultDiv, saveButton: saveQuickHunchBtn, checkButton: checkQuickHunchBtn };
             if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('quick'); if (checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'inline-block';
-        } catch (error) { console.error("SCRIPT.JS: Erro palpite rápido:", error); quickHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha.'}</p>`; quickHunchStrategyP.textContent = 'Erro.'; lastGeneratedHunch = { type: null };
-        } finally { generateQuickHunchBtn.innerHTML = '<i class="fas fa-random"></i> Gerar Palpite Rápido'; generateQuickHunchBtn.disabled = false; }
+        } catch (error) {
+            console.error("SCRIPT.JS: Erro palpite rápido:", error);
+            quickHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha ao gerar palpite.'}</p>`;
+            quickHunchStrategyP.textContent = 'Erro ao gerar.';
+            lastGeneratedHunch = { type: null };
+        } finally {
+            generateQuickHunchBtn.innerHTML = '<i class="fas fa-random"></i> Gerar Palpite Rápido';
+            generateQuickHunchBtn.disabled = false;
+        }
     }
 
     async function generateAndDisplayHotNumbersHunch() {
@@ -734,12 +698,24 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await fetchData(`api/main/gerar_jogo/numeros_quentes/${lottery}?num_concursos_analisar=${analyzeCount}`);
             if (data.erro) { throw new Error(data.detalhes || data.erro); } if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) { throw new Error("Palpite inválido (quentes)."); }
-            if (typeof renderGameNumbers === "function") renderGameNumbers(hotNumbersHunchNumbersDiv, data.jogo, [], [], lottery);
+            if (typeof renderGameNumbers === "function") {
+                renderGameNumbers(hotNumbersHunchNumbersDiv, data.jogo, [], [], lottery);
+            } else {
+                console.error("generateAndDisplayHotNumbersHunch: renderGameNumbers não está definida!");
+                hotNumbersHunchNumbersDiv.innerHTML = '<p class="error-message">Erro de renderização (renderGameNumbers não definida).</p>';
+            }
             hotNumbersHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Números Quentes'}`; if (data.aviso) { hotNumbersHunchStrategyP.textContent += ` (${data.aviso})`; }
             lastGeneratedHunch = { type: 'hot', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Números Quentes', outputDiv: hotNumbersHunchOutputDiv, numbersDiv: hotNumbersHunchNumbersDiv, checkResultDiv: hotHunchCheckResultDiv, saveButton: saveHotHunchBtn, checkButton: checkHotHunchBtn };
             if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('hot'); if (checkHotHunchBtn) checkHotHunchBtn.style.display = 'inline-block';
-        } catch (error) { console.error("SCRIPT.JS: Erro palpite números quentes:", error); hotNumbersHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha.'}</p>`; hotNumbersHunchStrategyP.textContent = 'Erro.'; lastGeneratedHunch = { type: null };
-        } finally { generateHotNumbersHunchBtn.innerHTML = '<i class="fas fa-chart-line"></i> Gerar Palpite Quente'; generateHotNumbersHunchBtn.disabled = false; }
+        } catch (error) {
+            console.error("SCRIPT.JS: Erro palpite números quentes:", error);
+            hotNumbersHunchNumbersDiv.innerHTML = `<p class="error-message">${error.message || 'Falha.'}</p>`;
+            hotNumbersHunchStrategyP.textContent = 'Erro.';
+            lastGeneratedHunch = { type: null };
+        } finally {
+            generateHotNumbersHunchBtn.innerHTML = '<i class="fas fa-chart-line"></i> Gerar Palpite Quente';
+            generateHotNumbersHunchBtn.disabled = false;
+        }
     }
 
     async function generateAndDisplayEsotericHunch() {
@@ -752,15 +728,28 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const requestBody = { data_nascimento: birthDate }; const data = await fetchData(`api/main/palpite-esoterico/${lotteryName}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
             if (data.erro) { throw new Error(data.erro); } if (!data.palpite_gerado) { throw new Error("API não retornou palpite."); }
-            if (typeof renderGameNumbers === "function") renderGameNumbers(esotericHunchNumbersDiv, data.palpite_gerado, [], [], lotteryName);
+            if (typeof renderGameNumbers === "function") {
+                renderGameNumbers(esotericHunchNumbersDiv, data.palpite_gerado, [], [], lotteryName);
+            } else {
+                 console.error("generateAndDisplayEsotericHunch: renderGameNumbers não está definida!");
+                 esotericHunchNumbersDiv.innerHTML = '<p class="error-message">Erro de renderização (renderGameNumbers não definida).</p>';
+            }
             esotericHunchMethodP.textContent = `Método: ${data.metodo_geracao || 'N/A'}`;
             let historyHtml = `<strong>Histórico:</strong><br>`;
             if (data.historico_desta_combinacao) { const hist = data.historico_desta_combinacao; historyHtml += `Premiada? <span style="color: ${hist.ja_foi_premiada_faixa_principal ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${hist.ja_foi_premiada_faixa_principal ? 'Sim' : 'Não'}</span> (${hist.vezes_premiada_faixa_principal}x) - Valor: ${hist.valor_total_ganho_faixa_principal_formatado}`; } else { historyHtml += "Não verificado."; }
             esotericHunchHistoryCheckDiv.innerHTML = historyHtml;
             lastGeneratedHunch = { type: 'esoteric', lottery: lotteryName, jogo: data.palpite_gerado, estrategia_metodo: data.metodo_geracao || 'N/A', outputDiv: esotericHunchOutputDiv, numbersDiv: esotericHunchNumbersDiv, checkResultDiv: esotericHunchHistoryCheckDiv, saveButton: saveEsotericHunchBtn, checkButton: checkEsotericHunchBtn };
             if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('esoteric'); if (checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'inline-block';
-        } catch (error) { console.error("SCRIPT.JS: Erro palpite esotérico:", error); esotericHunchNumbersDiv.innerHTML = ''; esotericHunchMethodP.textContent = ''; esotericHunchHistoryCheckDiv.innerHTML = `<p class="error-message">Falha: ${error.message || 'Erro.'}</p>`; lastGeneratedHunch = { type: null };
-        } finally { generateEsotericHunchBtn.innerHTML = '<i class="fas fa-meteor"></i> Gerar Palpite Cósmico'; generateEsotericHunchBtn.disabled = false; }
+        } catch (error) {
+            console.error("SCRIPT.JS: Erro palpite esotérico:", error);
+            esotericHunchNumbersDiv.innerHTML = '';
+            esotericHunchMethodP.textContent = '';
+            esotericHunchHistoryCheckDiv.innerHTML = `<p class="error-message">Falha: ${error.message || 'Erro.'}</p>`;
+            lastGeneratedHunch = { type: null };
+        } finally {
+            generateEsotericHunchBtn.innerHTML = '<i class="fas fa-meteor"></i> Gerar Palpite Cósmico';
+            generateEsotericHunchBtn.disabled = false;
+        }
     }
 
     function updateSaveButtonVisibility(hunchType) {
@@ -811,23 +800,28 @@ document.addEventListener('DOMContentLoaded', () => {
             catch (e) { targetCheckResultDiv.innerHTML = `<span class="misses">Falha ao buscar resultados.</span>`; return; }
         }
         if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) { targetCheckResultDiv.innerHTML = `<span class="misses">Resultados oficiais indisponíveis.</span>`; return; }
-        if(typeof checkGame !== "function" || typeof renderGameNumbers !== "function") { targetCheckResultDiv.innerHTML = "Erro interno."; return; }
+
+        if(typeof checkGame !== "function" || typeof renderGameNumbers !== "function") {
+             targetCheckResultDiv.innerHTML = "Erro interno (checkGame ou renderGameNumbers não definida).";
+             console.error("checkLastGeneratedHunch: checkGame ou renderGameNumbers não está definida!");
+             return;
+        }
         const result = checkGame(currentHunch.jogo, resultsToUse);
-        if (expectedHunchType === 'esoteric') { console.log("Conferência p/ esotérico:", result.message); } 
+        if (expectedHunchType === 'esoteric') { console.log("Conferência p/ esotérico:", result.message); }
         else { targetCheckResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers && result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`; }
         renderGameNumbers(targetNumbersDiv, currentHunch.jogo, result.hitNumbers, result.almostNumbers || [], currentLottery);
     }
-    
+
     function triggerConfetti() {
         if (!confettiCanvas) return;
-        for (let i = 0; i < 100; i++) { 
+        for (let i = 0; i < 100; i++) {
             const confetti = document.createElement('div');
             confetti.classList.add('confetti');
             confetti.style.left = Math.random() * 100 + 'vw';
             confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 70%)`;
-            const duration = Math.random() * 3 + 2; 
+            const duration = Math.random() * 3 + 2;
             confetti.style.animationDuration = duration + 's';
-            confetti.style.animationDelay = Math.random() * 0.5 + 's'; 
+            confetti.style.animationDelay = Math.random() * 0.5 + 's';
             confetti.addEventListener('animationend', () => { confetti.remove(); });
             confettiCanvas.appendChild(confetti);
         }
@@ -839,25 +833,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const drawnNumbers = officialResults.numeros.map(n => String(n).trim());
         const userNumbersStr = userGameNumbers.map(n => String(n).trim());
-        let hits = 0; 
+        let hits = 0;
         let hitNumbers = [];
-        userNumbersStr.forEach(num => { 
-            if (drawnNumbers.includes(num)) { 
-                hits++; 
-                hitNumbers.push(parseInt(num,10)); 
-            } 
+        userNumbersStr.forEach(num => {
+            if (drawnNumbers.includes(num)) {
+                hits++;
+                hitNumbers.push(parseInt(num,10));
+            }
         });
         let message = `Você acertou ${hits} número(s).`;
         if (hits > 0) {
             message += ` Acertos: ${hitNumbers.join(', ')}.`;
             const lotteryConfig = LOTTERY_CONFIG_JS[officialResults.loteria_tipo];
             const numbersToWin = lotteryConfig?.count_sorteadas || lotteryConfig?.count || 0;
-            if (hits === numbersToWin && numbersToWin > 0) { 
+            if (hits === numbersToWin && numbersToWin > 0) {
                 message += " Parabéns, você GANHOU o prêmio máximo!";
-                triggerConfetti(); 
+                triggerConfetti();
             }
         }
-        return { hits: hits, hitNumbers: hitNumbers, almostNumbers: [], message: message }; 
+        return { hits: hits, hitNumbers: hitNumbers, almostNumbers: [], message: message };
     }
 
     async function loadUserGames(filterLottery = "todos") {
@@ -868,15 +862,31 @@ document.addEventListener('DOMContentLoaded', () => {
             if (filterLottery !== "todos") query = query.where('lottery', '==', filterLottery);
             const snapshot = await query.get(); savedGamesContainer.innerHTML = '';
             if (snapshot.empty) { noSavedGamesP.style.display = 'block'; return; }
-            snapshot.forEach(doc => { const gameCard = createGameCardElement(doc.id, doc.data()); if(gameCard) savedGamesContainer.appendChild(gameCard); });
-        } catch (error) { console.error("Erro jogos salvos:", error); savedGamesContainer.innerHTML = '<p class="error-message">Erro ao carregar.</p>'; }
+            snapshot.forEach(doc => {
+                const gameCard = createGameCardElement(doc.id, doc.data());
+                if(gameCard) savedGamesContainer.appendChild(gameCard);
+            });
+        } catch (error) {
+            console.error("Erro jogos salvos:", error); // O erro original já está sendo logado aqui.
+            savedGamesContainer.innerHTML = `<p class="error-message">Erro ao carregar jogos salvos. Detalhe: ${error.message}</p>`;
+        }
     }
 
     function createGameCardElement(docId, gameData) {
         const card = document.createElement('div'); card.classList.add('card', 'game-card'); card.dataset.id = docId;
         const lotteryName = LOTTERY_CONFIG_JS[gameData.lottery]?.name || gameData.lottery.toUpperCase();
         const gameNumbersDiv = document.createElement('div'); gameNumbersDiv.classList.add('game-numbers');
-        renderGameNumbers(gameNumbersDiv, gameData.game, [], [], gameData.lottery);
+
+        // ADICIONANDO LOG DE DEBUG AQUI:
+        console.log(`DEBUG: Em createGameCardElement, antes de chamar renderGameNumbers. typeof renderGameNumbers é: ${typeof renderGameNumbers}`);
+
+        if (typeof renderGameNumbers === "function") {
+            renderGameNumbers(gameNumbersDiv, gameData.game, [], [], gameData.lottery);
+        } else {
+            console.error(`createGameCardElement: renderGameNumbers NÃO ESTÁ DEFINIDA ao tentar renderizar jogo ${docId}!`);
+            gameNumbersDiv.innerHTML = "<p style='color:red;'>Erro: Função de renderização de números não encontrada.</p>";
+        }
+
         const strategyP = document.createElement('p'); strategyP.classList.add('strategy-text'); strategyP.textContent = `Estratégia: ${gameData.strategy || 'N/A'}`;
         const dateP = document.createElement('p'); dateP.classList.add('game-card-info'); dateP.textContent = `Salvo em: ${gameData.savedAt ? new Date(gameData.savedAt.toDate()).toLocaleDateString() : 'N/A'}`;
         const actionsDiv = document.createElement('div'); actionsDiv.classList.add('game-card-actions');
@@ -887,6 +897,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return card;
     }
 
+
     function updateManualProbNumbersFeedback() {
         if (!manualProbLotteryTypeSelect || !manualProbUserNumbersInput || !manualProbNumbersCountFeedback) return;
         const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
@@ -895,11 +906,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const userNumbersCount = numbersStr.split(/[ ,;/\t\n]+/).filter(n => n.trim() !== "" && !isNaN(n)).length;
         manualProbNumbersCountFeedback.textContent = `Números: ${userNumbersCount} de ${expectedCount}.`;
     }
-    
+
     // --- INICIALIZAÇÃO E EVENT LISTENERS ---
     function setupAuthEventListeners() {
         if(loginSubmitBtn && loginEmailInput && loginPasswordInput && loginErrorP) {
-            loginSubmitBtn.addEventListener('click', () => { 
+            loginSubmitBtn.addEventListener('click', () => {
                 if (!firebaseAuth) { if(loginErrorP) loginErrorP.textContent = "Erro de inicialização."; return; }
                 const email = loginEmailInput.value; const password = loginPasswordInput.value;
                 loginErrorP.textContent = ""; if (!email || !password) { loginErrorP.textContent = "Preencha email e senha."; return; }
@@ -909,7 +920,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         if(registerSubmitBtn && registerEmailInput && registerPasswordInput && registerConfirmPasswordInput && registerErrorP) {
-            registerSubmitBtn.addEventListener('click', () => { 
+            registerSubmitBtn.addEventListener('click', () => {
                 if (!firebaseAuth) { if(registerErrorP) registerErrorP.textContent = "Erro de inicialização."; return; }
                 const email = registerEmailInput.value; const password = registerPasswordInput.value; const confirmPassword = registerConfirmPasswordInput.value;
                 registerErrorP.textContent = ""; if (!email || !password || !confirmPassword) { registerErrorP.textContent = "Preencha todos os campos."; return; }
@@ -924,28 +935,22 @@ document.addEventListener('DOMContentLoaded', () => {
             logoutBtn.addEventListener('click', () => { if (firebaseAuth && currentUser) { firebaseAuth.signOut().then(() => {}).catch(e => alert(e.message)); } });
         }
     }
-    
+
     function initializeFirebase() {
         if (typeof firebase !== 'undefined' && typeof firebaseConfig !== 'undefined') {
             try {
                 if (firebase.apps.length === 0) { firebaseApp = firebase.initializeApp(firebaseConfig); } else { firebaseApp = firebase.app(); }
                 firebaseAuth = firebase.auth(firebaseApp); firestoreDB = firebase.firestore(firebaseApp);
                 if (typeof setupAuthEventListeners === "function") setupAuthEventListeners();
-                
+
                 firebaseAuth.onAuthStateChanged(user => {
                     currentUser = user;
                     if (typeof updateLoginUI === "function") updateLoginUI(user);
-                    
-                    // A lógica de mostrar o conteúdo AGORA é gerenciada por handleWelcomeChoice ou effectivelyShowApp
-                    // Esta callback só atualiza o estado do usuário e a UI correspondente.
-                    // Se a escolha de voz já foi feita e a splash principal já sumiu, podemos mostrar o conteúdo.
                     if (localStorage.getItem('voiceGuideChoiceMade') === 'true') {
                         if (splashHiddenTimestamp > 0 || (mainSplashScreen && mainSplashScreen.classList.contains('hidden')) ) {
                             if (typeof effectivelyShowApp === "function") effectivelyShowApp();
                         }
-                        // Se a splash principal ainda não sumiu, o timeout dela chamará effectivelyShowApp.
                     } else if (typeof effectivelyShowApp === "function" && (!inclusiveWelcomeScreen || inclusiveWelcomeScreen.classList.contains('hidden'))) {
-                        // Fallback se a tela de boas-vindas foi pulada ou escondeu e o app não carregou
                         const timeSinceDOMLoad = Date.now() - domContentLoadedTimestamp;
                         let delayToHideMainSplash = (mainSplashScreen && !mainSplashScreen.classList.contains('hidden') && splashHiddenTimestamp === 0 && timeSinceDOMLoad < SPLASH_MINIMUM_VISIBLE_TIME) ? SPLASH_MINIMUM_VISIBLE_TIME - timeSinceDOMLoad : 0;
                         setTimeout(effectivelyShowApp, delayToHideMainSplash);
@@ -954,14 +959,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof enableFirebaseFeatures === "function") enableFirebaseFeatures();
                 return true;
             } catch (error) { console.error("SCRIPT.JS: CRITICAL Firebase init error:", error); if (typeof showGlobalError === "function") showGlobalError(`Erro Firebase: ${error.message}`); if (typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); return false; }
-        } else { 
-            console.error("SCRIPT.JS: Firebase SDK ou firebaseConfig não definidos."); 
-            if (typeof effectivelyShowApp === "function") { 
+        } else {
+            console.error("SCRIPT.JS: Firebase SDK ou firebaseConfig não definidos.");
+            if (typeof effectivelyShowApp === "function") {
                 const timeSinceDOMLoad = Date.now() - domContentLoadedTimestamp;
-                setTimeout(effectivelyShowApp, SPLASH_MINIMUM_VISIBLE_TIME > timeSinceDOMLoad ? SPLASH_MINIMUM_VISIBLE_TIME - timeSinceDOMLoad : 0); 
-            } 
-            if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); 
-            return false; 
+                setTimeout(effectivelyShowApp, SPLASH_MINIMUM_VISIBLE_TIME > timeSinceDOMLoad ? SPLASH_MINIMUM_VISIBLE_TIME - timeSinceDOMLoad : 0);
+            }
+            if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
+            return false;
         }
     }
 
@@ -969,8 +974,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!initializeFirebase()) {
             firebaseInitAttempts++;
             if (firebaseInitAttempts < maxFirebaseInitAttempts) setTimeout(attemptFirebaseInit, 500);
-            else { 
-                if (typeof showGlobalError === "function") showGlobalError("Não foi possível carregar os serviços. Tente recarregar."); 
+            else {
+                if (typeof showGlobalError === "function") showGlobalError("Não foi possível carregar os serviços. Tente recarregar.");
                 if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
                 if (typeof effectivelyShowApp === "function") { effectivelyShowApp(); }
             }
@@ -979,21 +984,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function effectivelyShowApp() {
         if (criticalSplashTimeout) { clearTimeout(criticalSplashTimeout); criticalSplashTimeout = null; }
-        
-        // Esconde a tela de boas-vindas se ainda estiver visível
         if (inclusiveWelcomeScreen && !inclusiveWelcomeScreen.classList.contains('hidden')) {
-            inclusiveWelcomeScreen.classList.add('hidden'); 
+            inclusiveWelcomeScreen.classList.add('hidden');
         }
-        // Esconde a splash principal se ainda estiver visível
-        if (mainSplashScreen && !mainSplashScreen.classList.contains('hidden') && splashHiddenTimestamp === 0) { 
+        if (mainSplashScreen && !mainSplashScreen.classList.contains('hidden') && splashHiddenTimestamp === 0) {
             mainSplashScreen.classList.add('hidden');
             splashHiddenTimestamp = Date.now();
         }
-        showAppContentNow(); // Mostra o conteúdo do aplicativo
+        showAppContentNow();
     }
-    
-    function showAppContentNow() { // Esta função agora SÓ mostra o conteúdo e faz fetches
-        if (appContent && appContent.style.display === 'none') { 
+
+    function showAppContentNow() {
+        if (appContent && appContent.style.display === 'none') {
             appContent.style.display = 'block';
             if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
             if (typeof fetchPlatformStats === "function") fetchPlatformStats();
@@ -1015,74 +1017,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- LÓGICA DA TELA DE BOAS-VINDAS INCLUSIVA ---
     function handleWelcomeChoice(activate) {
-        clearTimeout(welcomeScreenTimeout); 
-        setVoiceGuideState(activate); // Define o estado global e atualiza o botão do header
-        localStorage.setItem('voiceGuideChoiceMade', 'true'); 
+        clearTimeout(welcomeScreenTimeout);
+        setVoiceGuideState(activate);
+        localStorage.setItem('voiceGuideChoiceMade', 'true');
         if (activate) {
             speak("Guia de voz ativado. A interface principal será carregada.");
             localStorage.removeItem('voiceGuideDeclined');
         } else {
-            // speak("Guia de voz desativado. Carregando a interface."); // Opcional
             localStorage.setItem('voiceGuideDeclined', 'true');
         }
-        if (inclusiveWelcomeScreen) inclusiveWelcomeScreen.classList.add('hidden'); 
-        if (mainSplashScreen) mainSplashScreen.style.display = 'flex'; // Mostra a splash principal
+        if (inclusiveWelcomeScreen) inclusiveWelcomeScreen.classList.add('hidden');
+        if (mainSplashScreen) mainSplashScreen.style.display = 'flex';
 
-        // Animação da Splash Principal
         if (splashProgressBarFill && splashProgressContainer && mainSplashScreen && !mainSplashScreen.classList.contains('hidden')) {
             let progress = 0; const totalVisualBarTime = SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION; const intervalTime = Math.max(10, totalVisualBarTime / 100);
             const progressInterval = setInterval(() => { progress++; if (splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', progress); if (progress >= 100) { clearInterval(progressInterval); } }, intervalTime);
         }
-        
-        // Timeout para a splash principal ANTES de mostrar o conteúdo do app
-        criticalSplashTimeout = setTimeout(() => { 
-             if (splashHiddenTimestamp === 0 && typeof effectivelyShowApp === "function") { 
-                effectivelyShowApp(); 
+
+        criticalSplashTimeout = setTimeout(() => {
+             if (splashHiddenTimestamp === 0 && typeof effectivelyShowApp === "function") {
+                effectivelyShowApp();
             } else if (typeof effectivelyShowApp === "function" && mainSplashScreen && mainSplashScreen.classList.contains('hidden') && appContent.style.display === 'none'){
                 effectivelyShowApp();
             }
              if (!firebaseApp && typeof showGlobalError === "function") { showGlobalError("Falha crítica na inicialização."); if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();}
-             criticalSplashTimeout = null; 
-        }, SPLASH_MINIMUM_VISIBLE_TIME + 1000); 
+             criticalSplashTimeout = null;
+        }, SPLASH_MINIMUM_VISIBLE_TIME + 1000);
 
-        // Inicia o carregamento do Firebase AGORA, após a escolha na tela de boas-vindas
-        if (typeof attemptFirebaseInit === "function") { 
-            setTimeout(attemptFirebaseInit, 100); // Pequeno delay para a splash aparecer
-        } else {  
-            if (typeof effectivelyShowApp === "function") effectivelyShowApp(); 
-            if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures(); 
+        if (typeof attemptFirebaseInit === "function") {
+            setTimeout(attemptFirebaseInit, 100);
+        } else {
+            if (typeof effectivelyShowApp === "function") effectivelyShowApp();
+            if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
         }
     }
-    
+
     function initializeInclusiveWelcome() {
         if (localStorage.getItem('voiceGuideChoiceMade') === 'true') {
             const guideWasActive = localStorage.getItem('voiceGuideActive') === 'true';
-            handleWelcomeChoice(guideWasActive); 
+            handleWelcomeChoice(guideWasActive);
             return;
         }
 
         if (inclusiveWelcomeScreen) inclusiveWelcomeScreen.style.display = 'flex';
-        if (mainSplashScreen) mainSplashScreen.style.display = 'none'; 
-        if (voiceCommandBtn) voiceCommandBtn.style.display = 'none'; 
+        if (mainSplashScreen) mainSplashScreen.style.display = 'none';
+        if (voiceCommandBtn) voiceCommandBtn.style.display = 'none';
 
         const playInitialGreetingAndListen = () => {
             if (voiceGuideActive !== null || !inclusiveWelcomeScreen || inclusiveWelcomeScreen.classList.contains('hidden')) return;
             const greeting = "Bem-vindo ao Loto Genius AI. Esta plataforma é inclusiva. Deseja ativar o guia de voz? Diga 'Sim' ou 'Não', ou use os botões na tela.";
             speak(greeting, {
                 onEndCallback: () => {
-                    if (recognition && !isListening && voiceGuideActive === null) { 
+                    if (recognition && !isListening && voiceGuideActive === null) {
                         isListening = true; awaitingSpecificInput = true;
-                        recognition.onresult = (event) => { 
+                        recognition.onresult = (event) => {
                             const transcript = event.results[event.results.length-1][0].transcript.trim().toLowerCase();
-                            awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler; 
-                            clearTimeout(welcomeScreenTimeout); 
+                            awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler;
+                            clearTimeout(welcomeScreenTimeout);
                             if (transcript.includes('sim')) { handleWelcomeChoice(true); }
                             else if (transcript.includes('não')) { handleWelcomeChoice(false); }
                         };
                         recognition.onerror = (event) => {console.error("Erro welcome listen:", event.error); awaitingSpecificInput = false; isListening = false; recognition.onresult = defaultRecognitionResultHandler; clearTimeout(welcomeScreenTimeout); if(voiceGuideActive === null) handleWelcomeChoice(false);};
                         recognition.onend = () => {
-                            isListening = false; awaitingSpecificInput = false; recognition.onresult = defaultRecognitionResultHandler; 
-                            if (voiceGuideActive === null && welcomeScreenTimeout) { // Se não foi destruído pelo clearTimeout
+                            isListening = false; awaitingSpecificInput = false; recognition.onresult = defaultRecognitionResultHandler;
+                            if (voiceGuideActive === null && welcomeScreenTimeout) {
                                 // O timeout vai pegar
                             }
                         };
@@ -1097,10 +1095,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 firstInteractionDoneForAudio = true;
                 let voiceCheckCount = 0;
                 const checkAndPlay = () => { (speechSynthesis.getVoices().length > 0 || voiceCheckCount > 15) ? playInitialGreetingAndListen() : (voiceCheckCount++, setTimeout(checkAndPlay, 200)); };
-                if (speechSynthesis.onvoiceschanged !== undefined && speechSynthesis.getVoices().length === 0) { 
-                    speechSynthesis.onvoiceschanged = () => { setTimeout(checkAndPlay, 100); speechSynthesis.onvoiceschanged = null; }; 
+                if (speechSynthesis.onvoiceschanged !== undefined && speechSynthesis.getVoices().length === 0) {
+                    speechSynthesis.onvoiceschanged = () => { setTimeout(checkAndPlay, 100); speechSynthesis.onvoiceschanged = null; };
                 } else {
-                    checkAndPlay(); 
+                    checkAndPlay();
                 }
             }
         }, { capture: true, once: true });
@@ -1109,17 +1107,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('click', () => { clearTimeout(welcomeScreenTimeout); handleWelcomeChoice(false); });
 
         welcomeScreenTimeout = setTimeout(() => {
-            if (voiceGuideActive === null && inclusiveWelcomeScreen && inclusiveWelcomeScreen.style.display !== 'none') { 
-                handleWelcomeChoice(false); 
+            if (voiceGuideActive === null && inclusiveWelcomeScreen && inclusiveWelcomeScreen.style.display !== 'none') {
+                handleWelcomeChoice(false);
             }
-        }, 20000); 
+        }, 20000);
     }
 
 
     // --- INICIALIZAÇÃO PRINCIPAL DO SCRIPT ---
-    initializeVoiceCommands(); // Configura as APIs de voz e o botão do header
-    initializeInclusiveWelcome(); // Mostra a tela de boas-vindas primeiro
-    
+    initializeVoiceCommands();
+    initializeInclusiveWelcome();
+
     // --- EVENT LISTENERS (Configurados após todas as funções estarem definidas) ---
     if(loginModalBtn) loginModalBtn.addEventListener('click', () => openModal(loginModal));
     if(registerModalBtn) registerModalBtn.addEventListener('click', () => openModal(registerModal));
@@ -1129,73 +1127,73 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navDashboardBtn) navDashboardBtn.addEventListener('click', () => setActiveSection('dashboard-section'));
     if (navMyGamesBtn) navMyGamesBtn.addEventListener('click', () => { setActiveSection('my-games-section'); if (currentUser && typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); });
     if (navPoolsBtn) navPoolsBtn.addEventListener('click', () => setActiveSection('pools-section'));
-    
-    if (mainDisplayLotterySelect) { 
-        mainDisplayLotterySelect.addEventListener('change', (e) => { 
-            const selectedLottery = e.target.value; 
-            const selectedOption = e.target.options[e.target.selectedIndex]; 
+
+    if (mainDisplayLotterySelect) {
+        mainDisplayLotterySelect.addEventListener('change', (e) => {
+            const selectedLottery = e.target.value;
+            const selectedOption = e.target.options[e.target.selectedIndex];
             const lotteryFriendlyName = selectedOption ? selectedOption.text : (LOTTERY_CONFIG_JS[selectedLottery] ? LOTTERY_CONFIG_JS[selectedLottery].name : selectedLottery.toUpperCase());
-            if (resultsLotteryNameSpan) resultsLotteryNameSpan.textContent = lotteryFriendlyName; 
-            if(freqStatsLotteryNameSpan) freqStatsLotteryNameSpan.textContent = lotteryFriendlyName; 
-            if(pairFreqStatsLotteryNameSpan) pairFreqStatsLotteryNameSpan.textContent = lotteryFriendlyName; 
-            if(cityStatsLotteryNameSpan) cityStatsLotteryNameSpan.textContent = lotteryFriendlyName; 
+            if (resultsLotteryNameSpan) resultsLotteryNameSpan.textContent = lotteryFriendlyName;
+            if(freqStatsLotteryNameSpan) freqStatsLotteryNameSpan.textContent = lotteryFriendlyName;
+            if(pairFreqStatsLotteryNameSpan) pairFreqStatsLotteryNameSpan.textContent = lotteryFriendlyName;
+            if(cityStatsLotteryNameSpan) cityStatsLotteryNameSpan.textContent = lotteryFriendlyName;
             if(cityPrizeSumLotteryNameSpan) cityPrizeSumLotteryNameSpan.textContent = lotteryFriendlyName;
-            if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery); 
-            if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery); 
-            if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery); 
-            if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery); 
+            if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery);
+            if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery);
+            if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery);
+            if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery);
             if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(selectedLottery);
-        }); 
+        });
     }
-    if (fetchResultsBtn && mainDisplayLotterySelect) { 
-        fetchResultsBtn.addEventListener('click', () => { 
+    if (fetchResultsBtn && mainDisplayLotterySelect) {
+        fetchResultsBtn.addEventListener('click', () => {
             const selectedLottery = mainDisplayLotterySelect.value;
-            if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery); 
-            if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery); 
-            if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery); 
-            if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery); 
+            if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery);
+            if (typeof fetchAndDisplayFrequencyStats === "function") fetchAndDisplayFrequencyStats(selectedLottery);
+            if (typeof fetchAndDisplayPairFrequencyStats === "function") fetchAndDisplayPairFrequencyStats(selectedLottery);
+            if (typeof fetchAndDisplayCityStats === "function") fetchAndDisplayCityStats(selectedLottery);
             if (typeof fetchAndDisplayCityPrizeSumStats === "function") fetchAndDisplayCityPrizeSumStats(selectedLottery);
-        }); 
+        });
     }
     if (generateQuickHunchBtn) generateQuickHunchBtn.addEventListener('click', generateAndDisplayQuickHunch);
     if (generateEsotericHunchBtn) generateEsotericHunchBtn.addEventListener('click', generateAndDisplayEsotericHunch);
     if (generateHotNumbersHunchBtn) generateHotNumbersHunchBtn.addEventListener('click', generateAndDisplayHotNumbersHunch);
     if (typeof setupSaveHunchButtonListeners === "function") setupSaveHunchButtonListeners();
     if (typeof setupCheckHunchButtonListeners === "function") setupCheckHunchButtonListeners();
-    
-    if (promoRegisterBtn) { // Verificação adicionada
+
+    if (promoRegisterBtn) {
         promoRegisterBtn.addEventListener('click', () => { if (typeof openModal === "function") openModal(registerModal); });
     }
-    if (promoLoginBtn && typeof openModal === "function") { // Verificação mantida
+    if (promoLoginBtn && typeof openModal === "function") {
         promoLoginBtn.addEventListener('click', () => openModal(loginModal));
     }
-    
+
     if (filterLotteryMyGamesSelect) { filterLotteryMyGamesSelect.addEventListener('change', (e) => { if (currentUser && typeof loadUserGames === "function") loadUserGames(e.target.value); });}
-    
-    if (manualProbUserNumbersInput && manualProbLotteryTypeSelect) { 
+
+    if (manualProbUserNumbersInput && manualProbLotteryTypeSelect) {
         manualProbUserNumbersInput.addEventListener('input', updateManualProbNumbersFeedback);
-        manualProbLotteryTypeSelect.addEventListener('change', () => { 
-            const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex]; 
+        manualProbLotteryTypeSelect.addEventListener('change', () => {
+            const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
             if (!selectedOption || !selectedOption.dataset.count || !selectedOption.dataset.min || !selectedOption.dataset.max) return;
-            manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${selectedOption.dataset.count} de ${selectedOption.dataset.min}-${selectedOption.dataset.max})`; 
-            manualProbUserNumbersInput.value = ''; 
-            if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback(); 
+            manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${selectedOption.dataset.count} de ${selectedOption.dataset.min}-${selectedOption.dataset.max})`;
+            manualProbUserNumbersInput.value = '';
+            if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback();
             if(manualProbabilityResultDisplay) manualProbabilityResultDisplay.textContent = "Aguardando seu jogo...";
         });
         const initialSelectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
-         if (initialSelectedOption && initialSelectedOption.dataset.count && initialSelectedOption.dataset.min && initialSelectedOption.dataset.max){ 
-            manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${initialSelectedOption.dataset.count} de ${initialSelectedOption.dataset.min}-${initialSelectedOption.dataset.max})`; 
+         if (initialSelectedOption && initialSelectedOption.dataset.count && initialSelectedOption.dataset.min && initialSelectedOption.dataset.max){
+            manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${initialSelectedOption.dataset.count} de ${initialSelectedOption.dataset.min}-${initialSelectedOption.dataset.max})`;
          }
-        if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback(); 
+        if (typeof updateManualProbNumbersFeedback === "function") updateManualProbNumbersFeedback();
     }
-    if (manualCalculateProbBtn) { 
-        manualCalculateProbBtn.addEventListener('click', async () => { 
+    if (manualCalculateProbBtn) {
+        manualCalculateProbBtn.addEventListener('click', async () => {
             if (!manualProbLotteryTypeSelect || !manualProbUserNumbersInput || !manualProbabilityResultDisplay || typeof fetchData !== 'function') return;
-            const lotteryType = manualProbLotteryTypeSelect.value; 
-            const numbersStr = manualProbUserNumbersInput.value; 
-            const userNumbersRaw = numbersStr.split(/[ ,;/\t\n]+/); 
+            const lotteryType = manualProbLotteryTypeSelect.value;
+            const numbersStr = manualProbUserNumbersInput.value;
+            const userNumbersRaw = numbersStr.split(/[ ,;/\t\n]+/);
             const userNumbers = userNumbersRaw.map(n => n.trim()).filter(n => n !== "" && !isNaN(n)).map(n => parseInt(n,10));
-            const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex]; 
+            const selectedOption = manualProbLotteryTypeSelect.options[manualProbLotteryTypeSelect.selectedIndex];
             const expectedCount = parseInt(selectedOption.dataset.count, 10);
             if (userNumbers.length === 0) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Insira os números.</p>`; return; }
             if (userNumbers.length !== expectedCount) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Forneça ${expectedCount} números.</p>`; return; }
@@ -1211,7 +1209,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(resultData.descricao) displayText += `\n<small>${resultData.descricao}</small>`;
                 manualProbabilityResultDisplay.innerHTML = displayText.replace(/\n/g,'<br>');
             } catch (error) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Erro: ${error.message}</p>`; }
-        }); 
+        });
     }
     console.log("SCRIPT.JS: Final do script atingido.");
 });
