@@ -54,7 +54,7 @@ body {
     outline: none;
 }
 
-/* ++ TELA DE BOAS-VINDAS INCLUSIVA ++ */
+/* TELA DE BOAS-VINDAS INCLUSIVA */
 #inclusive-welcome-screen {
     position: fixed;
     top: 0;
@@ -74,46 +74,40 @@ body {
     visibility: visible;
     transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
 }
-#inclusive-welcome-screen.hidden {
+#inclusive-welcome-screen.hidden { /* Classe para esconder a tela de boas-vindas */
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
 }
-
 .welcome-content {
     max-width: 600px;
-    animation: fadeInSimple 1s ease-out 0.2s forwards;
-    opacity: 0;
+    animation: fadeInSimple 1s ease-out 0.2s forwards; /* Usando keyframe existente */
+    opacity: 0; /* Começa invisível para a animação */
 }
-
 .welcome-title-text {
     font-family: 'Orbitron', sans-serif;
     font-size: 2.2rem;
     color: #58c4ff;
     margin-bottom: 1rem;
 }
-
 .welcome-desc-text {
     font-size: 1.1rem;
     color: #c5dcf0;
     margin-bottom: 1.5rem;
     line-height: 1.7;
 }
-
 .welcome-question-text {
     font-size: 1.2rem;
     font-weight: bold;
     color: #ffd700; 
     margin-bottom: 1.5rem;
 }
-
 .welcome-actions {
     display: flex;
     gap: 20px;
     justify-content: center;
     margin-bottom: 1rem;
 }
-
 .welcome-btn {
     padding: 12px 25px;
     font-size: 1rem;
@@ -128,35 +122,15 @@ body {
     min-width: 200px; 
     justify-content: center;
 }
+.welcome-btn.positive-action { background-color: #2ecc71; color: #fff; }
+.welcome-btn.positive-action:hover { background-color: #27ae60; transform: translateY(-2px); }
+.welcome-btn.negative-action { background-color: #e74c3c; color: #fff; }
+.welcome-btn.negative-action:hover { background-color: #c0392b; transform: translateY(-2px); }
+.voice-prompt-alternative-text { font-size: 0.85rem; color: #a7b5e8; margin-top: 15px; }
 
-.welcome-btn.positive-action {
-    background-color: #2ecc71; 
-    color: #fff;
-}
-.welcome-btn.positive-action:hover {
-    background-color: #27ae60;
-    transform: translateY(-2px);
-}
-
-.welcome-btn.negative-action {
-    background-color: #e74c3c; 
-    color: #fff;
-}
-.welcome-btn.negative-action:hover {
-    background-color: #c0392b;
-    transform: translateY(-2px);
-}
-
-.voice-prompt-alternative-text {
-    font-size: 0.85rem;
-    color: #a7b5e8;
-    margin-top: 15px;
-}
-
-/* Splash Screen Principal (começa escondida) */
+/* Splash Screen Principal (começa escondida se a de boas-vindas estiver ativa) */
 #accessible-splash-screen {
-    /* display: none; (Controlado pelo HTML e JS) */
-    /* Resto dos estilos da splash como antes */
+    /* display: none; (Controlado pelo HTML/JS inicial) */
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: linear-gradient(145deg, #0d1226 0%, #111834 60%, #0a0d1f 100%);
     display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -180,9 +154,19 @@ body {
 @keyframes pulseGradient { 0% { filter: brightness(100%) saturate(100%); } 100% { filter: brightness(130%) saturate(120%); } }
 
 /* Cabeçalho */
-header { /* ... (como antes) ... */ }
-/* ... (restante dos estilos do header e navegação) ... */
-
+header { 
+    background: linear-gradient(90deg, #1f4068, #162447); 
+    color: #e0e0e0; 
+    padding: 0.8rem 1.5rem; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); 
+    position: sticky; 
+    top: 0; 
+    z-index: 1000; 
+}
+/* ... (restante dos estilos do header e navegação como na última versão) ... */
 /* Botão de Comando de Voz no Header */
 #voice-command-btn {
     min-width: 140px; 
@@ -195,7 +179,6 @@ header { /* ... (como antes) ... */ }
     box-shadow: 0 0 8px #4CAF50;
 }
 #voice-command-btn .fa-microphone-slash { color: #ff4765; }
-
 
 /* Banner Principal no Topo */
 .main-carousel-wrapper {
@@ -236,10 +219,8 @@ header { /* ... (como antes) ... */ }
         height: 180px;   
         border-radius: 0;
     }
-    #banner-top-dashboard .carousel-item,
-    #banner-top-dashboard .carousel-item img {
-        border-radius: 0;
-    }
+    #banner-top-dashboard .carousel-item { border-radius: 0; }
+    #banner-top-dashboard .carousel-item img { border-radius: 0; }
 }
 @media (max-width: 768px) {
     .main-carousel-wrapper { padding: 0.25rem 0; margin-bottom: 0.5rem; }
@@ -250,60 +231,8 @@ header { /* ... (como antes) ... */ }
 }
 
 /* Conteúdo Principal, Cards, Modais, Footer, etc. */
-/* ... (cole aqui o RESTANTE COMPLETO do seu style.css da versão anterior) ... */
-/* Certifique-se de incluir todos os estilos para .grid-container, .card, 
-   .game-numbers, .modal, etc. */
-
-/* Estilos GERAIS para CAROUSEL-AD (Aplicável a todos os .carousel-ad) */
-.carousel-ad { 
-    position: relative; 
-    overflow: hidden;   
-    border-radius: 8px; 
-    display: flex; 
-    align-items: center;
-    justify-content: center;
-}
-.carousel-ad .carousel-item { 
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
-    border-radius: inherit; 
-    display: flex; 
-    align-items: center;
-    justify-content: center;
-}
-.carousel-ad .carousel-item.active { opacity: 1; visibility: visible; z-index: 1; }
-.carousel-ad .carousel-item img { 
-    display: block; max-width: 100%; max-height: 100%; border-radius: inherit; 
-}
-.carousel-ad a.carousel-item { cursor: pointer; }
-.carousel-ad:empty::before { 
-    content: "Publicidade"; display: flex; align-items: center; justify-content: center;
-    width: 100%; height: 100%; color: #8a9ac4; font-size: 1rem;
-    background-color: #2a2a50; border: 2px dashed #3b3b6e; border-radius: inherit;
-}
-.carousel-ad > p { color: #8a9ac4; font-size: 1rem; text-align: center; }
-.carousel-ad:not(:empty) > p { display: none; }
-
-.ad-placeholder.banner-bottom-dashboard { 
-    min-height: 250px; max-width: 300px; height: 250px; margin: 1.5rem auto;
-    border: 2px dashed #3b3b6e; background-color: #2a2a50; 
-}
-#banner-bottom-dashboard .carousel-item img { object-fit: cover; }
-
-/* Responsividade e outros estilos específicos */
-@media (max-width: 768px) { 
-    header { padding: 0.8rem 1rem; flex-direction: column; align-items: center; } 
-    .logo-container { margin-bottom: 0.8rem; } 
-    #main-nav { width: 100%; justify-content: space-around; margin-bottom: 0.8rem; } 
-    .nav-item .nav-text { display: none; } .nav-item i { font-size: 1.2rem; } 
-    #auth-section { width: 100%; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5rem; }
-    #voice-command-btn { margin-bottom: 0.5rem; }
-    /* ... (resto das suas media queries) ... */
-}
-/* ... (resto dos seus estilos, como modais, footer, etc.) ... */
+main { padding: 1.5rem; max-width: 1100px; margin: 0 auto 20px auto; }
+/* ... (Cole aqui o RESTANTE COMPLETO do seu style.css da última versão, 
+          incluindo .grid-container, .card, .game-numbers, .modal, etc.) ... */
+/* Certifique-se que os estilos gerais de .carousel-ad e .carousel-item 
+   não conflitem de forma indesejada com os estilos específicos de #banner-top-dashboard. */
