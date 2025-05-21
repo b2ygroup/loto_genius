@@ -17,7 +17,25 @@
 </head>
 <body>
     <a href="#app-content" class="skip-link">Pular para o conteúdo principal</a>
-    <div id="accessible-splash-screen" role="dialog" aria-modal="true" aria-labelledby="splash-title" aria-describedby="splash-status-message">
+
+    <div id="inclusive-welcome-screen" role="dialog" aria-labelledby="welcome-title" aria-describedby="welcome-desc welcome-voice-prompt-alternative" aria-modal="true" style="display: flex;">
+        <div class="welcome-content">
+            <h1 id="welcome-title" class="welcome-title-text">Bem-vindo ao Loto Genius AI!</h1>
+            <p id="welcome-desc" class="welcome-desc-text">Esta plataforma é de inclusão e oferece um guia de voz opcional para auxiliar na navegação e uso das funcionalidades. O guia pode ser ativado ou desativado a qualquer momento.</p>
+            <p class="welcome-question-text">Deseja ativar o guia de voz agora?</p>
+            <div class="welcome-actions">
+                <button id="welcome-voice-yes-btn" class="welcome-btn positive-action">
+                    <i class="fas fa-check-circle" aria-hidden="true"></i> Sim, ativar guia
+                </button>
+                <button id="welcome-voice-no-btn" class="welcome-btn negative-action">
+                    <i class="fas fa-times-circle" aria-hidden="true"></i> Não, continuar sem
+                </button>
+            </div>
+            <p id="welcome-voice-prompt-alternative" class="voice-prompt-alternative-text">(Você também pode dizer "Sim" ou "Não" após a mensagem de áudio)</p>
+        </div>
+    </div>
+
+    <div id="accessible-splash-screen" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="splash-title" aria-describedby="splash-status-message">
         <div class="splash-content-wrapper">
             <div class="splash-logo-tech" aria-hidden="true">
                 <span class="char l">L</span><span class="char o1">o</span><span class="char t">t</span><span class="char o2">o</span>
@@ -39,7 +57,7 @@
             <button id="nav-pools-btn" class="nav-item" title="Bolões"><i class="fas fa-users" aria-hidden="true"></i> <span class="nav-text">Bolões</span></button>
         </nav>
         <div id="auth-section" aria-label="Autenticação do Usuário">
-            <button id="voice-command-btn" class="auth-btn" title="Ativar Guia de Voz" aria-pressed="false" style="margin-right: 10px; border-color: #82e0aa; min-width: 140px;">
+            <button id="voice-command-btn" class="auth-btn" title="Ativar Guia de Voz" aria-pressed="false" style="margin-right: 10px; border-color: #82e0aa; min-width: 140px; display: none;">
                 <i class="fas fa-microphone" aria-hidden="true"></i> <span class="voice-btn-text">Ativar Guia</span>
             </button>
             <button id="login-modal-btn" class="auth-btn">Login</button>
