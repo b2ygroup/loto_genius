@@ -388,7 +388,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
     async function fetchAndDisplayResults(lotteryName) {
         if (!apiResultsPre) { return; }
         apiResultsPre.innerHTML = '<div class="spinner small-spinner"></div> Carregando...';
@@ -588,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if ((command.includes('gerar') || command.includes('palpite')) && (command.includes('mega sena') || command.includes('mega'))) {
              if(mainLotterySelect) mainLotterySelect.value = 'megasena';
-             updateAllDashboardData('megasena');
+             if (typeof updateAllDashboardData === 'function') updateAllDashboardData('megasena');
              if (command.includes('rápido') && generateQuickHunchBtn) { generateQuickHunchBtn.click(); speak("Gerando palpite rápido para Mega-Sena.");}
              else if (command.includes('quente') && generateHotNumbersHunchBtn) { generateHotNumbersHunchBtn.click(); speak("Gerando palpite de números quentes para Mega-Sena.");}
              else if (command.includes('frio') && generateColdNumbersHunchBtn) { generateColdNumbersHunchBtn.click(); speak("Gerando palpite de números frios para Mega-Sena.");}
@@ -597,7 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if ((command.includes('gerar') || command.includes('palpite')) && (command.includes('lotofácil') || command.includes('fácil'))) {
             if(mainLotterySelect) mainLotterySelect.value = 'lotofacil';
-            updateAllDashboardData('lotofacil');
+            if (typeof updateAllDashboardData === 'function') updateAllDashboardData('lotofacil');
             if (command.includes('rápido') && generateQuickHunchBtn) { generateQuickHunchBtn.click(); speak("Gerando palpite rápido para Lotofácil.");}
             else if (command.includes('quente') && generateHotNumbersHunchBtn) { generateHotNumbersHunchBtn.click(); speak("Gerando palpite de números quentes para Lotofácil.");}
             else if (command.includes('frio') && generateColdNumbersHunchBtn) { generateColdNumbersHunchBtn.click(); speak("Gerando palpite de números frios para Lotofácil.");}
@@ -1037,7 +1036,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         if(logoutBtn) {
-            logoutBtn.addEventListener('click', () => { if (firebaseAuth && currentUser) { firebaseAuth.signOut().then(() => {}).catch(e => alert(e.message)); } });
+            logoutBtn.addEventListener('click', () => {
+                if (firebaseAuth && currentUser) {
+                    firebaseAuth.signOut()
+                        .then(() => {
+                            if(typeof setActiveSection === "function") setActiveSection('dashboard-section');
+                        })
+                        .catch(e => {
+                            alert("Erro ao sair: " + e.message);
+                            console.error("Erro no logout:", e);
+                        });
+                }
+            });
         }
     }
 
