@@ -16,7 +16,7 @@
     <script defer src="script.js"></script>
 </head>
 <body>
-
+    <a href="#app-content" class="skip-link">Pular para o conteúdo principal</a>
     <div id="accessible-splash-screen" role="dialog" aria-modal="true" aria-labelledby="splash-title" aria-describedby="splash-status-message">
         <div class="splash-content-wrapper">
             <div class="splash-logo-tech" aria-hidden="true">
@@ -39,9 +39,12 @@
             <button id="nav-pools-btn" class="nav-item" title="Bolões"><i class="fas fa-users" aria-hidden="true"></i> <span class="nav-text">Bolões</span></button>
         </nav>
         <div id="auth-section" aria-label="Autenticação do Usuário">
+            <button id="voice-command-btn" class="auth-btn" title="Ativar Guia de Voz" aria-pressed="false" style="margin-right: 10px; border-color: #82e0aa; min-width: 140px;">
+                <i class="fas fa-microphone" aria-hidden="true"></i> <span class="voice-btn-text">Ativar Guia</span>
+            </button>
             <button id="login-modal-btn" class="auth-btn">Login</button>
             <button id="register-modal-btn" class="auth-btn">Registrar</button>
-            <div id="user-info" style="display:none;"><span id="user-email"></span><button id="logout-btn" class="auth-btn logout"><i class="fas fa-sign-out-alt"></i></button></div>
+            <div id="user-info" style="display:none;"><span id="user-email"></span><button id="logout-btn" class="auth-btn logout" aria-label="Sair da sua conta"><i class="fas fa-sign-out-alt" aria-hidden="true"></i></button></div>
         </div>
     </header>
 
@@ -78,7 +81,7 @@
                 <div class="card large-card" id="quick-hunch-card" aria-labelledby="quick-hunch-title">
                     <h2 id="quick-hunch-title"><i class="fas fa-bolt" aria-hidden="true"></i> Palpite Aleatório Rápido</h2>
                     <label for="quick-hunch-lottery-type">Selecione a Loteria:</label>
-                    <select id="quick-hunch-lottery-type">
+                    <select id="quick-hunch-lottery-type" aria-label="Selecionar loteria para palpite rápido">
                         <option value="megasena">Mega-Sena</option>
                         <option value="lotofacil">Lotofácil</option>
                         <option value="lotomania">Lotomania</option>
@@ -87,7 +90,7 @@
                     <div class="button-group">
                         <button id="generate-quick-hunch-btn" class="action-btn primary-action"><i class="fas fa-random" aria-hidden="true"></i> Gerar Palpite Rápido</button>
                     </div>
-                    <div id="quick-hunch-output" class="game-card" style="display:none; margin-top: 1rem;" aria-live="polite">
+                    <div id="quick-hunch-output" class="game-card" style="display:none;" aria-live="polite" aria-atomic="true">
                         <h4><i class="fas fa-lightbulb" aria-hidden="true"></i> Seu Palpite Rápido:</h4>
                         <div id="quick-hunch-numbers" class="game-numbers"></div>
                         <p id="quick-hunch-strategy" class="strategy-text"></p>
@@ -95,26 +98,26 @@
                             <button id="save-quick-hunch-btn" class="action-btn small-btn" title="Salvar este jogo" style="display:none;"><i class="fas fa-save"></i> Salvar</button>
                             <button id="check-quick-hunch-btn" class="action-btn small-btn" title="Conferir este jogo" style="display:none;"><i class="fas fa-check-circle"></i> Conferir</button>
                         </div>
-                        <div id="quick-hunch-check-result" class="check-result-display"></div>
+                        <div id="quick-hunch-check-result" class="check-result-display" aria-live="polite"></div>
                     </div>
                 </div>
 
                 <div class="card large-card" id="hot-numbers-hunch-card" aria-labelledby="hot-numbers-hunch-title">
                     <h2 id="hot-numbers-hunch-title"><i class="fas fa-fire" aria-hidden="true"></i> Palpite Números Quentes</h2>
                     <label for="hot-numbers-lottery-type">Selecione a Loteria:</label>
-                    <select id="hot-numbers-lottery-type">
+                    <select id="hot-numbers-lottery-type" aria-label="Selecionar loteria para palpite de números quentes">
                         <option value="megasena">Mega-Sena</option>
                         <option value="lotofacil">Lotofácil</option>
                         <option value="lotomania">Lotomania</option>
                         <option value="quina">Quina</option>
                     </select>
                     <label for="hot-numbers-analyze-count">Analisar os últimos quantos concursos?</label>
-                    <input type="number" id="hot-numbers-analyze-count" value="20" min="1" max="100" style="width: 100px; margin-bottom: 1rem;">
+                    <input type="number" id="hot-numbers-analyze-count" value="20" min="1" max="100" style="width: 100px; margin-bottom: 1rem;" aria-label="Número de concursos para analisar para números quentes">
                     
                     <div class="button-group">
                         <button id="generate-hot-numbers-hunch-btn" class="action-btn primary-action"><i class="fas fa-chart-line" aria-hidden="true"></i> Gerar Palpite Quente</button>
                     </div>
-                    <div id="hot-numbers-hunch-output" class="game-card" style="display:none; margin-top: 1rem;" aria-live="polite">
+                    <div id="hot-numbers-hunch-output" class="game-card" style="display:none; margin-top: 1rem;" aria-live="polite" aria-atomic="true">
                         <h4><i class="fas fa-temperature-high" aria-hidden="true"></i> Seu Palpite Quente:</h4>
                         <div id="hot-numbers-hunch-numbers" class="game-numbers"></div>
                         <p id="hot-numbers-hunch-strategy" class="strategy-text"></p>
@@ -122,29 +125,29 @@
                             <button id="save-hot-hunch-btn" class="action-btn small-btn" title="Salvar este jogo" style="display:none;"><i class="fas fa-save"></i> Salvar</button>
                             <button id="check-hot-hunch-btn" class="action-btn small-btn" title="Conferir este jogo" style="display:none;"><i class="fas fa-check-circle"></i> Conferir</button>
                         </div>
-                        <div id="hot-hunch-check-result" class="check-result-display"></div>
+                        <div id="hot-hunch-check-result" class="check-result-display" aria-live="polite"></div>
                     </div>
                 </div>
 
                 <div class="card large-card" id="esoteric-hunch-card" style="display:none;" aria-labelledby="esoteric-title">
                     <h2 id="esoteric-title"><i class="fas fa-hat-wizard" aria-hidden="true"></i> Palpites Cósmicos & Numerológicos <span class="premium-tag">(Exclusivo Assinantes)</span></h2>
                     <label for="esoteric-lottery-type">Selecione a Loteria:</label>
-                    <select id="esoteric-lottery-type">
+                    <select id="esoteric-lottery-type" aria-label="Selecionar loteria para palpite cósmico">
                         <option value="megasena">Mega-Sena</option>
                         <option value="lotofacil">Lotofácil</option>
                         <option value="lotomania">Lotomania</option>
                         <option value="quina">Quina</option>
                     </select>
                     <label for="birth-date-input">Sua Data de Nascimento (DDMMAAAA):</label>
-                    <input type="text" id="birth-date-input" placeholder="Ex: 25121990" maxlength="8" inputmode="numeric" pattern="\d{8}">
+                    <input type="text" id="birth-date-input" placeholder="Ex: 25121990" maxlength="8" inputmode="numeric" pattern="\d{8}" aria-label="Data de nascimento no formato dia mês e ano com quatro dígitos">
                     <div class="button-group">
                         <button id="generate-esoteric-hunch-btn" class="action-btn primary-action"><i class="fas fa-meteor"></i> Gerar Palpite Cósmico</button>
                     </div>
-                    <div id="esoteric-hunch-output" class="game-card" style="display:none; margin-top: 1rem;" aria-live="polite">
+                    <div id="esoteric-hunch-output" class="game-card" style="display:none; margin-top: 1rem;" aria-live="polite" aria-atomic="true">
                         <h4><i class="fas fa-wand-sparkles" aria-hidden="true"></i> Seu Palpite Cósmico:</h4>
                         <div id="esoteric-hunch-numbers" class="game-numbers"></div>
                         <p id="esoteric-hunch-method" class="strategy-text"></p>
-                        <div id="esoteric-hunch-history-check" class="check-result-display" style="margin-top: 0.5rem; font-size: 0.85em;"></div>
+                        <div id="esoteric-hunch-history-check" class="check-result-display" style="margin-top: 0.5rem; font-size: 0.85em;" aria-live="polite"></div>
                          <div class="game-card-actions">
                             <button id="save-esoteric-hunch-btn" class="action-btn small-btn" title="Salvar este jogo" style="display:none;"><i class="fas fa-save"></i> Salvar</button>
                             <button id="check-esoteric-hunch-btn" class="action-btn small-btn" title="Conferir este jogo" style="display:none;"><i class="fas fa-check-circle"></i> Conferir</button>
@@ -156,25 +159,25 @@
                     <h3 id="results-title"><i class="fas fa-poll" aria-hidden="true"></i> Últimos Resultados</h3>
                     <div class="results-header">
                         <span id="results-lottery-name">Mega-Sena</span> 
-                        <button id="fetch-results-btn" class="action-btn small-btn refresh-btn" title="Atualizar Resultados"><i class="fas fa-sync-alt"></i></button>
+                        <button id="fetch-results-btn" class="action-btn small-btn refresh-btn" title="Atualizar Resultados" aria-label="Atualizar últimos resultados e estatísticas da loteria selecionada"><i class="fas fa-sync-alt"></i></button>
                     </div>
-                    <pre id="api-results" class="code-block" aria-live="polite">Selecione uma loteria e clique em atualizar.</pre>
+                    <div id="api-results" class="code-block" aria-live="polite">Selecione uma loteria e clique em atualizar.</div>
                 </div>
                 
                 <div class="card" id="manual-game-probability-card" aria-labelledby="manual-game-prob-title">
                     <h3 id="manual-game-prob-title"><i class="fas fa-calculator"></i> Probabilidade do Meu Jogo</h3>
                     <label for="manual-prob-lottery-type">Selecione a Loteria:</label>
-                    <select id="manual-prob-lottery-type">
+                    <select id="manual-prob-lottery-type" aria-label="Selecionar loteria para cálculo de probabilidade manual">
                         <option value="megasena" data-count="6" data-min="1" data-max="60">Mega-Sena (6 números de 1-60)</option>
                         <option value="lotofacil" data-count="15" data-min="1" data-max="25">Lotofácil (15 números de 1-25)</option>
                         <option value="lotomania" data-count="50" data-min="0" data-max="99">Lotomania (Aposta 50 de 0-99)</option>
                         <option value="quina" data-count="5" data-min="1" data-max="80">Quina (5 números de 1-80)</option>
                     </select>
                     <label for="manual-prob-user-numbers">Seus números (separados por vírgula):</label>
-                    <textarea id="manual-prob-user-numbers" rows="3" placeholder="Ex: 01,02,03,04,05,06"></textarea>
-                    <p id="manual-prob-numbers-count-feedback" class="input-feedback">Números: 0 de X.</p>
+                    <textarea id="manual-prob-user-numbers" rows="3" placeholder="Ex: 01,02,03,04,05,06" aria-label="Insira seus números para cálculo de probabilidade, separados por vírgula"></textarea>
+                    <p id="manual-prob-numbers-count-feedback" class="input-feedback" aria-live="polite">Números: 0 de X.</p>
                     <button id="manual-calculate-prob-btn" class="action-btn primary-action"><i class="fas fa-percent"></i> Calcular Probabilidade</button>
-                    <div id="manual-probability-result-display" class="result-display-box" style="margin-top:15px;">
+                    <div id="manual-probability-result-display" class="result-display-box" style="margin-top:15px;" aria-live="polite">
                         Aguardando seu jogo...
                     </div>
                 </div>
@@ -183,29 +186,29 @@
             <div class="grid-container-side">
                 <section id="winning-pools-preview" class="card" aria-labelledby="winning-pools-title">
                     <h3 id="winning-pools-title"><i class="fas fa-users-crown"></i> Bolões Premiados (Simulado)</h3>
-                    <ul id="recent-pools-list"><li><div class="spinner small-spinner"></div></li></ul>
+                    <ul id="recent-pools-list" aria-live="polite"><li><div class="spinner small-spinner"></div></li></ul>
                 </section>
                 <section id="top-winners-preview" class="card" aria-labelledby="top-winners-title">
                     <h3 id="top-winners-title"><i class="fas fa-medal"></i> Top Ganhadores (Simulado)</h3>
-                    <ol id="top-winners-list"><li><div class="spinner small-spinner"></div></li></ol>
+                    <ol id="top-winners-list" aria-live="polite"><li><div class="spinner small-spinner"></div></li></ol>
                 </section>
                 <div class="card" id="frequency-stats-card" aria-labelledby="frequency-stats-title">
                     <h3 id="frequency-stats-title"><i class="fas fa-sort-numeric-up-alt"></i> Mais Sorteados (<span id="freq-stats-lottery-name">Mega-Sena</span>)</h3>
-                    <div id="frequency-list-container" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
+                    <div id="frequency-list-container" class="stats-list-container" aria-live="polite"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
                 </div>
                 <div class="card" id="pair-frequency-stats-card" aria-labelledby="pair-frequency-stats-title">
                     <h3 id="pair-frequency-stats-title"><i class="fas fa-project-diagram"></i> Pares Frequentes (<span id="pair-freq-stats-lottery-name">Mega-Sena</span>)</h3>
-                    <div id="pair-frequency-list-container" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
+                    <div id="pair-frequency-list-container" class="stats-list-container" aria-live="polite"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
                 </div>
                  <div class="card" id="city-stats-card" aria-labelledby="city-stats-title">
                     <h3 id="city-stats-title"><i class="fas fa-city"></i> Cidades Premiadas (<span id="city-stats-lottery-name">Mega-Sena</span>)</h3>
                     <p class="stats-subtitle">(Ganhadores do prêmio principal)</p>
-                    <div id="city-list-container" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
+                    <div id="city-list-container" class="stats-list-container" aria-live="polite"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
                 </div>
                 <div class="card" id="city-prize-sum-card" aria-labelledby="city-prize-sum-title">
                     <h3 id="city-prize-sum-title"><i class="fas fa-hand-holding-usd"></i> Prêmios por Cidade (<span id="city-prize-sum-lottery-name">Mega-Sena</span>)</h3>
                     <p class="stats-subtitle">(Soma dos prêmios principais)</p>
-                    <div id="city-prize-sum-list-container" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
+                    <div id="city-prize-sum-list-container" class="stats-list-container" aria-live="polite"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
                 </div>
             </div>
             
@@ -225,7 +228,7 @@
                     <option value="lotomania">Lotomania</option><option value="quina">Quina</option>
                 </select>
             </div>
-            <div id="saved-games-container" class="grid-container cards-display">
+            <div id="saved-games-container" class="grid-container cards-display" aria-live="polite">
                 <p id="no-saved-games" style="display:none;">Você ainda não tem jogos salvos.</p>
             </div>
         </section>
@@ -239,9 +242,9 @@
         <div class="modal-content">
             <button class="close-btn" id="close-login-modal" aria-label="Fechar modal de login">&times;</button>
             <h2 id="login-modal-title">Login</h2>
-            <label for="login-email" class="visually-hidden">Email</label>
+            <label for="login-email">Email:</label>
             <input type="email" id="login-email" placeholder="Seu Email" required aria-required="true">
-            <label for="login-password" class="visually-hidden">Senha</label>
+            <label for="login-password">Senha:</label>
             <input type="password" id="login-password" placeholder="Sua Senha" required aria-required="true">
             <button id="login-submit-btn" class="modal-btn">Entrar</button>
             <p id="login-error" class="error-message" aria-live="assertive"></p>
@@ -252,11 +255,11 @@
         <div class="modal-content">
             <button class="close-btn" id="close-register-modal" aria-label="Fechar modal de registro">&times;</button>
             <h2 id="register-modal-title">Criar Conta</h2>
-            <label for="register-email" class="visually-hidden">Email</label>
+            <label for="register-email">Email:</label>
             <input type="email" id="register-email" placeholder="Seu Email" required aria-required="true">
-            <label for="register-password" class="visually-hidden">Senha</label>
+            <label for="register-password">Senha:</label>
             <input type="password" id="register-password" placeholder="Crie uma Senha (mín. 6 caracteres)" required aria-required="true">
-            <label for="register-confirm-password" class="visually-hidden">Confirme a Senha</label>
+            <label for="register-confirm-password">Confirme a Senha:</label>
             <input type="password" id="register-confirm-password" placeholder="Confirme a Senha" required aria-required="true">
             <button id="register-submit-btn" class="modal-btn">Registrar</button>
             <p id="register-error" class="error-message" aria-live="assertive"></p>

@@ -25,6 +25,38 @@ body {
 }
 .card-title-accessible i { margin-right: 8px; }
 
+/* Skip Link para Acessibilidade */
+.skip-link {
+    position: absolute;
+    top: -50px; /* Escondido fora da tela */
+    left: 10px;
+    background: #ffd700;
+    color: #1a1a2e;
+    padding: 10px 15px;
+    z-index: 100001; 
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 0 0 5px 5px;
+    transition: top 0.3s ease;
+}
+.skip-link:focus {
+    top: 0; /* Mostra quando focado */
+}
+
+
+/* Estilo para Foco Visível (Teclado) */
+*:focus-visible {
+    outline: 3px solid #ffd700 !important; /* Dourado para bom contraste */
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(71, 174, 255, 0.5) !important; /* Sombra azul clara */
+    z-index: 10001; /* Para garantir que o foco seja visível sobre outros elementos */
+}
+/* Remover outline padrão para :focus se :focus-visible é suportado e usado */
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+
+
 /* Splash Screen */
 #accessible-splash-screen {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -64,49 +96,56 @@ header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; letter-spaci
 #logout-btn { border-color: #ff4765; padding: 0.5rem 0.8rem; }
 #logout-btn:hover { background-color: #ff4765; color: #1a1a2e; box-shadow: 0 0 10px #ff4765; }
 
-/* === ESTILOS PARA O BANNER PRINCIPAL NO TOPO (ALTURA AJUSTADA E OBJECT-FIT: CONTAIN) === */
+/* Botão de Comando de Voz */
+#voice-command-btn {
+    min-width: 120px; /* Para acomodar o texto "Desativar Voz" */
+    transition: border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+#voice-command-btn.listening {
+    border-color: #4CAF50 !important; 
+    color: #4CAF50 !important;
+    box-shadow: 0 0 8px #4CAF50;
+}
+#voice-command-btn .fa-microphone-slash { color: #ff4765; }
+
+
+/* Banner Principal no Topo */
 .main-carousel-wrapper {
     width: 100%;
-    padding: 0.5rem 0; /* Menor padding vertical */
+    padding: 0.5rem 0; 
     margin-bottom: 1rem; 
-    background-color: #121220; /* Cor de fundo para a área do wrapper se necessário */
+    background-color: #121220; 
 }
-
 #banner-top-dashboard.carousel-ad {
-    max-width: 970px;  /* Largura comum para banners tipo billboard/leaderboard */
-    height: 250px;     /* ALTURA AJUSTADA para se assemelhar a um billboard (ex: 970x250) */
-                       /* Outra opção: 90px para um leaderboard (ex: 728x90 ou 970x90) */
+    max-width: 970px;  
+    height: 250px;     
     margin: 0 auto;    
     border-radius: 6px; 
-    background-color: #18192a; /* Cor de fundo para espaços vazios se a imagem usar 'contain' */
+    background-color: #18192a; 
     position: relative; 
     overflow: hidden; 
-    border: 1px solid #303256; /* Borda sutil */
+    border: 1px solid #303256; 
 }
-
 #banner-top-dashboard .carousel-item {
     width: 100%;
     height: 100%;
     border-radius: 6px; 
-    display: flex; /* Para centralizar a imagem quando 'contain' é usado */
+    display: flex; 
     align-items: center;
     justify-content: center;
 }
-
 #banner-top-dashboard .carousel-item img {
     display: block; 
-    max-width: 100%;  /* Garante que a imagem não ultrapasse a largura do item */
-    max-height: 100%; /* Garante que a imagem não ultrapasse a altura do item */
-    object-fit: contain; /* <<< IMAGEM IRÁ CABER DENTRO, MANTENDO PROPORÇÃO, PODENDO DEIXAR ESPAÇOS >>> */
+    max-width: 100%;  
+    max-height: 100%; 
+    object-fit: contain; 
     object-position: center center; 
-    border-radius: 6px; /* Se a imagem em si precisar de borda arredondada */
+    border-radius: 6px; 
 }
-
-/* Responsividade para o banner do topo */
-@media (max-width: 991px) { /* Ajuste para telas um pouco menores que 970px */
+@media (max-width: 991px) { 
     #banner-top-dashboard.carousel-ad {
-        max-width: 100%; /* Ocupar toda a largura */
-        height: 180px;   /* Altura proporcionalmente menor, ou um valor fixo que funcione bem */
+        max-width: 100%; 
+        height: 180px;   
         border-radius: 0;
     }
     #banner-top-dashboard .carousel-item,
@@ -114,7 +153,6 @@ header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; letter-spaci
         border-radius: 0;
     }
 }
-
 @media (max-width: 768px) {
     .main-carousel-wrapper {
         padding: 0.25rem 0;
@@ -124,18 +162,14 @@ header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; letter-spaci
         height: 150px; 
     }
 }
-
 @media (max-width: 480px) {
     #banner-top-dashboard.carousel-ad {
         height: 120px; 
     }
 }
-/* === FIM DOS ESTILOS DO BANNER PRINCIPAL === */
 
 /* Conteúdo Principal e Seções */
 main { padding: 1.5rem; max-width: 1100px; margin: 0 auto 20px auto; }
-/* ... (restante dos seus estilos como na versão anterior) ... */
-
 .main-section { display: none; }
 .main-section.active-section { display: block; animation: fadeIn 0.5s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -165,6 +199,17 @@ h4 i { margin-right: 5px; }
 }
 .card textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 
+/* Estilos para Labels nos Modais (se visíveis) */
+.modal-content label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+    color: #a2d2ff; 
+    text-align: left; 
+    font-size: 0.9rem;
+}
+
+
 .action-btn { padding: 0.7rem 1rem; margin-right: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; font-size: 0.95rem; cursor: pointer; border: 1px solid #3b3b6e; background-color: #2a2a50; color: #e0e0e0; transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; font-family: 'Roboto', sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; }
 .action-btn.primary-action { background-color: #47aeff; color: #1a1a2e; font-weight: bold; }
 .action-btn.primary-action:hover { background-color: #3aa0f0; box-shadow: 0 0 10px rgba(71, 174, 255, 0.6); }
@@ -177,7 +222,9 @@ h4 i { margin-right: 5px; }
 
 .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
 #results-lottery-name { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: #a2d2ff; }
-.code-block { background-color: #121224; padding: 0.8rem; border-radius: 6px; white-space: pre-wrap; word-wrap: break-word; border: 1px solid #2a2a50; min-height: 50px; font-family: 'Courier New', Courier, monospace; color: #a2d2ff; font-size: 0.85rem; box-shadow: inset 0 0 8px rgba(0,0,0,0.2); max-height: 200px; overflow-y: auto; }
+#api-results.code-block { /* Mudado de .code-block para ser mais específico */
+    background-color: #121224; padding: 0.8rem; border-radius: 6px; white-space: pre-wrap; word-wrap: break-word; border: 1px solid #2a2a50; min-height: 50px; font-family: 'Courier New', Courier, monospace; color: #a2d2ff; font-size: 0.85rem; box-shadow: inset 0 0 8px rgba(0,0,0,0.2); max-height: 200px; overflow-y: auto; 
+}
 .game-card { background-color: #2a2a50; border-radius: 8px; padding: 1rem; margin-top: 1rem; border: 1px solid #3b3b6e; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 .game-numbers { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.8rem; justify-content: center; }
 .game-number { background-color: #47aeff; color: #1a1a2e; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.3); opacity: 1; transform: scale(1) translateY(0); transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -197,82 +244,16 @@ h4 i { margin-right: 5px; }
 .highlight-item span.stat-number { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; color: #ffffff; display: block; margin-bottom: 0.3rem; font-weight: 700; transition: all 0.5s ease-in-out; }
 .highlight-item p { font-size: 0.85rem; color: #c5c6c7; }
 
-/* ESTILOS GERAIS PARA CAROUSEL-AD */
-.carousel-ad { 
-    position: relative; 
-    overflow: hidden;   
-    /* background-color e border removidos daqui para serem específicos por ID se necessário */
-    border-radius: 8px; /* Raio padrão para todos os carrosséis */
-    display: flex; 
-    align-items: center;
-    justify-content: center;
-}
-.carousel-ad .carousel-item { 
-    display: block; 
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
-    border-radius: inherit; 
-    /* Para centralizar a imagem se o item for um div wrapper */
-    display: flex; 
-    align-items: center;
-    justify-content: center;
-}
-.carousel-ad .carousel-item.active {
-    opacity: 1;
-    visibility: visible;
-    z-index: 1; 
-}
-.carousel-ad .carousel-item img { 
-    display: block; 
-    max-width: 100%; /* Garante que a imagem não seja maior que seu contêiner (item) */
-    max-height: 100%;/* Garante que a imagem não seja maior que seu contêiner (item) */
-    /* object-fit é definido por ID específico agora (#banner-top-dashboard) */
-    border-radius: inherit; 
-}
-.carousel-ad a.carousel-item { 
-    cursor: pointer;
-}
-.carousel-ad:empty::before { 
-    content: "Espaço Publicitário"; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    color: #8a9ac4; 
-    font-size: 1rem;
-    background-color: #2a2a50; /* Fundo para o placeholder */
-    border: 2px dashed #3b3b6e; /* Borda para o placeholder */
-    border-radius: inherit;
-}
-.carousel-ad > p { 
-    color: #8a9ac4;
-    font-size: 1rem;
-    text-align: center;
-}
-.carousel-ad:not(:empty) > p { 
-    display: none;
-}
-
-.ad-placeholder.banner-bottom-dashboard { 
-    min-height: 250px; 
-    max-width: 300px; 
-    height: 250px; 
-    margin: 1.5rem auto;
-    background-color: #2a2a50; /* Fundo se as imagens não cobrirem ou para o placeholder */
-    border: 2px dashed #3b3b6e; /* Borda do placeholder */
-}
-/* Garante que imagens no banner inferior também se ajustem bem */
-#banner-bottom-dashboard .carousel-item img {
-    object-fit: contain; /* Ou cover, dependendo do que você quer para este banner */
-}
-
+.carousel-ad { position: relative; overflow: hidden; border-radius: 8px; display: flex; align-items: center; justify-content: center; background-color: #18192a; /* Fundo geral para carrossel */ }
+.carousel-ad .carousel-item { display: block; width: 100%; height: 100%; position: absolute; top: 0; left: 0; opacity: 0; visibility: hidden; transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out; border-radius: inherit; display: flex; align-items: center; justify-content: center; }
+.carousel-ad .carousel-item.active { opacity: 1; visibility: visible; z-index: 1; }
+.carousel-ad .carousel-item img { display: block; max-width: 100%; max-height: 100%; border-radius: inherit; /* object-fit é definido por ID específico agora */ }
+.carousel-ad a.carousel-item { cursor: pointer; }
+.carousel-ad:empty::before { content: "Publicidade"; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #8a9ac4; font-size: 1rem; background-color: #2a2a50; border: 2px dashed #3b3b6e; border-radius: inherit; }
+.carousel-ad > p { color: #8a9ac4; font-size: 1rem; text-align: center; }
+.carousel-ad:not(:empty) > p { display: none; }
+.ad-placeholder.banner-bottom-dashboard { min-height: 250px; max-width: 300px; height: 250px; margin: 1.5rem auto; border: 2px dashed #3b3b6e; background-color: #2a2a50; }
+#banner-bottom-dashboard .carousel-item img { object-fit: contain; }
 
 #winning-pools-preview ul, #top-winners-preview ol { list-style-type: none; padding-left: 0; max-height: 250px; overflow-y: auto; }
 #winning-pools-preview li, #top-winners-preview li { background-color: #2a2a50; padding: 0.8rem 1rem; margin-bottom: 0.5rem; border-radius: 6px; border-left: 4px solid #47aeff; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
@@ -316,7 +297,8 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     .logo-container { margin-bottom: 0.8rem; } 
     #main-nav { width: 100%; justify-content: space-around; margin-bottom: 0.8rem; } 
     .nav-item .nav-text { display: none; } .nav-item i { font-size: 1.2rem; } 
-    #auth-section { width: 100%; display: flex; justify-content: center; gap: 0.5rem; } 
+    #auth-section { width: 100%; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5rem; } /* Adicionado flex-wrap */
+    #voice-command-btn { margin-bottom: 0.5rem; /* Espaço se quebrar linha */ }
     header h1 { font-size: 1.5rem; } main { padding: 1rem; } 
     .card { padding: 1rem 1.2rem; } 
     .grid-container, .grid-container-side { grid-template-columns: 1fr; } 
