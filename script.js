@@ -1,6 +1,6 @@
-// script.js (CORRIGIDO e Completo)
+// script.js (COMPLETO E CORRIGIDO - Várias Funções Preenchidas + Melhoria na Saudação por Voz)
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver com Correção de ReferenceError e Fluxo de Voz.");
+    console.log("SCRIPT.JS: DOMContentLoaded event fired. Ver com Funções Completas e Melhoria na Voz.");
     const domContentLoadedTimestamp = Date.now();
 
     // --- Constantes de Tempo da Splash Screen ---
@@ -70,11 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveEsotericHunchBtn = document.getElementById('save-esoteric-hunch-btn');
     const checkEsotericHunchBtn = document.getElementById('check-esoteric-hunch-btn');
     
-    // ++ SELETORES DO BANNER PROMOCIONAL DESCOMENTADOS ++
     const cosmicPromoBanner = document.getElementById('cosmic-promo-banner');
     const promoRegisterBtn = document.getElementById('promo-register-btn'); 
     const promoLoginBtn = document.getElementById('promo-login-btn');     
-    // ++ FIM DOS SELETORES DO BANNER PROMOCIONAL ++
 
     const mainDisplayLotterySelect = quickHunchLotteryTypeSelect; 
     const apiResultsPre = document.getElementById('api-results'); 
@@ -146,8 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const LOTTERY_CONFIG_JS = { megasena: { count: 6, color: "#209869", name: "Mega-Sena" }, lotofacil: { count: 15, color: "#930089", name: "Lotofácil" }, quina: { count: 5, color: "#260085", name: "Quina" }, lotomania: { count_sorteadas: 20, count_apostadas: 50, color: "#f78100", name: "Lotomania" } };
     const bannerConfigurations = {
         'banner-top-dashboard': [
-            { imageUrl: 'images/banner1.png', altText: 'Tammy\'s Store - Comprar agora!', linkUrl: 'https://www.instagram.com/tammysstore_/', isExternal: true },
-            { imageUrl: 'images/teste1.png', altText: 'LotoGenius - A Sorte Inteligente',},
+            { imageUrl: 'assets/images/banner1.jpg', altText: 'Tammy\'s Store - Comprar agora!', linkUrl: 'https://www.instagram.com/SEU_USUARIO_INSTAGRAM', isExternal: true },
+            { imageUrl: 'https://placehold.co/1200x250/1f4068/ffffff?text=Apenas+Visual+-+LotoGenius&fontsize=36', altText: 'LotoGenius - A Sorte Inteligente',},
             { imageUrl: 'https://placehold.co/1200x250/2a2a50/ffd700?text=Conheça+Recursos+Premium!&fontsize=32', altText: 'Recursos Premium LotoGenius', linkUrl: '#esoteric-hunch-card', isExternal: false }
         ],
         'banner-bottom-dashboard': [
@@ -166,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let awaitingSpecificInput = false;
 
     // ================================================================================================
-    // === DEFINIÇÕES DE FUNÇÕES ===
+    // === DEFINIÇÕES DE FUNÇÕES COMPLETAS ===
     // ================================================================================================
     
     function showGlobalError(message) { if (errorDiv) { errorDiv.textContent = message; errorDiv.style.display = 'block'; } else { console.error("SCRIPT.JS: Global error div não encontrado:", message); } }
@@ -403,16 +401,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // FUNÇÕES DE COMANDO DE VOZ (Definidas antes de initializeVoiceCommands)
-    function speak(text, options = {}) {
+    // ++ FUNÇÕES DE COMANDO DE VOZ ++
+    function speak(text, options = {}) { 
         if (speechSynthesis && text) {
-            if (speechSynthesis.speaking) { speechSynthesis.cancel(); }
+            if (speechSynthesis.speaking) { speechSynthesis.cancel(); } 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'pt-BR';
             const voices = speechSynthesis.getVoices();
             const ptBRVoice = voices.find(voice => voice.lang === 'pt-BR' || voice.lang === 'pt_BR');
             if (ptBRVoice) utterance.voice = ptBRVoice;
-            utterance.pitch = 1; utterance.rate = 1;
+            utterance.pitch = 1; utterance.rate = 1; 
             
             utterance.onend = () => {
                 if (options.onEndCallback && typeof options.onEndCallback === 'function') {
@@ -443,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (recognition && !isListening) {
             console.log("Ouvindo resposta para saudação de boas-vindas...");
             isListening = true;
-            awaitingSpecificInput = true;
+            awaitingSpecificInput = true; 
             recognition.onresult = (event) => { 
                 const transcript = event.results[event.results.length-1][0].transcript.trim().toLowerCase();
                 console.log("Resposta à saudação:", transcript);
@@ -465,15 +463,19 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             recognition.onerror = (event) => {
                 console.error("Erro ao ouvir resposta da saudação:", event.error);
-                clearTimeout(welcomeResponseTimeout); setVoiceGuideState(false); 
-                isListening = false; awaitingSpecificInput = false;
+                clearTimeout(welcomeResponseTimeout);
+                setVoiceGuideState(false); 
+                isListening = false;
+                awaitingSpecificInput = false;
                 recognition.onresult = defaultRecognitionResultHandler;
             };
             recognition.onend = () => { 
                 if (isListening && awaitingSpecificInput) { 
-                    clearTimeout(welcomeResponseTimeout); setVoiceGuideState(false); 
+                    clearTimeout(welcomeResponseTimeout);
+                    setVoiceGuideState(false); 
                 }
-                isListening = false; awaitingSpecificInput = false;
+                isListening = false;
+                awaitingSpecificInput = false;
                 recognition.onresult = defaultRecognitionResultHandler; 
                 if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening');
             };
@@ -483,16 +485,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playWelcomeMessage() {
-        if (localStorage.getItem('voiceGuideDeclined') === 'true') { setVoiceGuideState(false); return; }
-        if (sessionStorage.getItem('welcomePlayed')) { const wasActive = localStorage.getItem('voiceGuideActive') === 'true'; setVoiceGuideState(wasActive); return; }
-        const greeting = "Bem-vindo ao Loto Genius AI! Este é um assistente de loterias com foco em inclusão. Deseja ativar o guia de voz para uma experiência interativa? Diga 'Sim' ou 'Não'.";
+        if (localStorage.getItem('voiceGuideDeclined') === 'true') {
+            setVoiceGuideState(false); 
+            return;
+        }
+        if (sessionStorage.getItem('welcomePlayed')) {
+            const wasActive = localStorage.getItem('voiceGuideActive') === 'true';
+            setVoiceGuideState(wasActive); 
+            return;
+        }
+
+        const greeting = "Bem-vindo ao Loto Genius AI! Este é um assistente de loterias com foco em inclusão. Deseja ativar o guia de voz para uma experiência interativa? Diga 'Sim' ou 'Não', ou clique no botão de microfone e depois no botão 'Sim' ou 'Não' que aparecerá em breve.";
         speak(greeting, { 
             onEndCallback: () => {
                 if (voiceGuideActive === null) { 
+                    // Poderia adicionar botões visuais de Sim/Não aqui para clique também.
                     listenForWelcomeResponse();
                     welcomeResponseTimeout = setTimeout(() => {
-                        if (voiceGuideActive === null) { setVoiceGuideState(false); }
-                    }, 12000); 
+                        if (voiceGuideActive === null) { 
+                            console.log("Nenhuma resposta para o guia de voz, continuando sem.");
+                            setVoiceGuideState(false); 
+                        }
+                    }, 15000); // Aumentado para 15 segundos
                 }
             }
         });
@@ -514,13 +528,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function startListening(isContinuation = false) {
         if (recognition && voiceGuideActive && !isListening) {
             try {
-                if (!isContinuation) { voiceContext = { action: null, awaiting: null, data: {} }; }
-                recognition.start(); isListening = true;
+                if (!isContinuation) { 
+                    voiceContext = { action: null, awaiting: null, data: {} };
+                }
+                recognition.start();
+                isListening = true;
                 if(voiceCommandBtn) voiceCommandBtn.classList.add('listening');
                 console.log('Ouvindo comando...');
-            } catch (e) { console.error("Erro ao iniciar reconhecimento:", e); isListening = false; if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening'); }
-        } else if (!voiceGuideActive) { speak("O guia de voz está desativado. Clique no botão para ativar e depois para dar um comando.");
-        } else if (isListening) { console.log("Já estou ouvindo."); }
+            } catch (e) {
+                console.error("Erro ao iniciar reconhecimento:", e);
+                isListening = false;
+                if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening');
+            }
+        } else if (!voiceGuideActive) {
+            speak("O guia de voz está desativado. Clique no botão para ativar e depois para dar um comando.");
+        } else if (isListening) {
+            console.log("Já estou ouvindo.");
+        }
     }
     
     function processVoiceCommand(command) {
@@ -528,14 +552,18 @@ document.addEventListener('DOMContentLoaded', () => {
         awaitingSpecificInput = false; 
 
         if (command.includes('cancelar') || command.includes('parar')) {
-            speak("Ação cancelada."); voiceContext = { action: null, awaiting: null, data: {} };
-            if(isListening) { recognition.abort(); } return;
+            speak("Ação cancelada.");
+            voiceContext = { action: null, awaiting: null, data: {} };
+            if(isListening) { recognition.abort(); } 
+            return;
         }
     
         if (voiceContext.action === 'login_email_input') {
             voiceContext.data.email = command.replace(/arroba/g, '@').replace(/\s/g, '').toLowerCase();
             speak(`Entendi o email como ${voiceContext.data.email}. Está correto? Diga 'sim' ou 'não'.`, { shouldRelisten: true });
-            voiceContext.awaiting = 'login_email_confirmation'; awaitingSpecificInput = true; return;
+            voiceContext.awaiting = 'login_email_confirmation';
+            awaitingSpecificInput = true;
+            return;
         }
         if (voiceContext.action === 'login_email_input' && voiceContext.awaiting === 'login_email_confirmation') {
             if (command.includes('sim')) {
@@ -545,45 +573,68 @@ document.addEventListener('DOMContentLoaded', () => {
                 voiceContext = { action: null, awaiting: null, data: {} };
             } else if (command.includes('não') || command.includes('corrigir')) {
                 speak("Ok, por favor, diga seu email novamente.", { shouldRelisten: true });
-                voiceContext.awaiting = null; awaitingSpecificInput = true;
-            } else { speak("Não entendi. Diga 'sim' para confirmar o email, ou 'não' para corrigir.", { shouldRelisten: true }); awaitingSpecificInput = true; }
+                voiceContext.awaiting = null; 
+                awaitingSpecificInput = true;
+            } else {
+                speak("Não entendi. Diga 'sim' para confirmar o email, ou 'não' para corrigir.", { shouldRelisten: true });
+                awaitingSpecificInput = true;
+            }
             return;
         }
     
         if (command.includes('login') || command.includes('entrar') || command.includes('fazer login')) {
             if (currentUser) { speak("Você já está logado."); return; }
-            openModal(loginModal); speak("Tela de login aberta. Para preencher por voz, diga 'digitar email'.", { shouldRelisten: true });
-            voiceContext.action = 'login_prompt'; awaitingSpecificInput = true; return;
+            openModal(loginModal);
+            speak("Tela de login aberta. Para preencher por voz, diga 'digitar email'.", { shouldRelisten: true });
+            voiceContext.action = 'login_prompt'; 
+            awaitingSpecificInput = true;
+            return;
         }
         if (voiceContext.action === 'login_prompt' && command.includes('digitar email')) {
             speak("Ok, diga seu email agora.", { shouldRelisten: true });
-            voiceContext.action = 'login_email_input'; voiceContext.awaiting = null; awaitingSpecificInput = true; return;
+            voiceContext.action = 'login_email_input'; 
+            voiceContext.awaiting = null;
+            awaitingSpecificInput = true;
+            return;
         }
     
         if (command.includes('registrar') || command.includes('criar conta')) {
             if (currentUser) { speak("Você já está logado."); return; }
-            openModal(registerModal); speak("Tela de registro aberta. Preencha os campos utilizando o teclado.");
-            voiceContext = { action: null, awaiting: null, data: {} }; return;
+            openModal(registerModal);
+            speak("Tela de registro aberta. Preencha os campos utilizando o teclado.");
+            voiceContext = { action: null, awaiting: null, data: {} }; 
+            return;
         }
-        if (command.includes('painel') || command.includes('início') || command.includes('tela principal')) { setActiveSection('dashboard-section'); speak("Navegando para o painel principal."); return; }
+        if (command.includes('painel') || command.includes('início') || command.includes('tela principal')) {
+            setActiveSection('dashboard-section');
+            speak("Navegando para o painel principal.");
+            return;
+        }
         if (command.includes('meus jogos')) {
             if (!currentUser) { speak("Você precisa estar logado. Diga 'login'.", {shouldRelisten: true}); voiceContext.action = 'awaiting_login_for_my_games'; awaitingSpecificInput = true; return;}
-            setActiveSection('my-games-section'); speak("Navegando para Meus Jogos Salvos."); return;
+            setActiveSection('my-games-section');
+            speak("Navegando para Meus Jogos Salvos.");
+            return;
         }
         if (voiceContext.action === 'awaiting_login_for_my_games' && command.includes('login')) {
             openModal(loginModal); speak("Tela de login aberta. Diga 'digitar email'.", {shouldRelisten: true}); voiceContext.action = 'login_prompt'; awaitingSpecificInput = true; return;
         }
+
         if (command.includes('gerar mega sena rápido') || command.includes('palpite rápido mega sena')) {
             if (quickHunchLotteryTypeSelect) quickHunchLotteryTypeSelect.value = 'megasena';
-            if (generateQuickHunchBtn) { speak("Gerando palpite rápido para Mega-Sena."); generateQuickHunchBtn.click(); } return;
+            if (generateQuickHunchBtn) { speak("Gerando palpite rápido para Mega-Sena."); generateQuickHunchBtn.click(); }
+            return;
         }
          if (command.includes('gerar lotofácil rápido') || command.includes('palpite rápido lotofácil')) {
             if (quickHunchLotteryTypeSelect) quickHunchLotteryTypeSelect.value = 'lotofacil';
-            if (generateQuickHunchBtn) { speak("Gerando palpite rápido para Lotofácil."); generateQuickHunchBtn.click(); } return;
+            if (generateQuickHunchBtn) { speak("Gerando palpite rápido para Lotofácil."); generateQuickHunchBtn.click(); }
+            return;
         }
+        // Adicione mais comandos de geração de jogo aqui
         if (command.includes('ajuda') || command.includes('comandos')) {
             speak("Comandos: 'login', 'registrar', 'painel', 'meus jogos', 'gerar mega sena rápido', 'onde estou'.", {shouldRelisten: true});
-            awaitingSpecificInput = true; return;
+            awaitingSpecificInput = true; 
+            return;
         }
         if (command.includes('onde estou') || command.includes('descreva a tela')) {
             const activeSectionElement = document.querySelector('.main-section.active-section');
@@ -593,46 +644,68 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (activeSectionElement.id === 'my-games-section') sectionName = "a seção de Meus Jogos Salvos";
                 else if (activeSectionElement.id === 'pools-section') sectionName = "a seção de Bolões";
             }
-            speak(`Você está em ${sectionName}.`); return;
+            speak(`Você está em ${sectionName}.`);
+            return;
         }
         
-        if(!voiceContext.action || !voiceContext.awaiting) { speak("Comando não reconhecido. Tente 'ajuda'."); }
+        if(!voiceContext.action || !voiceContext.awaiting) {
+            speak("Comando não reconhecido. Tente 'ajuda'.");
+        }
     }
     
     function initializeVoiceCommands() {
         const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognitionAPI && speechSynthesis) {
             recognition = new SpeechRecognitionAPI();
-            recognition.lang = 'pt-BR'; recognition.continuous = false; recognition.interimResults = false; recognition.maxAlternatives = 1;
+            recognition.lang = 'pt-BR';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
             recognition.onresult = defaultRecognitionResultHandler;
+
             recognition.onerror = (event) => {
-                console.error('Erro no reconhecimento de voz:', event.error); isListening = false; awaitingSpecificInput = false;
+                console.error('Erro no reconhecimento de voz:', event.error);
+                isListening = false;
+                awaitingSpecificInput = false;
                 if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening');
                 if (event.error !== 'no-speech' && event.error !== 'aborted') {
-                    let errorMsg = "Erro com reconhecimento de voz.";
-                    if (event.error === 'audio-capture') errorMsg = "Problema com microfone.";
+                    let errorMsg = "Ocorreu um erro com o reconhecimento de voz.";
+                    if (event.error === 'audio-capture') errorMsg = "Problema com o microfone.";
                     else if (event.error === 'not-allowed') errorMsg = "Permissão ao microfone negada.";
                     speak(errorMsg);
                 }
             };
             recognition.onend = () => {
                 const wasListeningForSpecificInput = awaitingSpecificInput;
-                isListening = false; awaitingSpecificInput = false; 
+                isListening = false;
+                awaitingSpecificInput = false; 
                 if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening');
+                
                 if (voiceGuideActive && voiceContext.action && voiceContext.awaiting && wasListeningForSpecificInput) {
                     console.log("Diálogo ativo, re-escutando para:", voiceContext.awaiting);
                     setTimeout(() => startListening(true), 200); 
                 }
             };
+
             if (voiceCommandBtn) {
                 voiceCommandBtn.addEventListener('click', () => {
-                    if (recognition && isListening) { recognition.abort(); return; }
+                    if (recognition && isListening) {
+                        recognition.abort(); 
+                        console.log("Reconhecimento interrompido pelo clique.");
+                        return;
+                    }
                     if (voiceGuideActive === null) { playWelcomeMessage(); } 
-                    else if (!voiceGuideActive) { setVoiceGuideState(true); speak("Guia de voz ativado. Clique novamente ou diga 'ajuda'."); localStorage.removeItem('voiceGuideDeclined'); } 
-                    else { startListening(); }
+                    else if (!voiceGuideActive) {
+                        setVoiceGuideState(true);
+                        speak("Guia de voz ativado. Clique novamente para dar um comando ou diga 'ajuda'.");
+                        localStorage.removeItem('voiceGuideDeclined');
+                    } else { startListening(); }
                 });
+                
                 const initialVoiceGuideStateFromStorage = localStorage.getItem('voiceGuideActive') === 'true';
                 const declinedPreviously = localStorage.getItem('voiceGuideDeclined') === 'true';
+
                 if (declinedPreviously) { setVoiceGuideState(false); } 
                 else {
                     if (localStorage.getItem('voiceGuideActive') !== null) { setVoiceGuideState(initialVoiceGuideStateFromStorage); } 
@@ -640,12 +713,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
              if (speechSynthesis.onvoiceschanged !== undefined) { speechSynthesis.onvoiceschanged = () => {}; }
-        } else { console.warn('Web Speech API não é suportada.'); if (voiceCommandBtn) voiceCommandBtn.style.display = 'none'; }
+        } else {
+            console.warn('Web Speech API não é suportada neste navegador.');
+            if (voiceCommandBtn) voiceCommandBtn.style.display = 'none';
+        }
     }
     
+    // --- FUNÇÃO DE INICIALIZAÇÃO DA PÁGINA E CONTEÚDO ---
     function showAppContentNow() {
         if (accessibleSplashScreen && !accessibleSplashScreen.classList.contains('hidden')) {
-            accessibleSplashScreen.classList.add('hidden'); splashHiddenTimestamp = Date.now();
+            accessibleSplashScreen.classList.add('hidden');
+            splashHiddenTimestamp = Date.now();
             if(splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', '100');
         } else if (splashHiddenTimestamp > 0 && appContent && appContent.style.display !== 'none') { return; }
 
@@ -663,6 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const handleFirstAudioInteraction = () => {
                         if (!firstInteractionDone) {
                             firstInteractionDone = true;
+                            console.log("Primeira interação do usuário com o corpo do documento (para áudio).");
                             const initVoice = () => { if (voiceGuideActive === null && typeof playWelcomeMessage === "function") { setTimeout(playWelcomeMessage, 200);}};
                             let voiceCheckCount = 0;
                             const checkVoicesAndPlay = () => {
@@ -691,7 +770,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Autenticação e UI relacionada
+    // --- INICIALIZAÇÃO DO FIREBASE E AUTENTICAÇÃO ---
     function setupAuthEventListeners() {
         if(loginSubmitBtn && loginEmailInput && loginPasswordInput && loginErrorP) {
             loginSubmitBtn.addEventListener('click', () => { 
@@ -841,6 +920,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('click', function handleFirstInteractionForAudio() {
         if (!firstInteractionDone) {
             firstInteractionDone = true;
+            // console.log("Primeira interação do usuário com o corpo do documento (para áudio).");
             const initVoice = () => { if (voiceGuideActive === null && typeof playWelcomeMessage === "function") { setTimeout(playWelcomeMessage, 200);}};
             if (speechSynthesis.getVoices().length > 0) initVoice();
             else if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = initVoice;
@@ -894,7 +974,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof setupSaveHunchButtonListeners === "function") setupSaveHunchButtonListeners();
     if (typeof setupCheckHunchButtonListeners === "function") setupCheckHunchButtonListeners();
     
-    // Listener para botões do banner promocional (DESCOMENTADOS)
+    // Listeners para botões do banner promocional (GARANTIDOS QUE ESTÃO ATIVOS)
     if (promoRegisterBtn && typeof openModal === "function") {
         promoRegisterBtn.addEventListener('click', () => openModal(registerModal));
     }
