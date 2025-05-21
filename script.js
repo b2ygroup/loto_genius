@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function fetchAndDisplayStatsGeneric(lotteryName, statType, container, titleHeaderElement, endpointPrefix) {
+    async function fetchAndDisplayStatsGeneric(lotteryName, statType, container, endpointPrefix) {
         if (!container || !mainLotterySelect) { if(container) container.innerHTML = '<p class="error-message">Erro interno (stats).</p>'; return; }
         
         container.innerHTML = '<p class="loading-stats"><div class="spinner small-spinner"></div> Carregando...</p>';
@@ -372,11 +372,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dynamicLotteryNameManualSpan) dynamicLotteryNameManualSpan.textContent = lotteryFriendlyName;
 
         if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery);
-        if (typeof fetchAndDisplayFrequencyStats === "function" && frequencyListContainer) fetchAndDisplayStatsGeneric(selectedLottery, "Mais Sorteados", frequencyListContainer, null, "frequencia");
-        if (typeof fetchAndDisplayPairFrequencyStats === "function" && pairFrequencyListContainer) fetchAndDisplayStatsGeneric(selectedLottery, "Pares Frequentes", pairFrequencyListContainer, null, "pares-frequentes");
-        if (typeof fetchAndDisplayCityStats === "function" && cityListContainer) fetchAndDisplayStatsGeneric(selectedLottery, "Cidades Premiadas", cityListContainer, null, "cidades-premiadas");
-        if (typeof fetchAndDisplayCityPrizeSumStats === "function" && cityPrizeSumListContainer) fetchAndDisplayStatsGeneric(selectedLottery, "Prêmios por Cidade", cityPrizeSumListContainer, null, "maiores-premios-cidade");
-
+        if (typeof fetchAndDisplayStatsGeneric === "function") {
+            if (frequencyListContainer) fetchAndDisplayStatsGeneric(selectedLottery, "Mais Sorteados", frequencyListContainer, "frequencia");
+            if (pairFrequencyListContainer) fetchAndDisplayStatsGeneric(selectedLottery, "Pares Frequentes", pairFrequencyListContainer, "pares-frequentes");
+            if (cityListContainer) fetchAndDisplayStatsGeneric(selectedLottery, "Cidades Premiadas", cityListContainer, "cidades-premiadas");
+            if (cityPrizeSumListContainer) fetchAndDisplayStatsGeneric(selectedLottery, "Prêmios por Cidade", cityPrizeSumListContainer, "maiores-premios-cidade");
+        }
+        
         if (manualProbUserNumbersInput && selectedLotteryConfig) {
              const expectedCount = selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count;
              manualProbUserNumbersInput.placeholder = `Ex: 01,02,... (${expectedCount} de ${selectedLotteryConfig.min}-${selectedLotteryConfig.max})`;
@@ -385,6 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
              if(manualProbabilityResultDisplay) manualProbabilityResultDisplay.textContent = "Aguardando seu jogo...";
         }
     }
+
 
     async function fetchAndDisplayResults(lotteryName) {
         if (!apiResultsPre) { return; }
@@ -585,11 +588,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if ((command.includes('gerar') || command.includes('palpite')) && (command.includes('mega sena') || command.includes('mega'))) {
              if(mainLotterySelect) mainLotterySelect.value = 'megasena';
-             updateAllDashboardData('megasena'); // Atualiza os dados da dashboard para Mega-Sena
+             updateAllDashboardData('megasena');
              if (command.includes('rápido') && generateQuickHunchBtn) { generateQuickHunchBtn.click(); speak("Gerando palpite rápido para Mega-Sena.");}
              else if (command.includes('quente') && generateHotNumbersHunchBtn) { generateHotNumbersHunchBtn.click(); speak("Gerando palpite de números quentes para Mega-Sena.");}
              else if (command.includes('frio') && generateColdNumbersHunchBtn) { generateColdNumbersHunchBtn.click(); speak("Gerando palpite de números frios para Mega-Sena.");}
-             else if (generateQuickHunchBtn) { generateQuickHunchBtn.click(); speak("Gerando palpite aleatório para Mega-Sena.");} // Default to quick
+             else if (generateQuickHunchBtn) { generateQuickHunchBtn.click(); speak("Gerando palpite aleatório para Mega-Sena.");}
              return;
         }
         if ((command.includes('gerar') || command.includes('palpite')) && (command.includes('lotofácil') || command.includes('fácil'))) {

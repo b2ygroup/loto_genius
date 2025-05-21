@@ -92,8 +92,32 @@
                 </div>
             </div>
 
+            <section id="platform-highlights-container" class="dashboard-subsection" aria-labelledby="platform-highlights-title-h3">
+                 <h3 id="platform-highlights-title-h3" class="card-title-accessible" style="text-align: center; margin-bottom: 1.5rem; font-size: 1.8rem; border-bottom: 2px solid #47aeff; padding-bottom: 0.5rem;">
+                    <i class="fas fa-star" aria-hidden="true"></i> Loto Genius em Destaque
+                </h3>
+                <div class="grid-container-highlights">
+                    <div id="platform-highlights" class="card">
+                        <div class="highlights-grid">
+                            <div class="highlight-item"><i class="fas fa-dice-d20" aria-hidden="true"></i><span id="stats-jogos-gerados" class="stat-number">--</span><p>Palpites Gerados</p></div>
+                            <div class="highlight-item"><i class="fas fa-trophy" aria-hidden="true"></i><span id="stats-jogos-premiados" class="stat-number">--</span><p>Palpites Premiados (Estimativa)</p></div>
+                            <div class="highlight-item"><i class="fas fa-sack-dollar" aria-hidden="true"></i><span id="stats-valor-premios" class="stat-number">R$ --</span><p>Prêmios Potenciais (Estimativa)</p></div>
+                        </div>
+                    </div>
+                    <section id="winning-pools-preview" class="card" aria-labelledby="winning-pools-title">
+                        <h3 id="winning-pools-title"><i class="fas fa-users-crown"></i> Bolões Premiados (Simulado)</h3>
+                        <ul id="recent-pools-list" aria-live="polite"><li><div class="spinner small-spinner"></div></li></ul>
+                    </section>
+                    <section id="top-winners-preview" class="card" aria-labelledby="top-winners-title">
+                        <h3 id="top-winners-title"><i class="fas fa-medal"></i> Top Ganhadores (Simulado)</h3>
+                        <ol id="top-winners-list" aria-live="polite"><li><div class="spinner small-spinner"></div></li></ol>
+                    </section>
+                </div>
+            </section>
+
+
             <section id="lottery-info-section" class="dashboard-subsection" aria-labelledby="lottery-info-title-h3">
-                <h3 id="lottery-info-title-h3" class="card-title-accessible" style="text-align: center; margin-bottom: 1.5rem; font-size: 1.8rem; border-bottom: 2px solid #47aeff; padding-bottom: 0.5rem;">
+                <h3 id="lottery-info-title-h3" class="card-title-accessible" style="text-align: center; margin-top:2rem; margin-bottom: 1.5rem; font-size: 1.8rem; border-bottom: 2px solid #47aeff; padding-bottom: 0.5rem;">
                     <i class="fas fa-chart-bar" aria-hidden="true"></i> Informações e Estatísticas: <span id="dynamic-lottery-name-info">Mega-Sena</span>
                 </h3>
                 <div class="grid-container-stats">
@@ -121,6 +145,16 @@
                     </div>
                 </div>
             </section>
+
+            <div id="cosmic-promo-banner" class="card promo-banner" style="display:block; margin-top: 2rem;">
+                <h3 class="promo-title"><i class="fas fa-meteor"></i> Descubra Seus Números da Sorte Cósmicos! <i class="fas fa-hat-wizard"></i></h3>
+                <p class="promo-text">Use a sabedoria ancestral da numerologia para gerar palpites únicos...</p>
+                <p class="promo-cta"><strong>Registre-se ou faça login</strong> para ter acesso exclusivo...</p>
+                <div class="button-group" style="justify-content: center; margin-top:15px;">
+                    <button class="action-btn primary-action" id="promo-register-btn">Quero Me Registrar!</button>
+                    <button class="action-btn" id="promo-login-btn">Já Tenho Conta</button>
+                </div>
+            </div>
 
             <section id="hunch-generators-section" class="dashboard-subsection" aria-labelledby="hunch-generators-title-h3">
                 <h3 id="hunch-generators-title-h3" class="card-title-accessible" style="text-align: center; margin-top: 2.5rem; margin-bottom: 1.5rem; font-size: 1.8rem; border-bottom: 2px solid #47aeff; padding-bottom: 0.5rem;">
