@@ -62,6 +62,7 @@ env.bak/
 venv.bak/
 serviceAccountKey.json
 api/lottery_data/
+api/lottery_data_temp_for_upload/
 
 # Diretorio de saida do processador local (NÃO ENVIAR PARA O GIT)
 lottery_data_gerados/ # Se você usar este nome no script local
