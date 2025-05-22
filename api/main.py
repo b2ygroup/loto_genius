@@ -1,4 +1,3 @@
-# api/main.py
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import random
@@ -10,9 +9,9 @@ import math
 import re
 import logging
 import firebase_admin
-from firebase_admin import credentials, firestore as admin_firestore
+from firebase_admin import credentials, firestore as admin_firestore, exceptions as firebase_exceptions
 import requests
-from datetime import datetime 
+from datetime import datetime, timedelta, timezone
 
 app = Flask(__name__)
 CORS(app)
@@ -20,7 +19,6 @@ app.logger.setLevel(logging.INFO)
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
-# --- INICIALIZAÇÃO DO FIREBASE ADMIN ---
 FB_ADMIN_INITIALIZED = False
 db_admin = None
 try:
@@ -29,28 +27,27 @@ try:
         service_account_json_str = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON')
         service_account_info = json.loads(service_account_json_str)
         cred = credentials.Certificate(service_account_info)
-        firebase_admin.initialize_app(cred, name='lotoGeniusApiAppVercel')
-        app.logger.info("Firebase Admin SDK inicializado para main.py via variável de ambiente Vercel.")
+        firebase_admin.initialize_app(cred, name='lotoGeniusApiAppVercelMainPyFull') 
+        app.logger.info("Firebase Admin SDK inicializado para main.py via Vercel ENV.")
         FB_ADMIN_INITIALIZED = True
     elif os.path.exists(SERVICE_ACCOUNT_KEY_PATH_MAIN) and not firebase_admin._apps:
         cred = credentials.Certificate(SERVICE_ACCOUNT_KEY_PATH_MAIN)
-        firebase_admin.initialize_app(cred, name='lotoGeniusApiAppFileLocal')
+        firebase_admin.initialize_app(cred, name='lotoGeniusApiAppFileLocalMainPyFull') 
         app.logger.info("Firebase Admin SDK inicializado para main.py via arquivo local.")
         FB_ADMIN_INITIALIZED = True
-    elif firebase_admin._apps: 
-        app.logger.info("Firebase Admin SDK já estava inicializado.")
+    elif firebase_admin._apps:
+        app_name_to_use = list(firebase_admin._apps.keys())[0]
+        if not firebase_admin.get_app(name=app_name_to_use):
+             firebase_admin.initialize_app(name=app_name_to_use)
+        app.logger.info(f"Firebase Admin SDK já estava inicializado com o app: {app_name_to_use}.")
         FB_ADMIN_INITIALIZED = True
     
-    if FB_ADMIN_INITIALIZED and not db_admin :
-        if firebase_admin._apps:
+    if FB_ADMIN_INITIALIZED:
+        if not db_admin:
             app_name_to_use = list(firebase_admin._apps.keys())[0]
             db_admin = admin_firestore.client(app=firebase_admin.get_app(name=app_name_to_use))
-        else:
-            app.logger.warning("Nenhum app Firebase Admin encontrado após tentativas de inicialização.")
-            FB_ADMIN_INITIALIZED = False
-
-    if not FB_ADMIN_INITIALIZED:
-         app.logger.warning("Credenciais do Firebase Admin não configuradas corretamente. Funcionalidades dependentes do Firestore Admin podem não funcionar.")
+    else:
+         app.logger.warning("Credenciais do Firebase Admin não configuradas corretamente.")
 
 except Exception as e_fb_admin_main:
     app.logger.error(f"Erro GERAL ao inicializar Firebase Admin SDK em main.py: {e_fb_admin_main}")
@@ -60,9 +57,9 @@ LOTTERY_CONFIG = {
         "nome_exibicao": "Mega-Sena", "min": 1, "max": 60, "count": 6, "count_apostadas": 6,
         "color": "#209869", "processed_json_name": "megasena_processed_results.json",
         "count_sorteadas": 6,
-        "rateio_sena_key": "rateio_principal_valor",
-        "rateio_quina_key": "rateio_quina_valor",
-        "rateio_quadra_key": "rateio_quadra_valor"
+        "rateio_sena_key": "rateio_principal_valor", 
+        "rateio_quina_key": "rateio_quina_valor",   
+        "rateio_quadra_key": "rateio_quadra_valor"  
     },
     "lotofacil": {
         "nome_exibicao": "Lotofácil", "min": 1, "max": 25, "count": 15, "count_apostadas": 15,
@@ -81,11 +78,19 @@ LOTTERY_CONFIG = {
     }
 }
 
-platform_stats_data = {
-    "jogos_gerados_total": random.randint(20000, 33000),
-    "jogos_premiados_estimativa": random.randint(300, 800),
-    "valor_premios_estimativa_bruto": random.uniform(100000, 380000)
-}
+PLATFORM_STATS_DOC_REF = None
+FICTITIOUS_WINNERS_COL_REF = None
+if FB_ADMIN_INITIALIZED and db_admin:
+    PLATFORM_STATS_DOC_REF = db_admin.collection('platform_statistics').document('global_metrics')
+    FICTITIOUS_WINNERS_COL_REF = db_admin.collection('fictitious_top_winners')
+
+FICTITIOUS_NICKS = [
+    "Mestre dos Números", "Rainha da Sorte", "Profeta da Fortuna", "Ás da Loteria", 
+    "Imperador dos Palpites", "Dama da Premiação", "Oráculo Milionário", "Gênio da Quina",
+    "Estrela da Mega", "Visionário da Lotofácil", "Sábio das Dezenas", "Apostador Lendário",
+    "Bruxo dos Bolões", "Ninja dos Números", "Explorador da Sorte", "Arquiteto da Fortuna",
+    "Decifrador de Códigos", "Guardião dos Prêmios", "Peregrino da Prosperidade"
+]
 
 def format_currency(value):
     if isinstance(value, (int, float)): return f"R$ {value:_.2f}".replace('.', ',').replace('_', '.')
@@ -103,7 +108,7 @@ def parse_currency_to_float(currency_str):
     cleaned_str = currency_str.replace("R$", "").replace(".", "").replace(",", ".").strip()
     if not cleaned_str or cleaned_str == '-': return 0.0
     try: return float(cleaned_str)
-    except ValueError: app.logger.warning(f"Não foi possível converter '{currency_str}' para float."); return 0.0
+    except ValueError: return 0.0
 
 def load_processed_lottery_data(lottery_key):
     global FB_ADMIN_INITIALIZED, db_admin
@@ -126,7 +131,7 @@ def load_processed_lottery_data(lottery_key):
         data = response.json()
         app.logger.info(f"Sucesso ao carregar {lottery_key.upper()} ({len(data) if isinstance(data, list) else 'N/A'} registros) do Vercel Blob")
         return data
-    except firebase_admin.exceptions.FirebaseError as fb_err: app.logger.error(f"Erro do Firebase ao buscar URL para {lottery_key}: {fb_err}")
+    except firebase_exceptions.FirebaseError as fb_err: app.logger.error(f"Erro do Firebase ao buscar URL para {lottery_key}: {fb_err}")
     except requests.exceptions.RequestException as e: app.logger.error(f"Erro de requisição ao buscar JSON do Blob {blob_url if 'blob_url' in locals() else 'URL_DESCONHECIDO'}: {e}")
     except Exception as e_gen: app.logger.error(f"Erro genérico ao carregar dados de {blob_url if 'blob_url' in locals() else 'URL_DESCONHECIDO'}: {e_gen}")
     return None
@@ -147,36 +152,215 @@ def combinations_count(n, k):
     for i in range(k): res = res * (n - i) // (i + 1)
     return res
 
+def get_or_create_platform_stats_from_firestore():
+    if not PLATFORM_STATS_DOC_REF:
+        app.logger.warning("Firestore não disponível para get_or_create_platform_stats_from_firestore.")
+        return {
+            "total_generated_games": random.randint(35000, 45000),
+            "total_fictitious_prizes_awarded": random.randint(400, 900),
+            "total_fictitious_prize_value_bruto": random.uniform(150000, 500000),
+            "last_fictitious_winner_update_timestamp": datetime.now(timezone.utc) - timedelta(hours=2)
+        }
+    try:
+        doc = PLATFORM_STATS_DOC_REF.get()
+        if doc.exists:
+            data = doc.to_dict()
+            if 'last_fictitious_winner_update_timestamp' in data and not isinstance(data['last_fictitious_winner_update_timestamp'], datetime):
+                 data['last_fictitious_winner_update_timestamp'] = datetime.now(timezone.utc) - timedelta(hours=2) 
+            return data
+        else:
+            initial_stats = {
+                "total_generated_games": 30000,
+                "total_fictitious_prizes_awarded": 150,
+                "total_fictitious_prize_value_bruto": 200000.0,
+                "last_fictitious_winner_update_timestamp": admin_firestore.SERVER_TIMESTAMP 
+            }
+            PLATFORM_STATS_DOC_REF.set(initial_stats)
+            app.logger.info("Documento de estatísticas da plataforma inicializado no Firestore.")
+            initial_stats_for_return = initial_stats.copy()
+            initial_stats_for_return['last_fictitious_winner_update_timestamp'] = datetime.now(timezone.utc)
+            return initial_stats_for_return
+    except firebase_exceptions.FirebaseError as e:
+        app.logger.error(f"Erro ao acessar estatísticas no Firestore: {e}")
+        return { 
+            "total_generated_games": 35000, "total_fictitious_prizes_awarded": 400,
+            "total_fictitious_prize_value_bruto": 150000.0,
+            "last_fictitious_winner_update_timestamp": datetime.now(timezone.utc) - timedelta(hours=2)
+        }
+
+def _simulate_fictitious_win(current_stats_dict):
+    if not FICTITIOUS_WINNERS_COL_REF or not PLATFORM_STATS_DOC_REF or not db_admin:
+        app.logger.warning("Firestore não disponível para simular ganho fictício.")
+        return current_stats_dict
+
+    try:
+        is_new_winner = random.random() < 0.70 
+        winner_nick_base = random.choice(FICTITIOUS_NICKS)
+        chosen_lottery = random.choice(list(LOTTERY_CONFIG.keys()))
+        prize_value = random.uniform(50.0, 50000.0) 
+        if random.random() < 0.05: # 5% de chance de um prêmio maior
+            prize_value = random.uniform(50001.0, 750000.0)
+
+        winner_doc_ref = None
+        winner_data_to_set = {}
+
+        if not is_new_winner:
+            existing_winners_query = FICTITIOUS_WINNERS_COL_REF.order_by("last_win_date", direction=admin_firestore.Query.ASCENDING).limit(1).stream() 
+            existing_winners_list = [doc for doc in existing_winners_query]
+            if existing_winners_list:
+                winner_doc_to_update = random.choice(existing_winners_list)
+                winner_doc_ref = winner_doc_to_update.reference
+                winner_data_fs = winner_doc_to_update.to_dict()
+                
+                winner_data_to_set["nick"] = winner_data_fs.get("nick", f"{winner_nick_base} #{random.randint(100,999)}")
+                winner_data_to_set["total_prize_value_bruto"] = winner_data_fs.get("total_prize_value_bruto", 0) + prize_value
+                winner_data_to_set["number_of_wins"] = winner_data_fs.get("number_of_wins", 0) + 1
+                winner_data_to_set["last_win_lottery"] = chosen_lottery
+                winner_data_to_set["last_win_date"] = admin_firestore.SERVER_TIMESTAMP
+                app.logger.info(f"Atualizando ganhador fictício existente: {winner_data_to_set['nick']}")
+            else:
+                is_new_winner = True
+
+        if is_new_winner:
+            winner_data_to_set = {
+                "nick": f"{winner_nick_base} #{random.randint(1000,9999)}", # Maior range para nicks
+                "total_prize_value_bruto": prize_value,
+                "last_win_lottery": chosen_lottery,
+                "last_win_date": admin_firestore.SERVER_TIMESTAMP,
+                "number_of_wins": 1
+            }
+            winner_doc_ref = FICTITIOUS_WINNERS_COL_REF.document() 
+            app.logger.info(f"Criando novo ganhador fictício: {winner_data_to_set['nick']}")
+
+        if winner_doc_ref:
+            winner_doc_ref.set(winner_data_to_set, merge=True)
+
+        prizes_awarded = current_stats_dict.get("total_fictitious_prizes_awarded", 0) + 1
+        prize_value_total = current_stats_dict.get("total_fictitious_prize_value_bruto", 0) + prize_value
+        
+        PLATFORM_STATS_DOC_REF.update({
+            "total_fictitious_prizes_awarded": prizes_awarded,
+            "total_fictitious_prize_value_bruto": prize_value_total,
+            "last_fictitious_winner_update_timestamp": admin_firestore.SERVER_TIMESTAMP
+        })
+        app.logger.info("Estatísticas da plataforma atualizadas com ganho fictício.")
+        current_stats_dict["total_fictitious_prizes_awarded"] = prizes_awarded
+        current_stats_dict["total_fictitious_prize_value_bruto"] = prize_value_total
+        current_stats_dict["last_fictitious_winner_update_timestamp"] = datetime.now(timezone.utc) 
+
+    except firebase_exceptions.FirebaseError as e:
+        app.logger.error(f"Erro ao simular ganho fictício no Firestore: {e}")
+    
+    return current_stats_dict
+
 @app.route('/')
 def api_base_root():
     return jsonify({"message": "API Loto Genius Python (api/main.py).", "note": "Endpoints em /api/main/..." })
 
 @app.route('/api/main/')
 def api_main_home():
-    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.5.1 - Backend Review"})
+    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.7.0 - Ganhadores Fictícios e Palpite Lógico"})
 
 @app.route('/api/main/platform-stats', methods=['GET'])
-def get_platform_stats():
-    platform_stats_data["jogos_gerados_total"] += random.randint(1, 7)
-    if random.random() < 0.03:
-        platform_stats_data["jogos_premiados_estimativa"] += random.randint(1,2)
-        platform_stats_data["valor_premios_estimativa_bruto"] += random.uniform(1000, 15000)
+def get_platform_stats_persistent():
+    if not FB_ADMIN_INITIALIZED or not PLATFORM_STATS_DOC_REF:
+        app.logger.warning("Firestore não inicializado, usando estatísticas em memória para /platform-stats.")
+        in_memory_platform_stats = { 
+            "jogos_gerados_total": random.randint(35000, 45000),
+            "jogos_premiados_total": random.randint(400, 900),
+            "valor_premios_total_formatado": format_currency(random.uniform(150000, 500000)),
+        }
+        in_memory_platform_stats["jogos_gerados_total"] += random.randint(1, 7)
+        return jsonify(in_memory_platform_stats)
+
+    current_stats = get_or_create_platform_stats_from_firestore()
+    
+    new_total_generated_games = current_stats.get("total_generated_games", 0) + random.randint(1, 7)
+    try:
+        PLATFORM_STATS_DOC_REF.update({"total_generated_games": new_total_generated_games})
+        current_stats["total_generated_games"] = new_total_generated_games 
+    except firebase_exceptions.FirebaseError as e:
+        app.logger.error(f"Erro ao atualizar total_generated_games no Firestore: {e}")
+
+    should_simulate_win = False
+    # Aumenta a chance ou frequência para mais dinamismo se desejado
+    if random.random() < 0.15: # 15% de chance em cada chamada para simular um ganho
+        should_simulate_win = True
+    else:
+        last_update_obj = current_stats.get("last_fictitious_winner_update_timestamp")
+        if last_update_obj and isinstance(last_update_obj, datetime):
+             if (datetime.now(timezone.utc) - last_update_obj) > timedelta(minutes=10): # Reduzido para a cada 10 minutos
+                should_simulate_win = True
+    
+    if should_simulate_win:
+        current_stats = _simulate_fictitious_win(current_stats)
+
     return jsonify({
-        "jogos_gerados_total": platform_stats_data["jogos_gerados_total"],
-        "jogos_premiados_estimativa": platform_stats_data["jogos_premiados_estimativa"],
-        "valor_premios_estimativa_formatado": format_currency(platform_stats_data["valor_premios_estimativa_bruto"])
+        "jogos_gerados_total": current_stats.get("total_generated_games"),
+        "jogos_premiados_total": current_stats.get("total_fictitious_prizes_awarded"),
+        "valor_premios_total_formatado": format_currency(current_stats.get("total_fictitious_prize_value_bruto")),
     })
 
-@app.route('/api/main/recent-winning-pools', methods=['GET'])
-def get_recent_winning_pools():
-    pools = [{"name": "Bolão Astral da Fortuna", "lottery": "Mega-Sena", "prize": format_currency(random.uniform(200000, 700000)), "date": "25/12/2025"}, {"name": "Grupo Estrela Guia", "lottery": "Lotofácil", "prize": format_currency(random.uniform(7000, 20000)), "date": "10/11/2025"}]
-    return jsonify(random.sample(pools, k=min(len(pools), random.randint(1,2))))
-
 @app.route('/api/main/top-winners', methods=['GET'])
-def get_top_winners():
-    winners = [{"nick": "Vidente Premiado", "prize_total": format_currency(random.uniform(280000, 1300000))}, {"nick": "Numerólogo da Sorte", "prize_total": format_currency(random.uniform(190000, 800000))}]
-    random.shuffle(winners)
-    return jsonify(winners[:random.randint(1,len(winners))])
+def get_top_winners_persistent():
+    if not FB_ADMIN_INITIALIZED or not FICTITIOUS_WINNERS_COL_REF:
+        app.logger.warning("Firestore não inicializado, usando ganhadores fallback para /top-winners.")
+        winners_fallback = [{"nick": "Sortudo Virtual #777", "prize_total": format_currency(random.uniform(100000, 500000)), "lottery": "Mega-Sena", "date": "21/05/2025"}]
+        return jsonify(winners_fallback)
+
+    try:
+        winners_query = FICTITIOUS_WINNERS_COL_REF.order_by("total_prize_value_bruto", direction=admin_firestore.Query.DESCENDING).limit(10).stream()
+        winners_list = []
+        for winner_doc in winners_query:
+            winner_data = winner_doc.to_dict()
+            win_date = winner_data.get("last_win_date")
+            date_str = ""
+            if isinstance(win_date, datetime):
+                date_str = win_date.strftime("%d/%m/%Y")
+            elif hasattr(win_date, 'seconds'): # Checa se é um Timestamp do Firestore não convertido
+                date_str = datetime.fromtimestamp(win_date.seconds, tz=timezone.utc).strftime("%d/%m/%Y")
+            else:
+                date_str = "Data N/A"
+            
+            winners_list.append({
+                "nick": winner_data.get("nick", "Anônimo da Sorte"),
+                "prize_total": format_currency(winner_data.get("total_prize_value_bruto", 0)),
+                "lottery": LOTTERY_CONFIG.get(winner_data.get("last_win_lottery", ""), {}).get("nome_exibicao", "Diversas"),
+                "date": date_str
+            })
+        
+        if not winners_list and FICTITIOUS_WINNERS_COL_REF:
+            app.logger.info("Lista de Top Winners vazia, adicionando alguns ganhadores iniciais...")
+            initial_stats_dict = get_or_create_platform_stats_from_firestore()
+            for _ in range(random.randint(3,5)): 
+                initial_stats_dict = _simulate_fictitious_win(initial_stats_dict) 
+            
+            winners_query = FICTITIOUS_WINNERS_COL_REF.order_by("total_prize_value_bruto", direction=admin_firestore.Query.DESCENDING).limit(10).stream()
+            for winner_doc in winners_query:
+                winner_data = winner_doc.to_dict()
+                win_date = winner_data.get("last_win_date")
+                date_str = ""
+                if isinstance(win_date, datetime):
+                    date_str = win_date.strftime("%d/%m/%Y")
+                elif hasattr(win_date, 'seconds'):
+                    date_str = datetime.fromtimestamp(win_date.seconds, tz=timezone.utc).strftime("%d/%m/%Y")
+                else:
+                    date_str = "Data N/A"
+                winners_list.append({
+                    "nick": winner_data.get("nick"),
+                    "prize_total": format_currency(winner_data.get("total_prize_value_bruto")),
+                    "lottery": LOTTERY_CONFIG.get(winner_data.get("last_win_lottery", ""), {}).get("nome_exibicao", "Diversas"),
+                    "date": date_str
+                })
+        
+        return jsonify(winners_list)
+    except firebase_exceptions.FirebaseError as e:
+        app.logger.error(f"Erro ao buscar top winners do Firestore: {e}")
+        return jsonify({"error": "Não foi possível buscar os top winners"}), 500
+    except Exception as e_gen:
+        app.logger.error(f"Erro genérico ao buscar top winners: {e_gen}", exc_info=True)
+        return jsonify({"error": "Erro interno ao buscar top winners"}), 500
+
 
 @app.route('/api/main/resultados/<lottery_name>', methods=['GET'])
 def get_resultados_api(lottery_name):
@@ -194,8 +378,12 @@ def get_frequencia_numeros(lottery_name):
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
     if error_response: return jsonify(error_response), status_code
     if not isinstance(all_results, list): return jsonify({"data": [], "mensagem": "Formato de dados de resultados inválido."}), 500
-    todos_numeros = [num for sorteio in all_results if "numeros" in sorteio and isinstance(sorteio["numeros"], list) for num in sorteio["numeros"]]
-    if not todos_numeros: return jsonify({"data": [], "mensagem": "Nenhum número nos dados."}), 200
+    todos_numeros_raw = [num_str for sorteio in all_results if "numeros" in sorteio and isinstance(sorteio["numeros"], list) for num_str in sorteio["numeros"]]
+    todos_numeros = []
+    for num_str in todos_numeros_raw: 
+        try: todos_numeros.append(int(num_str))
+        except ValueError: pass 
+    if not todos_numeros: return jsonify({"data": [], "mensagem": "Nenhum número válido nos dados."}), 200
     contagem = Counter(todos_numeros); frequencia_ordenada = sorted(contagem.items(), key=lambda item: (-item[1], item[0]))
     frequencia_formatada = [{"numero": str(num).zfill(2), "frequencia": freq} for num, freq in frequencia_ordenada]
     return jsonify({"data": frequencia_formatada, "total_sorteios_analisados": len(all_results)})
@@ -208,7 +396,19 @@ def get_pares_frequentes(lottery_name):
     if error_response: return jsonify(error_response), status_code
     if not isinstance(all_results, list): return jsonify({"data": [], "mensagem": "Formato de dados de resultados inválido."}), 500
     numeros_por_sorteio = config.get("count_sorteadas", config.get("count"))
-    todos_os_itens_combinacao = [tuple(par) for s in all_results if s.get("numeros") and isinstance(s["numeros"], list) and len(s["numeros"]) == numeros_por_sorteio for par in combinations(sorted(s["numeros"]), 2)]
+    
+    todos_os_itens_combinacao = []
+    for s in all_results:
+        numeros_str_list = s.get("numeros")
+        if numeros_str_list and isinstance(numeros_str_list, list):
+            try:
+                numeros_int_list = sorted([int(n_str) for n_str in numeros_str_list])
+                if len(numeros_int_list) == numeros_por_sorteio: 
+                     for par in combinations(numeros_int_list, 2):
+                        todos_os_itens_combinacao.append(tuple(par))
+            except ValueError:
+                continue 
+
     if not todos_os_itens_combinacao: return jsonify({"data": [], "mensagem": "Não foi possível gerar pares."}), 200
     contagem_itens = Counter(todos_os_itens_combinacao); itens_ordenados = sorted(contagem_itens.items(), key=lambda item: (-item[1], item[0]))
     itens_formatados = [{"par": [str(n).zfill(2) for n in item_numeros], "frequencia": freq} for item_numeros, freq in itens_ordenados]
@@ -277,21 +477,20 @@ def calcular_probabilidade_jogo():
         return jsonify({"erro": f"Para {nome_loteria}, você deve fornecer {num_marcados_volante_config} números."}), 400
     prob_dec = 0; prob_txt = "Não aplicável."
     if lottery_type == "lotomania":
-        if len(numeros_usuario) == 50 and num_sorteados_premio_max == 20: # Para 20 acertos
-            comb_fav = combinations_count(num_marcados_volante_config, num_sorteados_premio_max) # Combinações de 50 escolhe 20
-            comb_tot = combinations_count(universo_total, num_sorteados_premio_max) # Combinações de 100 escolhe 20
-            if comb_tot > 0 and comb_fav > 0 : # comb_fav deve ser 1 aqui na verdade
-                prob_dec = 1 / comb_tot # A probabilidade de acertar OS 20 é 1 / C(100,20)
+        if len(numeros_usuario) == 50 and num_sorteados_premio_max == 20:
+            comb_tot = combinations_count(universo_total, num_sorteados_premio_max) 
+            if comb_tot > 0 :
+                prob_dec = 1 / comb_tot 
                 val_inv = round(comb_tot)
                 prob_txt = f"1 em {val_inv:,}".replace(',', '.') if val_inv != float('inf') else "1 em infinito"
             else: prob_txt = "Combinações inválidas."
-        else: prob_txt = "Lotomania (20 acertos) requer jogo de 50 números para este cálculo simplificado."
+        else: prob_txt = "Lotomania (20 acertos) requer jogo de 50 números para este cálculo."
     else:
-        if len(numeros_usuario) == num_sorteados_premio_max: # Jogo simples, ex: 6 na Mega
+        if len(numeros_usuario) == num_sorteados_premio_max: 
             comb_tot = combinations_count(universo_total, num_sorteados_premio_max)
             if comb_tot > 0: prob_dec = 1 / comb_tot; prob_txt = f"1 em {int(comb_tot):,}".replace(',', '.')
             else: prob_txt = "Combinações resultou em zero."
-        else: # Jogos com mais dezenas que o sorteio (ex: 7 na Mega)
+        else: 
             combinacoes_possiveis_com_numeros_marcados = combinations_count(len(numeros_usuario), num_sorteados_premio_max)
             combinacoes_totais_no_universo = combinations_count(universo_total, num_sorteados_premio_max)
             if combinacoes_totais_no_universo > 0 and combinacoes_possiveis_com_numeros_marcados > 0:
@@ -304,85 +503,83 @@ def calcular_probabilidade_jogo():
 def gerar_jogo_ia_aleatorio_rapido(lottery_name):
     config = LOTTERY_CONFIG.get(lottery_name)
     if not config: return {"jogo": [], "estrategia_usada": "Erro: Loteria não configurada"}
-    
-    numeros_a_gerar = config.get("count_apostadas", config.get("count")) # REVISAR: Pega a quantidade certa
+    numeros_a_gerar = config.get("count_apostadas", config.get("count"))
     min_num, max_num = config["min"], config["max"]
-
-    if (max_num - min_num + 1) < numeros_a_gerar: return {"jogo": [], "estrategia_usada": "Erro de Configuração (range insuficiente)"}
+    if (max_num - min_num + 1) < numeros_a_gerar: 
+        app.logger.error(f"Erro Aleatório Rápido para {lottery_name}: range insuficiente para gerar {numeros_a_gerar} números.")
+        return {"jogo": [], "estrategia_usada": f"Erro Config (range {max_num - min_num + 1} < {numeros_a_gerar})"}
     
-    # REVISAR: Garantir que 'num_numeros_gerar' seja respeitado
-    if (max_num - min_num + 1) < numeros_a_gerar:
-        app.logger.error(f"Erro de Configuração para {lottery_name}: range insuficiente ({max_num - min_num + 1}) para gerar {numeros_a_gerar} números.")
-        return {"jogo": [], "estrategia_usada": f"Erro de Configuração (range {max_num - min_num + 1} insuficiente para {numeros_a_gerar} números)"}
-
+    # !!! REVISAR ESTA LÓGICA DE CONTAGEM DE NÚMEROS !!!
+    # random.sample DEVE retornar a quantidade correta se o range for suficiente.
     jogo_final = sorted(random.sample(range(min_num, max_num + 1), numeros_a_gerar))
     
-    if len(jogo_final) != numeros_a_gerar:
-        app.logger.error(f"Falha ao gerar {numeros_a_gerar} números para {lottery_name} no aleatório rápido. Obtido: {len(jogo_final)}")
-        # Este caso não deveria acontecer com random.sample se o range for suficiente
-        return {"jogo": [], "estrategia_usada": "Erro interno na geração aleatória"}
-
-    estrategia_aplicada = f"{config.get('nome_exibicao', lottery_name.capitalize())}: Aleatório Rápido"
+    if len(jogo_final) != numeros_a_gerar: # Salvaguarda
+        app.logger.error(f"Falha crítica no Aleatório Rápido para {lottery_name}. Esperado {numeros_a_gerar}, obtido {len(jogo_final)}.")
+        return {"jogo": [], "estrategia_usada": "Erro Interno na Geração Aleatória"}
+        
+    estrategia_aplicada = f"{config.get('nome_exibicao', lottery_name.capitalize())}: Aleatório Otimizado" # Nome mais chamativo
     return {"jogo": jogo_final, "estrategia_usada": estrategia_aplicada}
 
 @app.route('/api/main/gerar_jogo/<lottery_name>', methods=['GET'])
 def gerar_jogo_api(lottery_name):
     lottery_name_lower = lottery_name.lower()
-    if lottery_name_lower not in LOTTERY_CONFIG: return jsonify({"erro": f"Loteria '{lottery_name}' não configurada."}), 404
+    config = LOTTERY_CONFIG.get(lottery_name_lower)
+    if not config: return jsonify({"erro": f"Loteria '{lottery_name}' não configurada."}), 404
     
     resultado_geracao = gerar_jogo_ia_aleatorio_rapido(lottery_name_lower)
-    
-    config = LOTTERY_CONFIG[lottery_name_lower]
     expected_count = config.get("count_apostadas", config.get("count"))
 
     if not resultado_geracao.get("jogo") or len(resultado_geracao.get("jogo")) != expected_count :
         app.logger.error(f"API /gerar_jogo: Falha ao gerar jogo para {lottery_name}. Esperado: {expected_count}, Recebido: {len(resultado_geracao.get('jogo', []))}. Detalhes: {resultado_geracao.get('estrategia_usada', 'Falha interna')}")
         return jsonify({"erro": f"Não foi possível gerar jogo para {lottery_name}.", "detalhes": resultado_geracao.get("estrategia_usada", "Falha interna na geração")}), 500
     
-    if resultado_geracao.get("jogo"): platform_stats_data["jogos_gerados_total"] += 1
+    if resultado_geracao.get("jogo") and PLATFORM_STATS_DOC_REF:
+        try:
+            PLATFORM_STATS_DOC_REF.update({"total_generated_games": admin_firestore.Increment(1)})
+        except Exception as e_stats:
+            app.logger.error(f"Erro ao incrementar total_generated_games (aleatório): {e_stats}")
     return jsonify(resultado_geracao)
 
 def get_hot_numbers_strategy(all_results, num_concursos_analisar, num_numeros_gerar, lottery_min, lottery_max, lottery_name_for_log=""):
-    # REVISAR: Garantir que 'num_numeros_gerar' seja respeitado
+    # !!! REVISAR ESTA LÓGICA DE CONTAGEM DE NÚMEROS !!!
     if not all_results: return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
     recent_results = all_results[:num_concursos_analisar]
     if not recent_results:
         recent_results = all_results if len(all_results) > 0 else []
         if not recent_results: return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
     
-    all_drawn_numbers_in_slice = [num for result in recent_results if "numeros" in result and isinstance(result["numeros"], list) for num in result["numeros"]]
+    all_drawn_numbers_in_slice_raw = [num_str for result in recent_results if "numeros" in result and isinstance(result["numeros"], list) for num_str in result["numeros"]]
+    all_drawn_numbers_in_slice = []
+    for n_str in all_drawn_numbers_in_slice_raw:
+        try: all_drawn_numbers_in_slice.append(int(n_str))
+        except ValueError: pass
+
     if not all_drawn_numbers_in_slice: return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
     
     number_counts = Counter(all_drawn_numbers_in_slice)
     hot_numbers_sorted_by_freq = sorted(number_counts.items(), key=lambda item: (-item[1], item[0]))
     
-    generated_game = [num for num, count in hot_numbers_sorted_by_freq[:num_numeros_gerar]] # Pega os N mais frequentes
+    generated_game = [num for num, count in hot_numbers_sorted_by_freq[:num_numeros_gerar]] 
     
     if len(generated_game) < num_numeros_gerar:
         possible_numbers = list(range(lottery_min, lottery_max + 1))
         complementar_needed = num_numeros_gerar - len(generated_game)
         pool_complementar = [num for num in possible_numbers if num not in generated_game]
         random.shuffle(pool_complementar)
-        
         generated_game.extend(pool_complementar[:complementar_needed])
 
-    # Salvaguarda final para garantir a contagem, se a lógica acima falhar
     if len(generated_game) != num_numeros_gerar:
         app.logger.warning(f"HotNumbers: Contagem incorreta ({len(generated_game)} de {num_numeros_gerar}) para {lottery_name_for_log}. Recorrendo a aleatório para completar/ajustar.")
-        # Se tem mais, corta. Se tem menos, preenche com aleatórios (evitando duplicatas se possível)
         if len(generated_game) > num_numeros_gerar:
             generated_game = sorted(random.sample(generated_game, num_numeros_gerar))
-        else: # len < num_numeros_gerar
+        else: 
             current_game_set = set(generated_game)
             possible_fillers = [n for n in range(lottery_min, lottery_max + 1) if n not in current_game_set]
             random.shuffle(possible_fillers)
             needed_to_fill = num_numeros_gerar - len(generated_game)
             generated_game.extend(possible_fillers[:needed_to_fill])
-        # Última checagem, se ainda não bate, usa o fallback geral
         if len(generated_game) != num_numeros_gerar:
              return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
-
-
     return sorted(generated_game)
 
 @app.route('/api/main/gerar_jogo/numeros_quentes/<lottery_name>', methods=['GET'])
@@ -407,22 +604,31 @@ def gerar_jogo_numeros_quentes_api(lottery_name):
         return jsonify({"jogo": fallback_result.get("jogo", []), "estrategia_usada": f"{config.get('nome_exibicao', lottery_name.capitalize())}: Números Quentes (Fallback Aleatório)", "aviso": "Estratégia não produziu resultado esperado, usando fallback."}), 200
     
     estrategia_aplicada = f"{config.get('nome_exibicao', lottery_name.capitalize())}: Números Quentes ({num_concursos_analisar} concursos)"
-    if jogo_final: platform_stats_data["jogos_gerados_total"] += 1
+    if jogo_final and PLATFORM_STATS_DOC_REF:
+        try:
+            PLATFORM_STATS_DOC_REF.update({"total_generated_games": admin_firestore.Increment(1)})
+        except Exception as e_stats:
+            app.logger.error(f"Erro ao incrementar total_generated_games (quentes): {e_stats}")
     return jsonify({"jogo": jogo_final, "estrategia_usada": estrategia_aplicada})
 
 def get_cold_numbers_strategy(all_results, num_concursos_analisar, num_numeros_gerar, lottery_min, lottery_max, lottery_name_for_log=""):
-    # REVISAR: Garantir que 'num_numeros_gerar' seja respeitado
+    # !!! REVISAR ESTA LÓGICA DE CONTAGEM DE NÚMEROS !!!
     if not all_results: return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
     recent_results_slice = all_results[:num_concursos_analisar]
     if not recent_results_slice:
         recent_results_slice = all_results if len(all_results) > 0 else []
         if not recent_results_slice: return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
     
-    drawn_numbers_in_slice = [num for result in recent_results_slice if "numeros" in result and isinstance(result["numeros"], list) for num in result["numeros"]]
+    drawn_numbers_in_slice_raw = [num_str for result in recent_results_slice if "numeros" in result and isinstance(result["numeros"], list) for num_str in result["numeros"]]
+    drawn_numbers_in_slice = []
+    for n_str in drawn_numbers_in_slice_raw:
+        try: drawn_numbers_in_slice.append(int(n_str))
+        except ValueError: pass
+
     frequency_counts = Counter(drawn_numbers_in_slice); all_possible_numbers = list(range(lottery_min, lottery_max + 1))
     cold_numbers_candidates = sorted([{'numero': num, 'frequencia': frequency_counts.get(num, 0)} for num in all_possible_numbers], key=lambda x: (x['frequencia'], x['numero']))
     
-    final_cold_selection = [candidate['numero'] for candidate in cold_numbers_candidates[:num_numeros_gerar]] # Pega os N menos frequentes
+    final_cold_selection = [candidate['numero'] for candidate in cold_numbers_candidates[:num_numeros_gerar]]
     
     if len(final_cold_selection) < num_numeros_gerar:
         remaining_possible = [num for num in all_possible_numbers if num not in final_cold_selection]; random.shuffle(remaining_possible)
@@ -457,11 +663,15 @@ def gerar_jogo_numeros_frios_api(lottery_name):
         return jsonify({"jogo": fallback_result.get("jogo", []), "estrategia_usada": f"{config.get('nome_exibicao', lottery_name.capitalize())}: Números Frios (Fallback Aleatório)", "aviso": "Estratégia não produziu resultado esperado, usando fallback."}), 200
     
     estrategia_aplicada = f"{config.get('nome_exibicao', lottery_name.capitalize())}: Números Frios ({num_concursos_analisar} concursos)"
-    if jogo_final: platform_stats_data["jogos_gerados_total"] += 1
+    if jogo_final and PLATFORM_STATS_DOC_REF:
+        try:
+            PLATFORM_STATS_DOC_REF.update({"total_generated_games": admin_firestore.Increment(1)})
+        except Exception as e_stats:
+            app.logger.error(f"Erro ao incrementar total_generated_games (frios): {e_stats}")
     return jsonify({"jogo": jogo_final, "estrategia_usada": estrategia_aplicada})
 
 def gerar_numeros_baseados_em_data_simples(data_nascimento_str, num_numeros, min_val, max_val):
-    # REVISAR: Garantir que 'num_numeros' seja respeitado
+    # !!! REVISAR ESTA LÓGICA DE CONTAGEM DE NÚMEROS !!!
     app.logger.info(f"Gerando palpite esotérico simples com data: {data_nascimento_str} para {num_numeros} números entre {min_val}-{max_val}")
     numeros_base = set(); soma_total_digitos = 0
     if data_nascimento_str and isinstance(data_nascimento_str, str):
@@ -473,9 +683,9 @@ def gerar_numeros_baseados_em_data_simples(data_nascimento_str, num_numeros, min
     
     palpite_final = list(numeros_base); 
     tentativas_aleatorias = 0; 
-    max_tentativas_por_numero = 50 # Aumentar tentativas para preenchimento
+    max_tentativas_preenchimento = num_numeros * 50 
 
-    while len(palpite_final) < num_numeros and tentativas_aleatorias < (num_numeros * max_tentativas_por_numero) :
+    while len(palpite_final) < num_numeros and tentativas_aleatorias < max_tentativas_preenchimento :
         num_aleatorio = random.randint(min_val, max_val)
         if num_aleatorio not in palpite_final: palpite_final.append(num_aleatorio)
         tentativas_aleatorias += 1
@@ -486,9 +696,12 @@ def gerar_numeros_baseados_em_data_simples(data_nascimento_str, num_numeros, min
         random.shuffle(elementos_possiveis)
         necessarios = num_numeros - len(palpite_final)
         palpite_final.extend(elementos_possiveis[:necessarios])
+        palpite_final = list(set(palpite_final)) # Garante unicidade após extend
     
     # Garante a quantidade exata, mesmo que a lógica acima falhe (improvável)
-    if len(palpite_final) != num_numeros:
+    if len(palpite_final) > num_numeros:
+        palpite_final = random.sample(palpite_final, num_numeros)
+    elif len(palpite_final) < num_numeros: # Ainda faltam números
         app.logger.error(f"Esotérico: Falha crítica ao ajustar contagem. Esperado {num_numeros}, obtido {len(palpite_final)}. Usando fallback aleatório total.")
         return sorted(random.sample(range(min_val, max_val + 1), num_numeros))
 
@@ -504,13 +717,14 @@ def verificar_historico_combinacao(lottery_name_lower, combinacao_palpite):
     try: palpite_formatado = sorted([int(n) for n in combinacao_palpite])
     except (ValueError, TypeError) as e: app.logger.error(f"[verificar_historico] Erro ao formatar palpite: {combinacao_palpite}, Erro: {e}"); return 0, 0.0
     for sorteio in todos_resultados:
-        numeros_sorteados = sorteio.get("numeros")
-        if numeros_sorteados and isinstance(numeros_sorteados, list):
+        numeros_sorteados_str = sorteio.get("numeros")
+        if numeros_sorteados_str and isinstance(numeros_sorteados_str, list):
             try:
-                numeros_sorteados_formatados = sorted([int(n) for n in numeros_sorteados])
+                numeros_sorteados_formatados = sorted([int(n) for n in numeros_sorteados_str])
                 if numeros_sorteados_formatados == palpite_formatado:
                     ocorrencias += 1
-                    valor_total_ganho += float(sorteio.get("rateio_principal_valor", 0.0))
+                    # Usa parse_currency_to_float para converter o valor do rateio
+                    valor_total_ganho += parse_currency_to_float(sorteio.get("rateio_principal_valor", "0.0"))
             except (ValueError, TypeError): continue 
     app.logger.info(f"[verificar_historico] Palpite {palpite_formatado} para {lottery_name_lower}: {ocorrencias} ocorrências, R${valor_total_ganho:.2f} ganhos.")
     return ocorrencias, valor_total_ganho
@@ -534,7 +748,7 @@ def gerar_palpite_esoterico_route(lottery_name):
     
     if not palpite_gerado or len(palpite_gerado) != num_a_gerar:
         app.logger.error(f"Falha ao gerar palpite esotérico: {palpite_gerado}, esperado: {num_a_gerar}. Usando fallback.")
-        palpite_gerado = sorted(random.sample(range(min_val, max_val + 1), num_a_gerar)) # Fallback
+        palpite_gerado = sorted(random.sample(range(min_val, max_val + 1), num_a_gerar)) 
         metodo_usado = "Aleatório (fallback pós-falha esotérica)"; app.logger.info(f"Fallback palpite aleatório: {palpite_gerado}")
     
     ocorrencias, valor_ganho = verificar_historico_combinacao(lottery_name_lower, palpite_gerado)
@@ -549,7 +763,115 @@ def gerar_palpite_esoterico_route(lottery_name):
             "valor_total_ganho_faixa_principal_float": valor_ganho
         }}
     app.logger.info(f"Retornando palpite esotérico para {lottery_name}: {response_data}")
+    if palpite_gerado and PLATFORM_STATS_DOC_REF:
+        try:
+            PLATFORM_STATS_DOC_REF.update({"total_generated_games": admin_firestore.Increment(1)})
+        except Exception as e_stats:
+            app.logger.error(f"Erro ao incrementar total_generated_games (esotérico): {e_stats}")
     return jsonify(response_data), 200
+
+def _generate_logical_hunch(lottery_name, all_results, config):
+    # !!! REVISAR ESTA LÓGICA DE CONTAGEM DE NÚMEROS !!!
+    app.logger.info(f"Gerando palpite lógico para {lottery_name}")
+    numeros_a_gerar = config.get("count_apostadas", config.get("count"))
+    min_val = config["min"]
+    max_val = config["max"]
+    
+    jogo_final_set = set() # Usar set para evitar duplicatas iniciais
+    
+    numeros_ultimo_sorteio = set()
+    if all_results and len(all_results) > 0:
+        try:
+            numeros_ultimo_sorteio = set(int(n) for n in all_results[0].get("numeros", []))
+        except ValueError:
+            app.logger.warning(f"Palpite Lógico: Não foi possível converter números do último sorteio para int.")
+    
+    if all_results:
+        todos_numeros_raw = [num_str for sorteio in all_results for num_str in sorteio.get("numeros", [])]
+        todos_numeros_int = []
+        for n_str in todos_numeros_raw:
+            try: todos_numeros_int.append(int(n_str))
+            except ValueError: pass
+
+        if todos_numeros_int:
+            contagem = Counter(todos_numeros_int)
+            frequencia_ordenada = sorted(contagem.items(), key=lambda item: (-item[1], item[0])) 
+            
+            num_frequentes_a_pegar = math.ceil(numeros_a_gerar * 0.4) # 40% dos mais frequentes
+            for num_freq, _ in frequencia_ordenada:
+                if len(jogo_final_set) < num_frequentes_a_pegar:
+                    if int(num_freq) not in numeros_ultimo_sorteio:
+                        jogo_final_set.add(int(num_freq))
+                else:
+                    break
+    
+    tentativas_preenchimento = 0
+    max_tentativas = numeros_a_gerar * 50 # Limite de tentativas para preenchimento
+    pool_aleatorio_inicial = [n for n in range(min_val, max_val + 1) if n not in numeros_ultimo_sorteio and n not in jogo_final_set]
+    random.shuffle(pool_aleatorio_inicial)
+
+    idx_pool = 0
+    while len(jogo_final_set) < numeros_a_gerar and idx_pool < len(pool_aleatorio_inicial):
+        jogo_final_set.add(pool_aleatorio_inicial[idx_pool])
+        idx_pool += 1
+        tentativas_preenchimento +=1 # Conta como tentativa
+        if tentativas_preenchimento > max_tentativas: break
+
+    if len(jogo_final_set) < numeros_a_gerar:
+        app.logger.warning(f"Palpite Lógico: Faltaram números ({len(jogo_final_set)} de {numeros_a_gerar}) para {lottery_name}. Completando totalmente aleatório o restante.")
+        numeros_restantes_necessarios = numeros_a_gerar - len(jogo_final_set)
+        pool_geral_restante = [n for n in range(min_val, max_val + 1) if n not in jogo_final_set] # Não precisa checar ultimo sorteio aqui, pois já estamos em fallback
+        random.shuffle(pool_geral_restante)
+        jogo_final_set.update(pool_geral_restante[:numeros_restantes_necessarios])
+
+    jogo_final_list = list(jogo_final_set)
+    # Garante a contagem correta final, se algo deu muito errado
+    if len(jogo_final_list) > numeros_a_gerar:
+        jogo_final_list = random.sample(jogo_final_list, numeros_a_gerar)
+    elif len(jogo_final_list) < numeros_a_gerar:
+        app.logger.error(f"Palpite Lógico: Falha crítica ao gerar contagem correta para {lottery_name}. Gerando totalmente aleatório para completar.")
+        # Completa com números totalmente aleatórios, garantindo unicidade com o que já tem
+        pool_complementar_final = [n for n in range(min_val, max_val + 1) if n not in jogo_final_list]
+        random.shuffle(pool_complementar_final)
+        necessarios_final = numeros_a_gerar - len(jogo_final_list)
+        jogo_final_list.extend(pool_complementar_final[:necessarios_final])
+        # Se mesmo assim falhar (range muito pequeno e números já usados), recorre ao sample direto
+        if len(jogo_final_list) != numeros_a_gerar:
+            return sorted(list(random.sample(range(min_val, max_val + 1), numeros_a_gerar)))
+
+
+    return sorted(jogo_final_list)
+
+@app.route('/api/main/gerar_jogo/logico/<lottery_name>', methods=['GET'])
+def gerar_jogo_logico_api(lottery_name):
+    lottery_name_lower = lottery_name.lower()
+    config = LOTTERY_CONFIG.get(lottery_name_lower)
+    if not config:
+        return jsonify({"erro": f"Loteria '{lottery_name}' não configurada."}), 404
+
+    all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
+    if error_response:
+        app.logger.warning(f"Dados históricos indisponíveis para palpite lógico de {lottery_name}. Gerando aleatório.")
+        resultado_fallback = gerar_jogo_ia_aleatorio_rapido(lottery_name_lower)
+        resultado_fallback["estrategia_usada"] = f"{config.get('nome_exibicao', lottery_name.capitalize())}: Lógico (Fallback Aleatório - Sem Histórico)"
+        return jsonify(resultado_fallback), 200
+
+    numeros_a_gerar = config.get("count_apostadas", config.get("count"))
+    jogo_final = _generate_logical_hunch(lottery_name_lower, all_results, config)
+
+    if not jogo_final or len(jogo_final) != numeros_a_gerar:
+        app.logger.error(f"API /gerar_jogo/logico: Falha ao gerar jogo para {lottery_name}. Usando fallback aleatório.")
+        resultado_fallback = gerar_jogo_ia_aleatorio_rapido(lottery_name_lower)
+        resultado_fallback["estrategia_usada"] = f"{config.get('nome_exibicao', lottery_name.capitalize())}: Lógico (Fallback Aleatório Crítico)"
+        return jsonify(resultado_fallback)
+
+    estrategia_aplicada = f"{config.get('nome_exibicao', lottery_name.capitalize())}: Palpite Lógico Inteligente"
+    if jogo_final and PLATFORM_STATS_DOC_REF:
+        try:
+            PLATFORM_STATS_DOC_REF.update({"total_generated_games": admin_firestore.Increment(1)})
+        except Exception as e_stats_update:
+            app.logger.error(f"Erro ao incrementar total_generated_games para palpite lógico: {e_stats_update}")
+    return jsonify({"jogo": jogo_final, "estrategia_usada": estrategia_aplicada})
 
 def determinar_faixa_premio_main(lottery_type, acertos):
     config_loteria = LOTTERY_CONFIG.get(lottery_type)
@@ -744,7 +1066,7 @@ def verificar_jogo_passado_megasena_api():
 
     if acertos == 6:
         faixa_premio_txt = "Sena"
-        rateio_key = lottery_config_ms.get("rateio_sena_key", "rateio_principal_valor") # Fallback para chave antiga se a nova não existir
+        rateio_key = lottery_config_ms.get("rateio_sena_key", "rateio_principal_valor") 
         valor_premio_str = sorteio_encontrado.get(rateio_key)
         valor_premio = parse_currency_to_float(valor_premio_str) if valor_premio_str is not None else 0.0
         premiado_flag = True
@@ -773,7 +1095,7 @@ def verificar_jogo_passado_megasena_api():
         "acertos": acertos,
         "premiado": premiado_flag,
         "faixa_premio": faixa_premio_txt,
-        "valor_premio_bruto": valor_premio, # Já é float
+        "valor_premio_bruto": valor_premio,
         "valor_premio_formatado": format_currency(valor_premio) if premiado_flag and valor_premio > 0 else ("Não aplicável" if not aviso_premio and premiado_flag else "R$ 0,00"),
         "aviso": aviso_premio
     }), 200

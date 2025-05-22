@@ -100,16 +100,16 @@
                     <div id="platform-highlights" class="card">
                         <div class="highlights-grid">
                             <div class="highlight-item"><i class="fas fa-dice-d20" aria-hidden="true"></i><span id="stats-jogos-gerados" class="stat-number">--</span><p>Palpites Gerados</p></div>
-                            <div class="highlight-item"><i class="fas fa-trophy" aria-hidden="true"></i><span id="stats-jogos-premiados" class="stat-number">--</span><p>Palpites Premiados (Estimativa)</p></div>
-                            <div class="highlight-item"><i class="fas fa-sack-dollar" aria-hidden="true"></i><span id="stats-valor-premios" class="stat-number">R$ --</span><p>Prêmios Potenciais (Estimativa)</p></div>
+                            <div class="highlight-item"><i class="fas fa-trophy" aria-hidden="true"></i><span id="stats-jogos-premiados" class="stat-number">--</span><p>Palpites Premiados (Fictício)</p></div>
+                            <div class="highlight-item"><i class="fas fa-sack-dollar" aria-hidden="true"></i><span id="stats-valor-premios" class="stat-number">R$ --</span><p>Prêmios Ganhos (Fictício)</p></div>
                         </div>
                     </div>
                     <section id="winning-pools-preview" class="card" aria-labelledby="winning-pools-title">
-                        <h3 id="winning-pools-title"><i class="fas fa-users-crown"></i> Bolões Premiados (Simulado)</h3>
+                        <h3 id="winning-pools-title"><i class="fas fa-users-crown"></i> Bolões Premiados</h3>
                         <ul id="recent-pools-list" aria-live="polite"><li><div class="spinner small-spinner"></div> Carregando...</li></ul>
                     </section>
                     <section id="top-winners-preview" class="card" aria-labelledby="top-winners-title">
-                        <h3 id="top-winners-title"><i class="fas fa-medal"></i> Top Ganhadores (Simulado)</h3>
+                        <h3 id="top-winners-title"><i class="fas fa-medal"></i> Top Ganhadores</h3>
                         <ol id="top-winners-list" aria-live="polite"><li><div class="spinner small-spinner"></div> Carregando...</li></ol>
                     </section>
                 </div>
@@ -183,11 +183,11 @@
                 </h3>
                 <nav class="tabs-navigation" aria-label="Tipos de Palpites">
                     <ul>
-                        <li><a href="#tab-hot" class="tab-link active" role="tab" aria-selected="true" aria-controls="tab-hot">Palpites Quentes 🔥</a></li>
-                        <li><a href="#tab-cold" class="tab-link" role="tab" aria-selected="false" aria-controls="tab-cold">Palpites Frios ❄️</a></li>
-                        <li><a href="#tab-esoteric" class="tab-link" role="tab" aria-selected="false" aria-controls="tab-esoteric">Palpites Esotéricos ✨</a></li>
-                        <li><a href="#tab-algorithmic" class="tab-link" role="tab" aria-selected="false" aria-controls="tab-algorithmic">Palpites Algorítmicos 💻</a></li>
-                        <li><a href="#tab-logic" class="tab-link" role="tab" aria-selected="false" aria-controls="tab-logic">Análises Lógicas 🧠</a></li>
+                        <li><a href="#tab-hot" id="tab-hot-link" class="tab-link active" role="tab" aria-selected="true" aria-controls="tab-hot">Palpites Quentes 🔥</a></li>
+                        <li><a href="#tab-cold" id="tab-cold-link" class="tab-link" role="tab" aria-selected="false" aria-controls="tab-cold">Palpites Frios ❄️</a></li>
+                        <li><a href="#tab-esoteric" id="tab-esoteric-link" class="tab-link" role="tab" aria-selected="false" aria-controls="tab-esoteric">Palpites Esotéricos ✨</a></li>
+                        <li><a href="#tab-algorithmic" id="tab-algorithmic-link" class="tab-link" role="tab" aria-selected="false" aria-controls="tab-algorithmic">Palpites Algorítmicos 💻</a></li>
+                        <li><a href="#tab-logic" id="tab-logic-link" class="tab-link" role="tab" aria-selected="false" aria-controls="tab-logic">Análises Lógicas 🧠</a></li>
                     </ul>
                 </nav>
 
@@ -233,7 +233,8 @@
                         </div>
                     </div>
                     <div id="tab-esoteric" class="tab-panel" role="tabpanel" aria-labelledby="tab-esoteric-link">
-                         <div class="card" id="esoteric-hunch-card" aria-labelledby="esoteric-title"> <h3 id="esoteric-title"><i class="fas fa-hat-wizard" aria-hidden="true"></i> Palpites Cósmicos</h3>
+                         <div class="card" id="esoteric-hunch-card" aria-labelledby="esoteric-title">
+                            <h3 id="esoteric-title"><i class="fas fa-hat-wizard" aria-hidden="true"></i> Palpites Cósmicos</h3>
                             <label for="birth-date-input" style="display:block; margin-top:1rem;">Sua Data de Nascimento (DDMMAAAA):</label>
                             <input type="text" id="birth-date-input" placeholder="Ex: 25121990" maxlength="8" inputmode="numeric" pattern="\\d{8}">
                             <div class="button-group" style="margin-top:1rem;">
@@ -252,7 +253,8 @@
                         </div>
                     </div>
                     <div id="tab-algorithmic" class="tab-panel" role="tabpanel" aria-labelledby="tab-algorithmic-link">
-                        <div class="card" id="quick-hunch-card" aria-labelledby="quick-hunch-title"> <h3 id="quick-hunch-title"><i class="fas fa-bolt" aria-hidden="true"></i> Palpite Aleatório Otimizado</h3>
+                        <div class="card" id="quick-hunch-card" aria-labelledby="quick-hunch-title">
+                            <h3 id="quick-hunch-title"><i class="fas fa-bolt" aria-hidden="true"></i> Palpite Aleatório Otimizado</h3>
                             <div class="button-group" style="margin-top:1rem;">
                                 <button id="generate-quick-hunch-btn" class="action-btn primary-action"><i class="fas fa-random" aria-hidden="true"></i> Gerar Palpite</button>
                             </div>
@@ -269,10 +271,25 @@
                         </div>
                     </div>
                     <div id="tab-logic" class="tab-panel" role="tabpanel" aria-labelledby="tab-logic-link">
-                        <div class="card">
-                            <h3>Análises Baseadas em Lógica Estatística</h3>
-                            <p>Utilize as estatísticas de números mais sorteados e pares frequentes (disponíveis na seção de "Informações e Estatísticas" acima) para inspirar seus jogos lógicos.</p>
-                            <p>Você pode combinar essas informações com suas próprias estratégias ou utilizar a ferramenta de "Salvar Jogo Manual" abaixo para registrar suas criações lógicas.</p>
+                        <div class="card" id="logic-hunch-card">
+                            <h3 id="logic-hunch-title"><i class="fas fa-brain"></i> Palpite Lógico Estratégico</h3>
+                            <p>Este gerador utiliza análises de frequência, atraso e outros padrões para criar um palpite mais elaborado.</p>
+                            <div class="button-group" style="margin-top:1rem;">
+                                <button id="generate-logic-hunch-btn" class="action-btn primary-action"><i class="fas fa-cogs"></i> Gerar Palpite Lógico</button>
+                            </div>
+                            <div id="logic-hunch-output" class="game-card" style="display:none; margin-top: 1rem;" aria-live="polite" aria-atomic="true">
+                                <h4><i class="fas fa-lightbulb"></i> Seu Palpite Lógico:</h4>
+                                <div id="logic-hunch-numbers" class="game-numbers"></div>
+                                <p id="logic-hunch-strategy" class="strategy-text"></p>
+                                <div class="game-card-actions">
+                                    <button id="save-logic-hunch-btn" class="action-btn small-btn" title="Salvar este jogo" style="display:none;"><i class="fas fa-save"></i> Salvar</button>
+                                    <button id="check-logic-hunch-btn" class="action-btn small-btn" title="Conferir este jogo" style="display:none;"><i class="fas fa-check-circle"></i> Conferir</button>
+                                </div>
+                                <div id="logic-hunch-check-result" class="check-result-display" aria-live="polite"></div>
+                            </div>
+                            <hr style="margin: 1.5rem 0;">
+                            <h4><i class="fas fa-chart-pie"></i> Inspiração Adicional:</h4>
+                            <p>Consulte as estatísticas de "Mais Sorteados" na seção de informações da loteria para complementar sua estratégia.</p>
                             <div id="frequency-list-container-logic-tab" class="stats-list-container" style="margin-top:1rem;"><p>Selecione uma loteria para ver os números mais sorteados.</p></div>
                         </div>
                     </div>
@@ -381,7 +398,7 @@
                 Gostou da ajuda do Loto Genius? Considere uma contribuição para mantermos a plataforma no ar e evoluindo!
             </p>
             <p style="margin-top:0.5rem;">
-                <strong>Chave PIX:</strong> <span id="pix-key-display">SUA_CHAVE_PIX_REAL_AQUI</span>
+                <strong>Chave PIX CPF:</strong> <span id="pix-key-display">334.021.198-11</span>
                 <button id="copy-pix-key-btn" class="action-btn small-btn" title="Copiar Chave PIX" style="margin-left: 10px;"><i class="fas fa-copy"></i> Copiar</button>
             </p>
             <button id="ok-prize-modal-btn" class="modal-btn" style="margin-top:1.5rem;">Ok, Entendi!</button>
