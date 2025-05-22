@@ -53,8 +53,9 @@
         <div class="logo-container"><h1>Loto Genius AI</h1></div>
         <nav id="main-nav" style="display:none;" aria-label="Navegação Principal">
             <button id="nav-dashboard-btn" class="nav-item active" title="Painel Principal"><i class="fas fa-tachometer-alt" aria-hidden="true"></i> <span class="nav-text">Painel</span></button>
-            <button id="nav-my-games-btn" class="nav-item" title="Meus Jogos"><i class="fas fa-ticket-alt" aria-hidden="true"></i> <span class="nav-text">Meus Jogos</span></button>
-            <button id="nav-pools-btn" class="nav-item" title="Bolões"><i class="fas fa-users" aria-hidden="true"></i> <span class="nav-text">Bolões em breve</span></button>
+            <button id="nav-my-games-btn" class="nav-item" title="Meus Jogos Salvos"><i class="fas fa-ticket-alt" aria-hidden="true"></i> <span class="nav-text">Jogos Salvos</span></button>
+            <button id="nav-my-mystery-games-btn" class="nav-item" title="Meus Jogos Misteriosos"><i class="fas fa-gift" aria-hidden="true"></i> <span class="nav-text">Misteriosos</span></button>
+            <button id="nav-pools-btn" class="nav-item" title="Bolões"><i class="fas fa-users" aria-hidden="true"></i> <span class="nav-text">Bolões (Breve)</span></button>
         </nav>
         <div id="auth-section" aria-label="Autenticação do Usuário">
             <button id="voice-command-btn" class="auth-btn" title="Ativar Guia de Voz" aria-pressed="false" style="margin-right: 10px; border-color: #82e0aa; min-width: 140px; display: none;">
@@ -105,8 +106,9 @@
                         </div>
                     </div>
                     <section id="winning-pools-preview" class="card" aria-labelledby="winning-pools-title">
-                        <h3 id="winning-pools-title"><i class="fas fa-users-crown"></i> Bolões Premiados</h3>
-                        <ul id="recent-pools-list" aria-live="polite"><li><div class="spinner small-spinner"></div> Carregando...</li></ul>
+                        <h3 id="winning-pools-title"><i class="fas fa-users-crown"></i> Bolões Premiados (Em Breve)</h3>
+                        <ul id="recent-pools-list" aria-live="polite"><li>Funcionalidade de bolões será implementada futuramente.</li></ul>
+                         <p id="pools-error-message" style="color: #ff4765; display: none;"></p>
                     </section>
                     <section id="top-winners-preview" class="card" aria-labelledby="top-winners-title">
                         <h3 id="top-winners-title"><i class="fas fa-medal"></i> Top Ganhadores</h3>
@@ -115,6 +117,21 @@
                 </div>
             </section>
 
+            <section id="mystery-game-purchase-section" class="dashboard-subsection" aria-labelledby="mystery-game-purchase-title-h3">
+                <h3 id="mystery-game-purchase-title-h3" class="card-title-accessible" style="text-align:center; color: #ffd700;">
+                    <i class="fas fa-dice-six" aria-hidden="true"></i> Jogo Misterioso Loto Genius!
+                </h3>
+                <div class="card" id="mystery-game-purchase-card" style="border-left: 5px solid #ffd700;">
+                    <h4>Sorte Surpresa da <span id="dynamic-lottery-name-mystery">Mega-Sena</span>!</h4>
+                    <p>Deixe nossa Inteligência Artificial criar um jogo único e misterioso para você. A sorte pode estar a um clique!</p>
+                    <p style="margin-top:0.5rem;">Valor do Jogo Misterioso: <strong id="mystery-game-price" style="color: #82e0aa;">R$ --</strong></p>
+                    <small style="font-size: 0.75em; color: #aaa;">(Este valor inclui o custo da aposta oficial + uma pequena taxa de serviço Loto Genius)</small>
+                    <button id="buy-mystery-game-btn" class="action-btn primary-action" style="margin-top: 1.5rem; background-color: #dbac00; width:100%;">
+                        <i class="fas fa-shopping-cart"></i> Quero meu Jogo Misterioso!
+                    </button>
+                    <div id="mystery-game-purchase-status" class="result-display-box" style="margin-top: 1rem; display:none;" aria-live="polite"></div>
+                </div>
+            </section>
             <section id="lottery-info-section" class="dashboard-subsection" aria-labelledby="lottery-info-title-h3">
                 <h3 id="lottery-info-title-h3" class="card-title-accessible">
                     <i class="fas fa-chart-bar" aria-hidden="true"></i> Informações e Estatísticas: <span id="dynamic-lottery-name-info">Mega-Sena</span>
@@ -339,7 +356,7 @@
         </section>
 
         <section id="my-games-section" class="main-section" aria-labelledby="my-games-title">
-            <h2 id="my-games-title"><i class="fas fa-history" aria-hidden="true"></i> Meus Jogos Salvos</h2>
+            <h2 id="my-games-title"><i class="fas fa-history" aria-hidden="true"></i> Meus Jogos Salvos (Gerados/Manuais)</h2>
             <div id="saved-games-filters" style="margin-bottom: 1rem; display:flex; gap:10px; align-items:center;">
                 <label for="filter-lottery-mygames">Filtrar:</label>
                 <select id="filter-lottery-mygames" aria-label="Filtrar jogos salvos por loteria">
@@ -352,10 +369,17 @@
                 <p id="no-saved-games" style="display:none;">Você ainda não tem jogos salvos.</p>
             </div>
         </section>
+        
+        <section id="my-mystery-games-section" class="main-section" aria-labelledby="my-mystery-games-title" style="display:none;">
+            <h2 id="my-mystery-games-title"><i class="fas fa-gift" aria-hidden="true"></i> Meus Jogos Misteriosos Adquiridos</h2>
+            <p style="margin-bottom: 1rem; color: #c5dcf0;">Aqui você pode acompanhar seus Jogos Misteriosos e revelá-los após o sorteio oficial do concurso correspondente.</p>
+            <div id="my-mystery-games-container" class="grid-container cards-display" aria-live="polite">
+                <p>Carregando seus Jogos Misteriosos...</p> 
+            </div>
+        </section>
         <section id="pools-section" class="main-section" aria-labelledby="pools-title">
              <h2 id="pools-title"><i class="fas fa-users"></i> Bolões Comunitários</h2>
              <p>Em breve: Crie e participe de bolões inteligentes para aumentar suas chances!</p>
-             <p id="pools-error-message" style="color: #ff4765; display: none;">Erro ao carregar informações dos bolões. Por favor, tente mais tarde.</p>
         </section>
     </main>
 
