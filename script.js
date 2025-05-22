@@ -1,14 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
     const domContentLoadedTimestamp = Date.now();
 
-    const SPLASH_LOGO_ANIM_MAX_DELAY = 1300; // Constantes do Splash Screen
-    // ... (resto das constantes do Splash Screen) ...
-    const SPLASH_MINIMUM_VISIBLE_TIME = Math.max(
-        SPLASH_LOGO_ANIM_MAX_DELAY + 600,
-        2200 + 1000,
-        2500 + 3000
-    ) + 1000;
-
+    const SPLASH_LOGO_ANIM_MAX_DELAY = 1300;
+    const SPLASH_LOGO_ANIM_DURATION = 600;
+    const SPLASH_TEXT_ANIM_DELAY = 2200;
+    const SPLASH_TEXT_ANIM_DURATION = 1000;
+    const SPLASH_PROGRESS_BAR_START_DELAY = 2500;
+    const SPLASH_PROGRESS_BAR_FILL_DURATION = 3000;
+    const APPROX_TOTAL_CSS_ANIM_DURATION = Math.max(
+        SPLASH_LOGO_ANIM_MAX_DELAY + SPLASH_LOGO_ANIM_DURATION,
+        SPLASH_TEXT_ANIM_DELAY + SPLASH_TEXT_ANIM_DURATION,
+        SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION
+    );
+    const SPLASH_MINIMUM_VISIBLE_TIME = APPROX_TOTAL_CSS_ANIM_DURATION + 1000;
 
     const inclusiveWelcomeScreen = document.getElementById('inclusive-welcome-screen');
     const activateVoiceGuideBtn = document.getElementById('welcome-voice-yes-btn');
@@ -380,14 +384,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { container.innerHTML = `<p class="error-message">Falha ao carregar.</p>`; }
     }
 
-    // Helper para resetar a exibição de um gerador de palpite
+    // Helper para resetar a exibição de um gerador de palpite específico
     function resetHunchDisplay(elements) {
-        if (elements.outputDiv) elements.outputDiv.style.display = 'none';
-        if (elements.numbersDiv) elements.numbersDiv.innerHTML = '';
-        if (elements.strategyP) elements.strategyP.textContent = '';
-        if (elements.checkResultDiv) elements.checkResultDiv.innerHTML = '';
-        if (elements.saveButton) elements.saveButton.style.display = 'none';
-        if (elements.checkButton) elements.checkButton.style.display = 'none';
+        if (elements.outputDiv) elements.outputDiv.style.display = 'none'; // Esconde o card de output
+        if (elements.numbersDiv) elements.numbersDiv.innerHTML = ''; // Limpa os números
+        if (elements.strategyP) elements.strategyP.textContent = ''; // Limpa a estratégia
+        if (elements.checkResultDiv) elements.checkResultDiv.innerHTML = ''; // Limpa o resultado da conferência
+        if (elements.saveButton) elements.saveButton.style.display = 'none'; // Esconde o botão salvar
+        if (elements.checkButton) elements.checkButton.style.display = 'none'; // Esconde o botão conferir
     }
 
     function updateAllDashboardData(selectedLottery) {
@@ -400,36 +404,36 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dynamicLotteryNameHunchTabsSpan) dynamicLotteryNameHunchTabsSpan.textContent = lotteryFriendlyName;
         if (dynamicLotteryNameManualSpan) dynamicLotteryNameManualSpan.textContent = lotteryFriendlyName;
 
-        // Limpar/Resetar exibições de palpites anteriores
-        resetHunchDisplay({ // Logged-out quick hunch
+        // Resetar todos os displays de palpites
+        resetHunchDisplay({
             outputDiv: quickHunchOutputDivLoggedOut, numbersDiv: quickHunchNumbersDivLoggedOut,
             strategyP: quickHunchStrategyPLoggedOut, checkResultDiv: quickHunchCheckResultDivLoggedOut,
             checkButton: checkQuickHunchBtnLoggedOut
         });
         lastGeneratedHunchLoggedOut = { type: null };
 
-        resetHunchDisplay({ // Logged-in quick/algorithmic hunch
+        resetHunchDisplay({
             outputDiv: quickHunchOutputDiv, numbersDiv: quickHunchNumbersDiv,
             strategyP: quickHunchStrategyP, checkResultDiv: quickHunchCheckResultDiv,
             saveButton: saveQuickHunchBtn, checkButton: checkQuickHunchBtn
         });
-        resetHunchDisplay({ // Logged-in hot hunch
+        resetHunchDisplay({
             outputDiv: hotNumbersHunchOutputDiv, numbersDiv: hotNumbersHunchNumbersDiv,
             strategyP: hotNumbersHunchStrategyP, checkResultDiv: hotHunchCheckResultDiv,
             saveButton: saveHotHunchBtn, checkButton: checkHotHunchBtn
         });
-        resetHunchDisplay({ // Logged-in cold hunch
+        resetHunchDisplay({
             outputDiv: coldNumbersHunchOutputDiv, numbersDiv: coldNumbersHunchNumbersDiv,
             strategyP: coldNumbersHunchStrategyP, checkResultDiv: coldHunchCheckResultDiv,
             saveButton: saveColdHunchBtn, checkButton: checkColdHunchBtn
         });
-        resetHunchDisplay({ // Logged-in esoteric hunch
+        resetHunchDisplay({ // Para o esotérico, o checkResultDiv é o esotericHunchHistoryCheckDiv
             outputDiv: esotericHunchOutputDiv, numbersDiv: esotericHunchNumbersDiv,
             strategyP: esotericHunchMethodP, checkResultDiv: esotericHunchHistoryCheckDiv,
             saveButton: saveEsotericHunchBtn, checkButton: checkEsotericHunchBtn
         });
-         if (esotericHunchHistoryCheckDiv) { // O histórico do esotérico pode ser diferente
-            esotericHunchHistoryCheckDiv.innerHTML = 'Gere um palpite para ver o histórico.';
+        if (esotericHunchHistoryCheckDiv) { // Pode precisar de tratamento especial se o histórico não deve ser totalmente limpo
+             esotericHunchHistoryCheckDiv.innerHTML = 'Gere um palpite cósmico para ver o histórico e conferir.';
         }
         lastGeneratedHunch = { type: null };
 
@@ -743,28 +747,37 @@ document.addEventListener('DOMContentLoaded', () => {
         } else { if (voiceCommandBtn) voiceCommandBtn.style.display = 'none'; }
     }
 
-    // Função setActiveTab revisada para usar aria-controls
     function setActiveTab(clickedLinkElement) {
-        if (!clickedLinkElement || !tabLinks.length || !tabPanels.length) return;
-
+        if (!clickedLinkElement || !tabLinks.length || !tabPanels.length) {
+            console.warn("setActiveTab: Elementos de aba ausentes ou link não fornecido.");
+            return;
+        }
+    
         const targetPanelId = clickedLinkElement.getAttribute('aria-controls');
-
+        console.log("Tentando ativar aba para o painel: ", targetPanelId); // Para depuração
+    
         tabLinks.forEach(link => {
             link.classList.remove('active');
             link.setAttribute('aria-selected', 'false');
         });
-
+    
         clickedLinkElement.classList.add('active');
         clickedLinkElement.setAttribute('aria-selected', 'true');
-
+    
+        let panelActivated = false;
         tabPanels.forEach(panel => {
             panel.classList.remove('active'); // Garante que todos os painéis estão escondidos
             if (panel.id === targetPanelId) {
                 panel.classList.add('active'); // Mostra o painel correto
+                panelActivated = true;
+                console.log("Painel ativado: ", panel.id); // Para depuração
             }
         });
+    
+        if (!panelActivated) {
+            console.error("Nenhum painel encontrado com o ID: ", targetPanelId);
+        }
         
-        // Carregar dados específicos da aba de lógica, se for o caso
         if (targetPanelId === 'tab-logic-content-panel' && mainLotterySelect) {
             const logicFreqContainer = document.getElementById('frequency-list-container-logic-tab');
             if (logicFreqContainer) {
@@ -846,7 +859,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) throw new Error("Palpite inválido.");
             
             renderGameNumbers(quickHunchNumbersDivLoggedOut, data.jogo, [], [], lottery);
-            quickHunchStrategyPLoggedOut.textContent = `Método: ${data.estrategia_usada || 'Aleatório'}`;
+            quickHunchStrategyPLoggedOut.textContent = `Método: ${data.estrategia_usada || 'Aleatório'}`; // A estrategia_usada vem do backend
             lastGeneratedHunchLoggedOut = { type: 'quick-logged-out', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Aleatório', outputDiv: quickHunchOutputDivLoggedOut, numbersDiv: quickHunchNumbersDivLoggedOut, checkResultDiv: quickHunchCheckResultDivLoggedOut, checkButton: checkQuickHunchBtnLoggedOut };
             if (checkQuickHunchBtnLoggedOut) checkQuickHunchBtnLoggedOut.style.display = 'inline-block';
         } catch (error) {
@@ -972,15 +985,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const birthDateRaw = birthDateInput.value.trim(); const birthDate = birthDateRaw.replace(/\D/g, '');
         if (!birthDate) { alert("Insira sua data de nascimento."); birthDateInput.focus(); return; } if (birthDate.length !== 8) { alert("Formato da data inválido. Use DDMMAAAA."); birthDateInput.focus(); return; }
         generateEsotericHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...'; generateEsotericHunchBtn.disabled = true;
-        esotericHunchOutputDiv.style.display = 'block'; esotericHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>'; esotericHunchMethodP.textContent = 'Consultando...'; esotericHunchHistoryCheckDiv.innerHTML = '';
+        esotericHunchOutputDiv.style.display = 'block'; esotericHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>'; esotericHunchMethodP.textContent = 'Consultando...'; 
+        esotericHunchHistoryCheckDiv.innerHTML = 'Verificando histórico...'; // Mensagem inicial para histórico
         if(saveEsotericHunchBtn) saveEsotericHunchBtn.style.display = 'none'; if(checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'none';
         try {
             const requestBody = { data_nascimento: birthDate }; const data = await fetchData(`api/main/palpite-esoterico/${lotteryName}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
             if (data.erro) { throw new Error(data.erro); } if (!data.palpite_gerado) { throw new Error("API não retornou palpite."); }
             renderGameNumbers(esotericHunchNumbersDiv, data.palpite_gerado, [], [], lotteryName);
             esotericHunchMethodP.textContent = `Método: ${data.metodo_geracao || 'N/A'}`;
-            let historyHtml = `<strong>Histórico desta combinação (último resultado):</strong><br>`;
-            if (data.historico_desta_combinacao) { const hist = data.historico_desta_combinacao; historyHtml += `Premiada? <span style="color: ${hist.ja_foi_premiada_faixa_principal ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${hist.ja_foi_premiada_faixa_principal ? 'Sim' : 'Não'}</span> (${hist.vezes_premiada_faixa_principal}x) - Valor Total Histórico: ${hist.valor_total_ganho_faixa_principal_formatado}`; } else { historyHtml += "Não verificado."; }
+            let historyHtml = `<strong>Histórico desta combinação:</strong><br>`;
+            if (data.historico_desta_combinacao) { const hist = data.historico_desta_combinacao; historyHtml += `Premiada (principal)? <span style="color: ${hist.ja_foi_premiada_faixa_principal ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${hist.ja_foi_premiada_faixa_principal ? 'Sim' : 'Não'}</span> (${hist.vezes_premiada_faixa_principal}x) <br>Valor Total (principal): ${hist.valor_total_ganho_faixa_principal_formatado}`; } else { historyHtml += "Não verificado ou nunca premiado."; }
             esotericHunchHistoryCheckDiv.innerHTML = historyHtml;
             lastGeneratedHunch = { type: 'esoteric', lottery: lotteryName, jogo: data.palpite_gerado, estrategia_metodo: data.metodo_geracao || 'N/A', outputDiv: esotericHunchOutputDiv, numbersDiv: esotericHunchNumbersDiv, checkResultDiv: esotericHunchHistoryCheckDiv, saveButton: saveEsotericHunchBtn, checkButton: checkEsotericHunchBtn };
             if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('esoteric'); if (checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'inline-block';
@@ -1065,9 +1079,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const result = checkGame(currentHunchData.jogo, resultsToUse);
         
-        if (expectedHunchType === 'esoteric') {
+        if (expectedHunchType === 'esoteric') { // Para o esotérico, o 'checkResultDiv' é o 'esotericHunchHistoryCheckDiv'
              let conferenceHtml = `<strong>Conferência com Último Resultado:</strong><br>`;
              conferenceHtml += `Acertos: <span class="${result.hits > 0 ? 'hits' : 'misses'}">${result.hits}</span>. ${result.message}`;
+             // Poderia adicionar o histórico aqui novamente ou manter separado se a UI permitir
+             // Por ora, substitui o conteúdo do div de histórico pela conferência
              if (targetCheckResultDiv) targetCheckResultDiv.innerHTML = conferenceHtml;
         } else {
             if (targetCheckResultDiv) targetCheckResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers && result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`;
@@ -1398,7 +1414,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mainLotterySelect) {
                  updateAllDashboardData(mainLotterySelect.value);
             }
-            if (currentUser) { // Assegura que a aba correta é mostrada se o usuário já estiver logado ao carregar.
+            if (currentUser) {
                 const firstTabLink = document.querySelector('.tabs-navigation .tab-link[aria-controls="tab-hot-content-panel"]');
                 if (firstTabLink && typeof setActiveTab === 'function') {
                     setActiveTab(firstTabLink);
@@ -1426,7 +1442,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
              if (!firebaseApp && typeof showGlobalError === "function") { showGlobalError("Falha crítica na inicialização."); if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();}
              criticalSplashTimeout = null;
-        }, SPLASH_MINIMUM_VISIBLE_TIME + 500); // Adicionado um pequeno buffer
+        }, SPLASH_MINIMUM_VISIBLE_TIME + 500); 
 
         if (typeof attemptFirebaseInit === "function") {
             setTimeout(attemptFirebaseInit, 100);
