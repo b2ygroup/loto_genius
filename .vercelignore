@@ -1,9 +1,53 @@
-api/lottery_data/
-api/lottery_data_temp_for_upload/
-api/arquivos_excel_caixa/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 *.xlsx
 *.csv
-__pycache__/
-.env
-# Adicione outras pastas/arquivos de desenvolvimento que não precisam ir para o deploy
+serviceAccountKey.json # Se você não estiver usando a ENV VAR FIREBASE_SERVICE_ACCOUNT_JSON na Vercel
+api/lottery_data/ # CRUCIAL para não incluir os JSONs locais no deploy
+api/lottery_data_temp_for_upload/ # CRUCIAL
+api/arquivos_excel_caixa/ # CRUCIAL
 .vscode/
