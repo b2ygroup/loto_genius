@@ -1651,11 +1651,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }, { capture: true, once: true });
         };
 
-        // Correção 2: Trocando 'click' por 'touchstart' para melhor responsividade mobile
-        if (activateVoiceGuideBtn) activateVoiceGuideBtn.addEventListener('touchstart', () => { handleWelcomeChoice(true); });
-        if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('touchstart', () => { handleWelcomeChoice(false); });
+        // Correção Definitiva: Usando 'click' que funciona em todas as plataformas.
+        if (activateVoiceGuideBtn) activateVoiceGuideBtn.addEventListener('click', () => { handleWelcomeChoice(true); });
+        if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('click', () => { handleWelcomeChoice(false); });
         
-        // Correção 1: Comentando a chamada automática de voz que causa o erro no Android
+        // Mantém a correção original: Não chamar a função de voz automaticamente.
         // playInitialGreetingAndListen();
     }
 
