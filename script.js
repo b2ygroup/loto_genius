@@ -291,7 +291,8 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = '';
 
         if (!gameNumbers || !Array.isArray(gameNumbers) || gameNumbers.length === 0) {
-            container.innerHTML = '<p>Nenhum número gerado.</p>';
+            // Não exibir "Nenhum número gerado" aqui, pois o card do gerador já tem um título.
+            // Se o contêiner ficar vazio, o usuário saberá que precisa gerar.
             return;
         }
 
@@ -384,14 +385,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { container.innerHTML = `<p class="error-message">Falha ao carregar.</p>`; }
     }
 
-    // Helper para resetar a exibição de um gerador de palpite específico
     function resetHunchDisplay(elements) {
-        if (elements.outputDiv) elements.outputDiv.style.display = 'none'; // Esconde o card de output
-        if (elements.numbersDiv) elements.numbersDiv.innerHTML = ''; // Limpa os números
-        if (elements.strategyP) elements.strategyP.textContent = ''; // Limpa a estratégia
-        if (elements.checkResultDiv) elements.checkResultDiv.innerHTML = ''; // Limpa o resultado da conferência
-        if (elements.saveButton) elements.saveButton.style.display = 'none'; // Esconde o botão salvar
-        if (elements.checkButton) elements.checkButton.style.display = 'none'; // Esconde o botão conferir
+        if (elements.outputDiv) elements.outputDiv.style.display = 'none';
+        if (elements.numbersDiv) elements.numbersDiv.innerHTML = '';
+        if (elements.strategyP) elements.strategyP.textContent = '';
+        if (elements.checkResultDiv) elements.checkResultDiv.innerHTML = '';
+        if (elements.saveButton) elements.saveButton.style.display = 'none';
+        if (elements.checkButton) elements.checkButton.style.display = 'none';
     }
 
     function updateAllDashboardData(selectedLottery) {
@@ -404,35 +404,34 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dynamicLotteryNameHunchTabsSpan) dynamicLotteryNameHunchTabsSpan.textContent = lotteryFriendlyName;
         if (dynamicLotteryNameManualSpan) dynamicLotteryNameManualSpan.textContent = lotteryFriendlyName;
 
-        // Resetar todos os displays de palpites
-        resetHunchDisplay({
+        resetHunchDisplay({ 
             outputDiv: quickHunchOutputDivLoggedOut, numbersDiv: quickHunchNumbersDivLoggedOut,
             strategyP: quickHunchStrategyPLoggedOut, checkResultDiv: quickHunchCheckResultDivLoggedOut,
             checkButton: checkQuickHunchBtnLoggedOut
         });
         lastGeneratedHunchLoggedOut = { type: null };
 
-        resetHunchDisplay({
+        resetHunchDisplay({ 
             outputDiv: quickHunchOutputDiv, numbersDiv: quickHunchNumbersDiv,
             strategyP: quickHunchStrategyP, checkResultDiv: quickHunchCheckResultDiv,
             saveButton: saveQuickHunchBtn, checkButton: checkQuickHunchBtn
         });
-        resetHunchDisplay({
+        resetHunchDisplay({ 
             outputDiv: hotNumbersHunchOutputDiv, numbersDiv: hotNumbersHunchNumbersDiv,
             strategyP: hotNumbersHunchStrategyP, checkResultDiv: hotHunchCheckResultDiv,
             saveButton: saveHotHunchBtn, checkButton: checkHotHunchBtn
         });
-        resetHunchDisplay({
+        resetHunchDisplay({ 
             outputDiv: coldNumbersHunchOutputDiv, numbersDiv: coldNumbersHunchNumbersDiv,
             strategyP: coldNumbersHunchStrategyP, checkResultDiv: coldHunchCheckResultDiv,
             saveButton: saveColdHunchBtn, checkButton: checkColdHunchBtn
         });
-        resetHunchDisplay({ // Para o esotérico, o checkResultDiv é o esotericHunchHistoryCheckDiv
+        resetHunchDisplay({ 
             outputDiv: esotericHunchOutputDiv, numbersDiv: esotericHunchNumbersDiv,
             strategyP: esotericHunchMethodP, checkResultDiv: esotericHunchHistoryCheckDiv,
             saveButton: saveEsotericHunchBtn, checkButton: checkEsotericHunchBtn
         });
-        if (esotericHunchHistoryCheckDiv) { // Pode precisar de tratamento especial se o histórico não deve ser totalmente limpo
+        if (esotericHunchHistoryCheckDiv) { 
              esotericHunchHistoryCheckDiv.innerHTML = 'Gere um palpite cósmico para ver o histórico e conferir.';
         }
         lastGeneratedHunch = { type: null };
@@ -460,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const activeTabLink = document.querySelector('.tabs-navigation .tab-link.active');
-        if (currentUser && activeTabLink && activeTabLink.getAttribute('aria-controls') === 'tab-logic-content-panel') {
+        if (currentUser && activeTabLink && activeTabLink.getAttribute('aria-controls') === 'tab-logic') {
             const logicFreqContainer = document.getElementById('frequency-list-container-logic-tab');
             if (logicFreqContainer) {
                 fetchAndDisplayStatsGeneric(selectedLottery, "Mais Sorteados (Lógica)", logicFreqContainer, "frequencia");
@@ -670,8 +669,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((command.includes('gerar') || command.includes('palpite')) && (command.includes('mega sena') || command.includes('mega'))) {
              if(mainLotterySelect) mainLotterySelect.value = 'megasena';
              if (typeof updateAllDashboardData === 'function') updateAllDashboardData('megasena');
-             const activeHotTabLink = document.querySelector('.tab-link[aria-controls="tab-hot-content-panel"]');
-             const activeAlgoTabLink = document.querySelector('.tab-link[aria-controls="tab-algorithmic-content-panel"]');
+             const activeHotTabLink = document.querySelector('.tab-link[aria-controls="tab-hot"]');
+             const activeAlgoTabLink = document.querySelector('.tab-link[aria-controls="tab-algorithmic"]');
 
              if (currentUser) {
                 if (command.includes('quente') && generateHotNumbersHunchBtn && activeHotTabLink) { if(typeof setActiveTab === "function") setActiveTab(activeHotTabLink); generateHotNumbersHunchBtn.click(); speak("Gerando palpite de números quentes para Mega-Sena.");}
@@ -685,8 +684,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((command.includes('gerar') || command.includes('palpite')) && (command.includes('lotofácil') || command.includes('fácil'))) {
             if(mainLotterySelect) mainLotterySelect.value = 'lotofacil';
             if (typeof updateAllDashboardData === 'function') updateAllDashboardData('lotofacil');
-            const activeHotTabLink = document.querySelector('.tab-link[aria-controls="tab-hot-content-panel"]');
-            const activeAlgoTabLink = document.querySelector('.tab-link[aria-controls="tab-algorithmic-content-panel"]');
+            const activeHotTabLink = document.querySelector('.tab-link[aria-controls="tab-hot"]');
+            const activeAlgoTabLink = document.querySelector('.tab-link[aria-controls="tab-algorithmic"]');
             if (currentUser) {
                 if (command.includes('quente') && generateHotNumbersHunchBtn && activeHotTabLink) { if(typeof setActiveTab === "function") setActiveTab(activeHotTabLink); generateHotNumbersHunchBtn.click(); speak("Gerando palpite de números quentes para Lotofácil.");}
                 else if (activeAlgoTabLink && generateQuickHunchBtn) { if(typeof setActiveTab === "function") setActiveTab(activeAlgoTabLink); generateQuickHunchBtn.click(); speak("Gerando palpite algorítmico para Lotofácil.");}
@@ -748,13 +747,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setActiveTab(clickedLinkElement) {
-        if (!clickedLinkElement || !tabLinks.length || !tabPanels.length) {
-            console.warn("setActiveTab: Elementos de aba ausentes ou link não fornecido.");
+        if (!clickedLinkElement || !tabLinks || !tabLinks.length || !tabPanels || !tabPanels.length) {
+            console.warn("setActiveTab: Elementos de aba ausentes ou link não fornecido.", clickedLinkElement, tabLinks, tabPanels);
             return;
         }
     
-        const targetPanelId = clickedLinkElement.getAttribute('aria-controls');
-        console.log("Tentando ativar aba para o painel: ", targetPanelId); // Para depuração
+        const targetPanelId = clickedLinkElement.getAttribute('aria-controls'); // Ex: "tab-hot"
+        console.log("Tentando ativar aba. Link controla o painel ID: ", targetPanelId);
     
         tabLinks.forEach(link => {
             link.classList.remove('active');
@@ -766,19 +765,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
         let panelActivated = false;
         tabPanels.forEach(panel => {
-            panel.classList.remove('active'); // Garante que todos os painéis estão escondidos
-            if (panel.id === targetPanelId) {
-                panel.classList.add('active'); // Mostra o painel correto
+            panel.classList.remove('active'); 
+            if (panel.id === targetPanelId) { // Compara o ID do painel com o valor de aria-controls
+                panel.classList.add('active'); 
                 panelActivated = true;
-                console.log("Painel ativado: ", panel.id); // Para depuração
+                console.log("Painel efetivamente ATIVADO (classe adicionada): ", panel.id);
             }
         });
     
         if (!panelActivated) {
-            console.error("Nenhum painel encontrado com o ID: ", targetPanelId);
+            console.error("Nenhum painel encontrado com o ID: ", targetPanelId, "Verifique os IDs dos painéis no HTML.");
         }
         
-        if (targetPanelId === 'tab-logic-content-panel' && mainLotterySelect) {
+        if (targetPanelId === 'tab-logic' && mainLotterySelect) { // ID do painel, não do link
             const logicFreqContainer = document.getElementById('frequency-list-container-logic-tab');
             if (logicFreqContainer) {
                  fetchAndDisplayStatsGeneric(mainLotterySelect.value, "Mais Sorteados (Lógica)", logicFreqContainer, "frequencia");
@@ -813,7 +812,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
             if (typeof checkForPrizesAndNotify === 'function') checkForPrizesAndNotify(user.uid);
             
-            const firstTabLink = document.querySelector('.tabs-navigation .tab-link[aria-controls="tab-hot-content-panel"]');
+            const firstTabLink = document.querySelector('.tabs-navigation .tab-link[aria-controls="tab-hot"]');
             if (firstTabLink && typeof setActiveTab === 'function') {
                 setActiveTab(firstTabLink);
             }
@@ -856,10 +855,17 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await fetchData(`api/main/gerar_jogo/${lottery}`);
             if (data.erro) throw new Error(data.detalhes || data.erro);
-            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) throw new Error("Palpite inválido.");
+            if (!data.jogo || !Array.isArray(data.jogo) /*|| data.jogo.length === 0 Ajustado abaixo*/) {
+                 // Adicionar verificação de contagem correta de números para a loteria
+                const config = LOTTERY_CONFIG_JS[lottery.toLowerCase()];
+                const expectedCount = config ? (config.count_apostadas || config.count) : 0;
+                if (!data.jogo || data.jogo.length !== expectedCount) {
+                    throw new Error(`Palpite inválido. Esperava ${expectedCount} números para ${config ? config.name : lottery}. Recebido: ${data.jogo ? data.jogo.length : 0}`);
+                }
+            }
             
             renderGameNumbers(quickHunchNumbersDivLoggedOut, data.jogo, [], [], lottery);
-            quickHunchStrategyPLoggedOut.textContent = `Método: ${data.estrategia_usada || 'Aleatório'}`; // A estrategia_usada vem do backend
+            quickHunchStrategyPLoggedOut.textContent = `Método: ${data.estrategia_usada || 'Aleatório'}`;
             lastGeneratedHunchLoggedOut = { type: 'quick-logged-out', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Aleatório', outputDiv: quickHunchOutputDivLoggedOut, numbersDiv: quickHunchNumbersDivLoggedOut, checkResultDiv: quickHunchCheckResultDivLoggedOut, checkButton: checkQuickHunchBtnLoggedOut };
             if (checkQuickHunchBtnLoggedOut) checkQuickHunchBtnLoggedOut.style.display = 'inline-block';
         } catch (error) {
@@ -880,7 +886,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if(saveQuickHunchBtn) saveQuickHunchBtn.style.display = 'none'; if(checkQuickHunchBtn) checkQuickHunchBtn.style.display = 'none'; if(quickHunchCheckResultDiv) quickHunchCheckResultDiv.innerHTML = '';
         try {
             const data = await fetchData(`api/main/gerar_jogo/${lottery}`);
-            if (data.erro) { throw new Error(data.detalhes || data.erro);  } if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) { throw new Error("Palpite inválido.");}
+            const config = LOTTERY_CONFIG_JS[lottery.toLowerCase()];
+            const expectedCount = config ? (config.count_apostadas || config.count) : 0;
+
+            if (data.erro) { throw new Error(data.detalhes || data.erro);  } 
+            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length !== expectedCount) { 
+                throw new Error(`Palpite inválido. Esperava ${expectedCount} números para ${config ? config.name : lottery}. Recebido: ${data.jogo ? data.jogo.length : 'nenhum'}`);
+            }
             renderGameNumbers(quickHunchNumbersDiv, data.jogo, [], [], lottery);
             quickHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Aleatório Otimizado'}`;
             lastGeneratedHunch = { type: 'quick', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Aleatório Otimizado', outputDiv: quickHunchOutputDiv, numbersDiv: quickHunchNumbersDiv, checkResultDiv: quickHunchCheckResultDiv, saveButton: saveQuickHunchBtn, checkButton: checkQuickHunchBtn };
@@ -905,7 +917,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if(saveHotHunchBtn) saveHotHunchBtn.style.display = 'none'; if(checkHotHunchBtn) checkHotHunchBtn.style.display = 'none'; if(hotHunchCheckResultDiv) hotHunchCheckResultDiv.innerHTML = '';
         try {
             const data = await fetchData(`api/main/gerar_jogo/numeros_quentes/${lottery}?num_concursos_analisar=${analyzeCount}`);
-            if (data.erro) { throw new Error(data.detalhes || data.erro); } if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) { throw new Error("Palpite inválido (quentes)."); }
+            const config = LOTTERY_CONFIG_JS[lottery.toLowerCase()];
+            const expectedCount = config ? (config.count_apostadas || config.count) : 0;
+
+            if (data.erro) { throw new Error(data.detalhes || data.erro); } 
+            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length !== expectedCount) { 
+                throw new Error(`Palpite inválido (quentes). Esperava ${expectedCount} números para ${config ? config.name : lottery}. Recebido: ${data.jogo ? data.jogo.length : 'nenhum'}`);
+            }
             renderGameNumbers(hotNumbersHunchNumbersDiv, data.jogo, [], [], lottery);
             hotNumbersHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Números Quentes'}`; if (data.aviso) { hotNumbersHunchStrategyP.textContent += ` (${data.aviso})`; }
             lastGeneratedHunch = { type: 'hot', lottery: lottery, jogo: data.jogo, estrategia_metodo: data.estrategia_usada || 'Números Quentes', outputDiv: hotNumbersHunchOutputDiv, numbersDiv: hotNumbersHunchNumbersDiv, checkResultDiv: hotHunchCheckResultDiv, saveButton: saveHotHunchBtn, checkButton: checkHotHunchBtn };
@@ -945,11 +963,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const data = await fetchData(`api/main/gerar_jogo/numeros_frios/${lottery}?num_concursos_analisar=${analyzeCount}`);
+            const config = LOTTERY_CONFIG_JS[lottery.toLowerCase()];
+            const expectedCount = config ? (config.count_apostadas || config.count) : 0;
+
             if (data.erro) {
                 throw new Error(data.detalhes || data.erro);
             }
-            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length === 0) {
-                throw new Error("Palpite inválido (frios). A API não retornou um jogo válido.");
+            if (!data.jogo || !Array.isArray(data.jogo) || data.jogo.length !== expectedCount) {
+                throw new Error(`Palpite inválido (frios). Esperava ${expectedCount} números para ${config ? config.name : lottery}. Recebido: ${data.jogo ? data.jogo.length : 'nenhum'}`);
             }
             renderGameNumbers(coldNumbersHunchNumbersDiv, data.jogo, [], [], lottery);
             coldNumbersHunchStrategyP.textContent = `Método: ${data.estrategia_usada || 'Números Frios'}`;
@@ -986,15 +1007,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!birthDate) { alert("Insira sua data de nascimento."); birthDateInput.focus(); return; } if (birthDate.length !== 8) { alert("Formato da data inválido. Use DDMMAAAA."); birthDateInput.focus(); return; }
         generateEsotericHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...'; generateEsotericHunchBtn.disabled = true;
         esotericHunchOutputDiv.style.display = 'block'; esotericHunchNumbersDiv.innerHTML = '<div class="spinner small-spinner"></div>'; esotericHunchMethodP.textContent = 'Consultando...'; 
-        esotericHunchHistoryCheckDiv.innerHTML = 'Verificando histórico...'; // Mensagem inicial para histórico
+        esotericHunchHistoryCheckDiv.innerHTML = 'Verificando histórico...';
         if(saveEsotericHunchBtn) saveEsotericHunchBtn.style.display = 'none'; if(checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'none';
         try {
             const requestBody = { data_nascimento: birthDate }; const data = await fetchData(`api/main/palpite-esoterico/${lotteryName}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
-            if (data.erro) { throw new Error(data.erro); } if (!data.palpite_gerado) { throw new Error("API não retornou palpite."); }
+            const config = LOTTERY_CONFIG_JS[lotteryName.toLowerCase()];
+            const expectedCount = config ? (config.count_apostadas || config.count) : 0;
+
+            if (data.erro) { throw new Error(data.erro); } 
+            if (!data.palpite_gerado || !Array.isArray(data.palpite_gerado) || data.palpite_gerado.length !== expectedCount) { 
+                throw new Error(`API não retornou palpite válido. Esperava ${expectedCount} números para ${config ? config.name : lotteryName}. Recebido: ${data.palpite_gerado ? data.palpite_gerado.length : 'nenhum'}`);
+            }
             renderGameNumbers(esotericHunchNumbersDiv, data.palpite_gerado, [], [], lotteryName);
             esotericHunchMethodP.textContent = `Método: ${data.metodo_geracao || 'N/A'}`;
             let historyHtml = `<strong>Histórico desta combinação:</strong><br>`;
-            if (data.historico_desta_combinacao) { const hist = data.historico_desta_combinacao; historyHtml += `Premiada (principal)? <span style="color: ${hist.ja_foi_premiada_faixa_principal ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${hist.ja_foi_premiada_faixa_principal ? 'Sim' : 'Não'}</span> (${hist.vezes_premiada_faixa_principal}x) <br>Valor Total (principal): ${hist.valor_total_ganho_faixa_principal_formatado}`; } else { historyHtml += "Não verificado ou nunca premiado."; }
+            if (data.historico_desta_combinacao) { const hist = data.historico_desta_combinacao; historyHtml += `Premiada (principal)? <span style="color: ${hist.ja_foi_premiada_faixa_principal ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${hist.ja_foi_premiada_faixa_principal ? 'Sim' : 'Não'}</span> (${hist.vezes_premiada_faixa_principal}x) <br>Valor Total Histórico (principal): ${hist.valor_total_ganho_faixa_principal_formatado}`; } else { historyHtml += "Não verificado ou nunca premiado."; }
             esotericHunchHistoryCheckDiv.innerHTML = historyHtml;
             lastGeneratedHunch = { type: 'esoteric', lottery: lotteryName, jogo: data.palpite_gerado, estrategia_metodo: data.metodo_geracao || 'N/A', outputDiv: esotericHunchOutputDiv, numbersDiv: esotericHunchNumbersDiv, checkResultDiv: esotericHunchHistoryCheckDiv, saveButton: saveEsotericHunchBtn, checkButton: checkEsotericHunchBtn };
             if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('esoteric'); if (checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'inline-block';
@@ -1079,11 +1106,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const result = checkGame(currentHunchData.jogo, resultsToUse);
         
-        if (expectedHunchType === 'esoteric') { // Para o esotérico, o 'checkResultDiv' é o 'esotericHunchHistoryCheckDiv'
+        if (expectedHunchType === 'esoteric') {
              let conferenceHtml = `<strong>Conferência com Último Resultado:</strong><br>`;
              conferenceHtml += `Acertos: <span class="${result.hits > 0 ? 'hits' : 'misses'}">${result.hits}</span>. ${result.message}`;
-             // Poderia adicionar o histórico aqui novamente ou manter separado se a UI permitir
-             // Por ora, substitui o conteúdo do div de histórico pela conferência
              if (targetCheckResultDiv) targetCheckResultDiv.innerHTML = conferenceHtml;
         } else {
             if (targetCheckResultDiv) targetCheckResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers && result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`;
@@ -1415,7 +1440,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  updateAllDashboardData(mainLotterySelect.value);
             }
             if (currentUser) {
-                const firstTabLink = document.querySelector('.tabs-navigation .tab-link[aria-controls="tab-hot-content-panel"]');
+                const firstTabLink = document.querySelector('.tabs-navigation .tab-link[aria-controls="tab-hot"]'); // usa o ID do painel conforme definido no HTML
                 if (firstTabLink && typeof setActiveTab === 'function') {
                     setActiveTab(firstTabLink);
                 }

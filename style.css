@@ -28,19 +28,19 @@ body {
 /* Skip Link para Acessibilidade */
 .skip-link {
     position: absolute;
-    top: -50px; /* Escondido fora da tela */
+    top: -50px;
     left: 10px;
     background: #ffd700;
     color: #1a1a2e;
     padding: 10px 15px;
-    z-index: 200001; /* Muito alto para garantir visibilidade sobre outros elementos */
+    z-index: 200001;
     text-decoration: none;
     font-weight: bold;
     border-radius: 0 0 5px 5px;
     transition: top 0.3s ease;
 }
 .skip-link:focus {
-    top: 0; /* Torna visível ao focar */
+    top: 0;
 }
 
 /* Estilo para Foco Visível (Teclado) */
@@ -48,7 +48,7 @@ body {
     outline: 3px solid #ffd700 !important;
     outline-offset: 2px;
     box-shadow: 0 0 0 4px rgba(71, 174, 255, 0.5) !important;
-    z-index: 10001; /* Alto para garantir visibilidade */
+    z-index: 10001;
 }
 *:focus:not(:focus-visible) {
     outline: none;
@@ -162,7 +162,7 @@ header {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     position: sticky;
     top: 0;
-    z-index: 1000; /* Header acima do conteúdo normal */
+    z-index: 1000;
 }
 .logo-container { display: flex; align-items: center; }
 header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; letter-spacing: 1px; color: #ffffff; text-shadow: 0 0 5px #47aeff; }
@@ -305,8 +305,8 @@ h4 i { margin-right: 5px; }
     margin-top: 2.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid rgba(71, 174, 255, 0.15);
-    position: relative; /* REVISÃO ABAS: Garante contexto de empilhamento */
-    z-index: 1; /* REVISÃO ABAS: Valor base */
+    position: relative; 
+    z-index: 1; 
 }
 .dashboard-subsection:first-of-type {
     margin-top: 1.5rem;
@@ -458,19 +458,19 @@ h4 i { margin-right: 5px; }
 .error-message { color: #ff4765; font-size: 0.9rem; margin-top: 10px; text-align: center; min-height: 1.2em; }
 footer { text-align: center; padding: 2rem; background-color: #121224; color: #888; margin-top: 3rem; font-size: 0.9rem; }
 
-/* REVISÃO ABAS: Estilos para Abas */
+/* ABAS - Estilos Revisados */
 .tabs-navigation {
-    margin-bottom: 0; /* Remove margin para conectar com painel */
+    margin-bottom: 0; 
     border-bottom: 2px solid #3b3b6e;
-    position: relative; /* Para z-index funcionar se necessário */
-    z-index: 2; /* Garante que a navegação da aba fique acima do painel */
+    position: relative; 
+    z-index: 2; 
 }
 .tabs-navigation ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
     display: flex;
-    flex-wrap: wrap; /* Permite que as abas quebrem linha em telas menores */
+    flex-wrap: wrap; 
     gap: 0.3rem;
 }
 .tabs-navigation .tab-link {
@@ -484,56 +484,63 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     border: 1px solid transparent;
     border-bottom: none;
     position: relative;
-    bottom: -2px; /* Sobrepõe a borda inferior da navegação */
+    bottom: -2px; 
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-    background-color: #2a2a50; /* Fundo para abas inativas */
+    background-color: #2a2a50; 
 }
 .tabs-navigation .tab-link:hover,
-.tabs-navigation .tab-link:focus { /* Adicionado foco para acessibilidade */
+.tabs-navigation .tab-link:focus {
     background-color: #3b3b6e;
     color: #ffffff;
-    outline: none; /* Remove outline padrão do foco, pois temos o customizado */
+    outline: none; 
 }
 .tabs-navigation .tab-link.active {
-    background-color: #1e1e3f; /* Cor do painel de conteúdo */
-    color: #82e0aa; /* Cor de destaque */
-    border-color: #3b3b6e #3b3b6e #1e1e3f #3b3b6e; /* cima, dir, (fundo), esq */
+    background-color: #1e1e3f; 
+    color: #82e0aa; 
+    border-color: #3b3b6e #3b3b6e #1e1e3f #3b3b6e; 
     font-weight: bold;
-    z-index: 3; /* Acima das abas inativas */
+    z-index: 3; 
+}
+
+.tabs-content { /* Contêiner para todos os painéis */
+    position: relative;
+    z-index: 1; /* Abaixo da navegação das abas */
 }
 
 .tabs-content .tab-panel {
-    display: none; /* Escondido por padrão */
-    background-color: #1e1e3f; /* Mesma cor da aba ativa para parecer contínuo */
+    display: none; 
+    background-color: #1e1e3f;
     border: 1px solid #3b3b6e;
-    border-top: none; /* Importante para a conexão visual */
-    border-radius: 0 0 8px 8px; /* Cantos arredondados apenas embaixo */
+    border-top: none; 
+    border-radius: 0 0 8px 8px; 
     padding: 0; /* O card interno terá o padding */
-    min-height: 200px; /* REVISÃO ABAS: Garante altura mínima para visualização */
-    position: relative; /* REVISÃO ABAS: Garante contexto de empilhamento */
-    z-index: 1; /* REVISÃO ABAS: Abaixo da navegação das abas */
+    min-height: 250px; /* Garante alguma altura mínima para visualização */
 }
 .tabs-content .tab-panel.active {
-    display: block;
+    display: block; /* MOSTRA o painel ativo */
     animation: fadeInTabPanel 0.4s ease-out;
 }
 @keyframes fadeInTabPanel {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
 }
+/* Estilos para o card DENTRO de um painel de aba */
 .tab-panel .card {
-    margin-top: 0;
-    box-shadow: none;
-    border: none;
-    border-radius: 0; 
-    padding: 1.5rem;
+    margin-top: 0; /* Remove margem superior do card, pois o painel já pode ter */
+    box-shadow: none; /* Remove sombra do card se o painel já tem borda/estilo */
+    border: none; /* Remove borda do card */
+    border-radius: 0; /* Remove border-radius para se ajustar ao painel */
+    padding: 1.5rem; /* Adiciona padding interno ao card */
+    width: 100%; /* Garante que o card preencha o painel */
+    background-color: transparent; /* Faz o card ter o mesmo fundo do painel */
 }
-.tab-panel .card:first-child { /* Se houver múltiplos cards dentro de um painel */
+.tab-panel .card:first-child {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
 
-/* REVISÃO RESPONSIVIDADE: Media Queries */
+
+/* RESPONSIVIDADE */
 @media (max-width: 768px) {
     header { padding: 0.8rem 1rem; flex-direction: column; align-items: center; }
     .logo-container { margin-bottom: 0.8rem; }
@@ -559,10 +566,17 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     .frequency-item .num, .pair-frequency-item .pair-nums, .city-stats-item .city-name, .city-prize-item .city-name { order: 1; margin-right: 5px; }
     .pair-frequency-item .pair-nums { margin-bottom: 5px; }
 
-    /* REVISÃO ABAS: Responsividade das abas */
     .tabs-navigation .tab-link {
-        font-size: 0.85rem; /* Fonte menor para caber mais abas */
+        font-size: 0.85rem; 
         padding: 0.6rem 0.8rem;
+    }
+    /* Garante que a seção de ferramentas manuais não seja cortada em telas menores */
+    #dashboard-section {
+        overflow-y: auto; /* Permite rolagem se o conteúdo exceder a altura */
+        -webkit-overflow-scrolling: touch; /* Rolagem suave em iOS */
+    }
+    #manual-tools-section {
+        padding-bottom: 2rem; /* Adiciona espaço extra no final no mobile */
     }
 }
 @media (max-width: 480px) {
@@ -573,26 +587,25 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     .splash-subtitle-message { font-size: 0.8rem; }
     .progress-bar-container { width: 180px; }
 
-     /* REVISÃO ABAS: Responsividade ainda menor para abas */
     .tabs-navigation .tab-link {
         font-size: 0.75rem;
         padding: 0.5rem 0.6rem;
     }
     .tabs-navigation ul {
-        gap: 0.1rem; /* Ainda menos espaço se necessário */
+        gap: 0.1rem; 
     }
 }
-/* REVISÃO RESPONSIVIDADE: Garantir que Ferramentas Manuais esteja visível */
+
 #manual-tools-section {
-    display: block; /* Garante que está visível por padrão */
-    /* background-color: rgba(255,0,0,0.1); */ /* Descomente para debug visual */
+    display: block; 
+    /* background-color: rgba(0, 255, 0, 0.05); */ /* Verde leve para debug visual no mobile */
 }
 
 
 #global-error-msg { display: none; background-color: #ff4765; color: white; text-align: center; padding: 10px; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100000; font-size: 0.9rem; }
 .spinner.small-spinner { width: 25px; height: 25px; border-width: 3px; margin: 5px auto; border-top-color: #47aeff; border-radius: 50%; border-style: solid; border-color: rgba(173, 216, 230, 0.3); border-top-color: #47aeff; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-#confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100000; overflow: hidden; } /* Alto z-index para confetti */
+#confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100000; overflow: hidden; }
 .confetti { position: absolute; top: -20px; width: 10px; height: 20px; background-color: #f00; opacity: 0.7; animation: fall linear forwards; }
 @keyframes fall { 0% { transform: translateY(0vh) rotateZ(0deg); } 100% { transform: translateY(105vh) rotateZ(720deg); } }
 
