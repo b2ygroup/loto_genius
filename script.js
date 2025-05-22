@@ -150,14 +150,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const manualSaveGameBtn = document.getElementById('manual-save-game-btn');
     const manualSaveGameResultDisplay = document.getElementById('manual-save-game-result-display');
 
-    // Conferir Jogo Passado (agora genérico)
-    const verifyPastGameCardTitle = document.getElementById('verify-past-game-title-dynamic'); // Novo ID para o título do card
-    const pastGameContestInput = document.getElementById('past-game-contest'); // ID genérico
-    const pastGameNumbersInput = document.getElementById('past-game-numbers'); // ID genérico
-    const verifyPastGameBtn = document.getElementById('verify-past-game-btn'); // ID genérico
-    const verifyPastGameResultDiv = document.getElementById('verify-past-game-result'); // ID genérico
-    // Adicionar input para foto do bilhete (para o futuro)
-    // const pastGamePhotoInput = document.getElementById('past-game-photo');
+    const verifyPastGameCardTitleDynamicSpan = document.getElementById('verify-past-game-title-dynamic');
+    const pastGameContestInput = document.getElementById('past-game-contest');
+    const pastGameNumbersInput = document.getElementById('past-game-numbers');
+    const pastGameNumbersLabel = document.getElementById('past-game-numbers-label');
+    const verifyPastGameBtn = document.getElementById('verify-past-game-btn');
+    const verifyPastGameResultDiv = document.getElementById('verify-past-game-result');
 
 
     const savedGamesContainer = document.getElementById('saved-games-container');
@@ -184,9 +182,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let firebaseInitAttempts = 0;
     const maxFirebaseInitAttempts = 10;
     const LOTTERY_CONFIG_JS = {
-        megasena: { count: 6, count_apostadas: 6, min:1, max:60, color: "#209869", name: "Mega-Sena" },
-        lotofacil: { count: 15, count_apostadas: 15, min:1, max:25, color: "#930089", name: "Lotofácil" },
-        quina: { count: 5, count_apostadas: 5, min:1, max:80, color: "#260085", name: "Quina" },
+        megasena: { count: 6, count_apostadas: 6, min:1, max:60, color: "#209869", name: "Mega-Sena", count_sorteadas: 6 },
+        lotofacil: { count: 15, count_apostadas: 15, min:1, max:25, color: "#930089", name: "Lotofácil", count_sorteadas: 15 },
+        quina: { count: 5, count_apostadas: 5, min:1, max:80, color: "#260085", name: "Quina", count_sorteadas: 5 },
         lotomania: { count_sorteadas: 20, count_apostadas: 50, min:0, max:99, color: "#f78100", name: "Lotomania" }
     };
     const bannerConfigurations = {
@@ -275,7 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (stats && typeof stats.jogos_gerados_total === 'number') { animateCounter(statsJogosGeradosSpan, stats.jogos_gerados_total); } 
             else { statsJogosGeradosSpan.textContent = "N/A"; }
 
-            // Usar as chaves persistentes do backend
             if (stats && typeof stats.jogos_premiados_total === 'number') { animateCounter(statsJogosPremiadosSpan, stats.jogos_premiados_total); } 
             else { statsJogosPremiadosSpan.textContent = "N/A"; }
 
@@ -296,7 +293,10 @@ document.addEventListener('DOMContentLoaded', () => {
             recentPoolsList.innerHTML = '';
             if (pools && pools.length > 0) { pools.forEach(pool => { const li = document.createElement('li'); li.innerHTML = `<span><i class="fas fa-trophy pool-icon"></i> ${pool.name} (${pool.lottery})</span> <span class="pool-prize">${pool.prize}</span> <small>${pool.date}</small>`; recentPoolsList.appendChild(li); }); }
             else { recentPoolsList.innerHTML = '<li>Nenhum bolão premiado recentemente.</li>'; }
-        } catch (error) { recentPoolsList.innerHTML = '<li>Erro ao carregar bolões.</li>';}
+        } catch (error) { 
+            recentPoolsList.innerHTML = '<li>Erro ao carregar bolões. Tente novamente mais tarde.</li>';
+            console.error("Erro em fetchRecentWinningPools:", error.status, error.message, error.data);
+        }
     }
 
     async function fetchTopWinners() { 
@@ -315,9 +315,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }); 
             }
             else { topWinnersList.innerHTML = '<li>Ranking de ganhadores indisponível ou ainda não populado.</li>'; }
-        } catch (error) { topWinnersList.innerHTML = '<li>Erro ao carregar ranking de ganhadores.</li>';}
+        } catch (error) { 
+            topWinnersList.innerHTML = '<li>Erro ao carregar ranking de ganhadores.</li>';
+            console.error("Erro em fetchTopWinners:", error.status, error.message, error.data);
+        }
     }
-
 
     function renderGameNumbers(container, gameNumbers, hitNumbers = [], almostNumbers = [], lotteryType = '') {
         if (!container) { return; }
@@ -434,7 +436,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dynamicLotteryNameHunchLoggedOutSpan) dynamicLotteryNameHunchLoggedOutSpan.textContent = lotteryFriendlyName;
         if (dynamicLotteryNameHunchTabsSpan) dynamicLotteryNameHunchTabsSpan.textContent = lotteryFriendlyName;
         if (dynamicLotteryNameManualSpan) dynamicLotteryNameManualSpan.textContent = lotteryFriendlyName;
-        if (verifyPastGameCardTitle) verifyPastGameCardTitle.textContent = `Conferir Jogo Passado da ${lotteryFriendlyName}`;
+        
+        // Atualiza título e placeholders do card "Conferir Jogo Passado"
+        if (verifyPastGameCardTitleDynamicSpan) {
+            verifyPastGameCardTitleDynamicSpan.textContent = lotteryFriendlyName;
+        }
+        if (pastGameNumbersInput && selectedLotteryConfig) { 
+            const expectedCount = selectedLotteryConfig.count_sorteadas || selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count; 
+            const placeholderText = `Ex: 01,... (${expectedCount} números de ${selectedLotteryConfig.min}-${selectedLotteryConfig.max})`;
+            pastGameNumbersInput.placeholder = placeholderText;
+            if(pastGameNumbersLabel) pastGameNumbersLabel.textContent = `Seu Jogo (${expectedCount} números separados por vírgula):`;
+            pastGameNumbersInput.value = ''; 
+            if(verifyPastGameResultDiv) verifyPastGameResultDiv.style.display = 'none';
+        }
 
 
         resetHunchDisplay({ 
@@ -469,6 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
             strategyP: logicHunchStrategyP, checkResultDiv: logicHunchCheckResultDiv,
             saveButton: saveLogicHunchBtn, checkButton: checkLogicHunchBtn
         });
+
         if (esotericHunchHistoryCheckDiv) { 
              esotericHunchHistoryCheckDiv.innerHTML = 'Gere um palpite cósmico para ver o histórico e conferir.';
         }
@@ -495,13 +510,6 @@ document.addEventListener('DOMContentLoaded', () => {
             manualSaveUserNumbersInput.placeholder = `Ex: 01,02,... (${expectedCount} de ${selectedLotteryConfig.min}-${selectedLotteryConfig.max} para ${lotteryFriendlyName})`;
             if (typeof updateManualSaveNumbersFeedback === "function") updateManualSaveNumbersFeedback();
         }
-        if (pastGameNumbersInput && selectedLotteryConfig) { // Atualiza placeholder do "Conferir Jogo Passado"
-            const expectedCount = selectedLotteryConfig.count_sorteadas || selectedLotteryConfig.count; // Usa count_sorteadas
-            pastGameNumbersInput.placeholder = `Ex: 01,... (${expectedCount} números de ${selectedLotteryConfig.min}-${selectedLotteryConfig.max})`;
-            pastGameNumbersInput.value = ''; // Limpa o campo ao mudar de loteria
-            if(verifyPastGameResultDiv) verifyPastGameResultDiv.style.display = 'none';
-        }
-
 
         const activeTabLink = document.querySelector('.tabs-navigation .tab-link.active');
         if (currentUser && activeTabLink && activeTabLink.getAttribute('aria-controls') === 'tab-logic') {
@@ -792,7 +800,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setActiveTab(clickedLinkElement) {
         if (!clickedLinkElement || !tabLinks || !tabLinks.length || !tabPanels || !tabPanels.length) {
-            console.warn("setActiveTab: Elementos de aba ausentes ou link não fornecido.", clickedLinkElement, tabLinks, tabPanels);
+            console.warn("setActiveTab: Elementos de aba ausentes ou link não fornecido.");
             return;
         }
     
@@ -1806,9 +1814,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (verifyPastGameBtn) { // Conferir Jogo Passado (Genérico)
+    if (verifyPastGameBtn) { 
         verifyPastGameBtn.addEventListener('click', async () => {
-            const lotteryType = mainLotterySelect.value;
+            const lotteryType = mainLotterySelect.value; 
             const selectedLotteryConfig = LOTTERY_CONFIG_JS[lotteryType.toLowerCase()];
 
             if (!selectedLotteryConfig) {
@@ -1837,7 +1845,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const userNumbersRaw = numbersStr.split(/[ ,;/\t\n]+/);
             const userNumbers = userNumbersRaw.map(n => n.trim()).filter(n => n !== "" && !isNaN(n)).map(n => parseInt(n, 10));
 
-            const expectedCount = selectedLotteryConfig.count_sorteadas || selectedLotteryConfig.count; // Usar count_sorteadas se disponível
+            const expectedCount = selectedLotteryConfig.count_sorteadas || selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count;
             if (userNumbers.length !== expectedCount) {
                 verifyPastGameResultDiv.innerHTML = `<p class="error-message">Você deve fornecer ${expectedCount} números para ${selectedLotteryConfig.name}.</p>`;
                 verifyPastGameResultDiv.style.display = 'block';
@@ -1862,12 +1870,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             try {
                 const payload = {
-                    lottery: lotteryType, // Envia o tipo de loteria
+                    lottery: lotteryType, 
                     concurso: contestNumber,
                     numeros_usuario: userNumbers.sort((a, b) => a - b)
                 };
-                // Chamar endpoint genérico
-                const resultData = await fetchData('api/main/verificar-jogo-passado', {
+                
+                const resultData = await fetchData('api/main/verificar-jogo-passado', { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1887,14 +1895,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (resultData.premiado) {
                     htmlResult += `<p style="color:#2ecc71; font-weight:bold; font-size:1.1em;">Parabéns! Jogo Premiado!</p>`;
                     htmlResult += `<p><strong>Faixa do Prêmio:</strong> ${resultData.faixa_premio}</p>`;
-                    if (resultData.valor_premio_formatado && resultData.valor_premio_formatado !== "N/A") {
+                    if (resultData.valor_premio_formatado && resultData.valor_premio_formatado !== "N/A" && resultData.valor_premio_formatado !== "R$ 0,00") {
                         htmlResult += `<p><strong>Valor do Prêmio (na época):</strong> <span class="highlight">${resultData.valor_premio_formatado}</span></p>`;
+                    } else if (resultData.aviso) {
+                        htmlResult += `<p><small><i>Aviso sobre o valor: ${resultData.aviso}</i></small></p>`;
                     }
                     if (resultData.acertos === (selectedLotteryConfig.count_sorteadas || selectedLotteryConfig.count)) triggerConfetti();
                 } else {
                     htmlResult += `<p style="color:#ff4765;">Jogo não premiado neste concurso.</p>`;
                 }
-                if(resultData.aviso) {
+                if(resultData.aviso && !resultData.premiado) { 
                     htmlResult += `<p><small><i>Aviso: ${resultData.aviso}</i></small></p>`;
                 }
                 verifyPastGameResultDiv.innerHTML = htmlResult;

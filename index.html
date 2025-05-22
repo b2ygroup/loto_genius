@@ -105,11 +105,11 @@
                         </div>
                     </div>
                     <section id="winning-pools-preview" class="card" aria-labelledby="winning-pools-title">
-                        <h3 id="winning-pools-title"><i class="fas fa-users-crown"></i> Bolões Premiados</h3>
+                        <h3 id="winning-pools-title"><i class="fas fa-users-crown"></i> Bolões Premiados (Simulado)</h3>
                         <ul id="recent-pools-list" aria-live="polite"><li><div class="spinner small-spinner"></div> Carregando...</li></ul>
                     </section>
                     <section id="top-winners-preview" class="card" aria-labelledby="top-winners-title">
-                        <h3 id="top-winners-title"><i class="fas fa-medal"></i> Top Ganhadores</h3>
+                        <h3 id="top-winners-title"><i class="fas fa-medal"></i> Top Ganhadores (Fictício)</h3>
                         <ol id="top-winners-list" aria-live="polite"><li><div class="spinner small-spinner"></div> Carregando...</li></ol>
                     </section>
                 </div>
@@ -233,7 +233,7 @@
                         </div>
                     </div>
                     <div id="tab-esoteric" class="tab-panel" role="tabpanel" aria-labelledby="tab-esoteric-link">
-                         <div class="card" id="esoteric-hunch-card" aria-labelledby="esoteric-title">
+                         <div class="card" id="esoteric-hunch-card" aria-labelledby="esoteric-title"> 
                             <h3 id="esoteric-title"><i class="fas fa-hat-wizard" aria-hidden="true"></i> Palpites Cósmicos</h3>
                             <label for="birth-date-input" style="display:block; margin-top:1rem;">Sua Data de Nascimento (DDMMAAAA):</label>
                             <input type="text" id="birth-date-input" placeholder="Ex: 25121990" maxlength="8" inputmode="numeric" pattern="\\d{8}">
@@ -253,7 +253,7 @@
                         </div>
                     </div>
                     <div id="tab-algorithmic" class="tab-panel" role="tabpanel" aria-labelledby="tab-algorithmic-link">
-                        <div class="card" id="quick-hunch-card" aria-labelledby="quick-hunch-title">
+                        <div class="card" id="quick-hunch-card" aria-labelledby="quick-hunch-title"> 
                             <h3 id="quick-hunch-title"><i class="fas fa-bolt" aria-hidden="true"></i> Palpite Aleatório Otimizado</h3>
                             <div class="button-group" style="margin-top:1rem;">
                                 <button id="generate-quick-hunch-btn" class="action-btn primary-action"><i class="fas fa-random" aria-hidden="true"></i> Gerar Palpite</button>
@@ -273,7 +273,7 @@
                     <div id="tab-logic" class="tab-panel" role="tabpanel" aria-labelledby="tab-logic-link">
                         <div class="card" id="logic-hunch-card">
                             <h3 id="logic-hunch-title"><i class="fas fa-brain"></i> Palpite Lógico Estratégico</h3>
-                            <p>Este gerador utiliza análises de frequência, atraso e outros padrões para criar um palpite mais elaborado.</p>
+                            <p>Este gerador utiliza análises de frequência, atraso e outros padrões para criar um palpite mais elaborado com base na loteria selecionada.</p>
                             <div class="button-group" style="margin-top:1rem;">
                                 <button id="generate-logic-hunch-btn" class="action-btn primary-action"><i class="fas fa-cogs"></i> Gerar Palpite Lógico</button>
                             </div>
@@ -321,14 +321,14 @@
                         <div id="manual-save-game-result-display" class="result-display-box" style="margin-top:15px; display:none;" aria-live="polite"></div>
                     </div>
 
-                    <div class="card" id="verify-past-megasena-card" aria-labelledby="verify-past-megasena-title">
-                        <h3 id="verify-past-megasena-title"><i class="fas fa-history"></i> Conferir Jogo Passado da Mega-Sena</h3>
-                        <label for="past-megasena-contest">Número do Concurso:</label>
-                        <input type="number" id="past-megasena-contest" placeholder="Ex: 2700">
-                        <label for="past-megasena-numbers">Seu Jogo (6 números separados por vírgula):</label>
-                        <textarea id="past-megasena-numbers" rows="2" placeholder="Ex: 01,02,03,04,05,06"></textarea>
-                        <button id="verify-past-megasena-btn" class="action-btn primary-action" style="width:100%; margin-top:1rem;"><i class="fas fa-search-dollar"></i> Verificar Jogo</button>
-                        <div id="verify-past-megasena-result" class="result-display-box" style="margin-top:15px; display:none;" aria-live="polite"></div>
+                    <div class="card" id="verify-past-game-card" aria-labelledby="verify-past-game-card-title-h3">
+                        <h3 id="verify-past-game-card-title-h3"><i class="fas fa-history"></i> Conferir Jogo Passado da <span id="verify-past-game-title-dynamic">Mega-Sena</span></h3>
+                        <label for="past-game-contest">Número do Concurso:</label>
+                        <input type="number" id="past-game-contest" placeholder="Ex: 2700">
+                        <label for="past-game-numbers" id="past-game-numbers-label">Seu Jogo (6 números separados por vírgula):</label>
+                        <textarea id="past-game-numbers" rows="2" placeholder="Ex: 01,02,03,04,05,06"></textarea>
+                        <button id="verify-past-game-btn" class="action-btn primary-action" style="width:100%; margin-top:1rem;"><i class="fas fa-search-dollar"></i> Verificar Jogo</button>
+                        <div id="verify-past-game-result" class="result-display-box" style="margin-top:15px; display:none;" aria-live="polite"></div>
                     </div>
                 </div>
             </section>

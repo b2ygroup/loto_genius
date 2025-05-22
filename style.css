@@ -191,22 +191,22 @@ header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; letter-spaci
     margin-bottom: 1rem;
     background-color: #121220;
 }
-/* Estilo unificado para ambos os carrosséis */
 .banner-top-dashboard, .banner-bottom-dashboard {
-    max-width: 970px; /* Largura do banner maior */
-    height: 250px;    /* Altura do banner maior */
-    margin: 0 auto;   /* Centralizado */
-    border-radius: 6px;
-    background-color: #18192a; /* Cor de fundo placeholder */
+    max-width: 970px; 
+    height: 250px;    
+    margin: 0 auto;  
+    border-radius: 8px; /* Aumentado para mais suavidade */
+    background-color: #18192a; 
     position: relative;
     overflow: hidden;
     border: 1px solid #303256;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2); /* Sombra sutil */
 }
 .banner-top-dashboard .carousel-item, 
 .banner-bottom-dashboard .carousel-item {
     width: 100%;
     height: 100%;
-    border-radius: 6px;
+    border-radius: inherit; /* Herda o border-radius do pai */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -217,13 +217,12 @@ header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; letter-spaci
     display: block;
     max-width: 100%;
     max-height: 100%;
-    object-fit: contain; /* Para não cortar a imagem, ajusta dentro do espaço */
+    object-fit: cover; /* Alterado para 'cover' para preencher melhor */
     object-position: center center;
+    border-radius: inherit;
 }
-/* Ajuste específico para o carrossel inferior se necessário, como margem */
 .banner-bottom-dashboard {
-    margin-top: 2rem; /* Mantém a margem que já tinha */
-    /* Removido min-height e border-dashed, pois agora segue o estilo do de cima */
+    margin-top: 2rem; 
 }
 
 
@@ -236,13 +235,13 @@ main { padding: 1.5rem; max-width: 1200px; margin: 0 auto 20px auto; }
     background-color: #1e1e3f;
     padding: 1.5rem;
     border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 5px rgba(71, 174, 255, 0.2) inset;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 5px rgba(71, 174, 255, 0.1) inset; /* Ajustada sombra interna */
     border: 1px solid #2a2a50;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
 }
-.card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 8px rgba(71, 174, 255, 0.4) inset; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 8px rgba(71, 174, 255, 0.2) inset; }
 
 h2, h3 { font-family: 'Orbitron', sans-serif; color: #47aeff; margin-top: 0; margin-bottom: 1.2rem; border-bottom: 1px solid #3b3b6e; padding-bottom: 0.6rem; letter-spacing: 0.5px; }
 h2 i, h3 i { margin-right: 8px; }
@@ -374,14 +373,6 @@ h4 i { margin-right: 5px; }
 .highlight-item span.stat-number { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; color: #ffffff; display: block; margin-bottom: 0.3rem; font-weight: 700; transition: all 0.5s ease-in-out; }
 .highlight-item p { font-size: 0.85rem; color: #c5c6c7; }
 
-.carousel-ad {
-    position: relative;
-    overflow: hidden;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 .carousel-ad .carousel-item {
     width: 100%;
     height: 100%;
@@ -412,6 +403,59 @@ h4 i { margin-right: 5px; }
 .carousel-ad > p { color: #8a9ac4; font-size: 1rem; text-align: center; }
 .carousel-ad:not(:empty) > p { display: none; }
 
+/* Estilos Melhorados para Top Winners */
+#top-winners-preview ol { 
+    list-style-type: none; 
+    padding-left: 0; 
+    max-height: 280px; /* Aumentar um pouco a altura */
+    overflow-y: auto; 
+}
+#top-winners-preview li { 
+    background-color: #2a2a50; 
+    padding: 0.9rem 1.2rem; /* Mais padding */
+    margin-bottom: 0.6rem; 
+    border-radius: 8px; /* Mais arredondado */
+    border-left: 5px solid #ffd700; /* Destaque amarelo */
+    font-size: 0.95rem; 
+    display: flex; 
+    flex-direction: column; /* Empilhar informações */
+    gap: 0.3rem; /* Espaço entre os textos internos */
+    transition: background-color 0.3s ease;
+}
+#top-winners-preview li:hover {
+    background-color: #3b3b6e;
+}
+#top-winners-preview li > span:first-child { /* Nick e Posição */
+    font-weight: bold;
+    color: #e0e0e0;
+    display: flex;
+    align-items: center;
+}
+#top-winners-preview li .winner-icon { 
+    color: #ffd700; 
+    margin-right: 8px; 
+    font-size: 1.1em;
+}
+#top-winners-preview li .winner-prize { 
+    font-weight: bold; 
+    color: #2ecc71; 
+    font-size: 1.1em; /* Destacar o prêmio */
+    margin-top: 0.2rem;
+}
+#top-winners-preview li small { 
+    font-size: 0.8rem; 
+    color: #a2d2ff; 
+    margin-top: 0.2rem;
+}
+
+
+#winning-pools-preview ul { list-style-type: none; padding-left: 0; max-height: 250px; overflow-y: auto; }
+#winning-pools-preview li { background-color: #2a2a50; padding: 0.8rem 1rem; margin-bottom: 0.5rem; border-radius: 6px; border-left: 4px solid #47aeff; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
+#winning-pools-preview li .pool-prize { font-weight: bold; color: #f1c40f; }
+#winning-pools-preview li small { display: block; font-size: 0.75rem; color: #888; }
+.pool-icon { color: #f1c40f; margin-right: 5px; } 
+
+
 .stats-list-container { max-height: 280px; overflow-y: auto; padding-right: 10px; margin-top: 0.8rem; }
 .stats-list-container .loading-stats, .stats-list-container .no-stats, .stats-list-container .error-message { text-align: center; padding: 20px; color: #a7b5e8; font-style: italic; }
 .stats-list-container .error-message { color: #ff4765; font-style: normal; }
@@ -427,9 +471,9 @@ h4 i { margin-right: 5px; }
 .stats-subtitle { font-size: 0.8rem; color: #8899aa; text-align: center; margin-top: -0.8rem; margin-bottom: 0.8rem; }
 #manual-game-probability-card textarea,
 #manual-game-save-card textarea,
-#verify-past-megasena-card textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
+#verify-past-game-card textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
 .input-feedback { font-size: 0.8rem; color: #8899aa; min-height: 1.2em; margin-bottom: 0.8rem; text-align: right; }
-#manual-calculate-prob-btn, #manual-save-game-btn, #verify-past-megasena-btn { margin-top: 0.5rem; width: 100%; }
+#manual-calculate-prob-btn, #manual-save-game-btn, #verify-past-game-btn { margin-top: 0.5rem; width: 100%; }
 
 .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(10, 10, 20, 0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
 .modal.show { display: flex; }
@@ -628,7 +672,7 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
 #hot-numbers-hunch-output.game-card,
 #cold-numbers-hunch-output.game-card,
 #esoteric-hunch-output.game-card,
-#logic-hunch-output.game-card { /* Adicionado gerador lógico */
+#logic-hunch-output.game-card { 
     margin-top: 1.5rem;
     background-color: rgba(28, 28, 54, 0.878);
     border-left: 4px solid #4dd0e1;
@@ -642,24 +686,22 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
 #esoteric-hunch-output.game-card {
     border-left-color: #be93f9;
 }
-#logic-hunch-output.game-card { /* Estilo para o novo gerador lógico */
-    border-left-color: #76d7c4; /* Uma cor verde-água diferente */
+#logic-hunch-output.game-card { 
+    border-left-color: #76d7c4; 
 }
-
 
 #quick-hunch-output h4 .fa-lightbulb,
 #hot-numbers-hunch-output h4 .fa-temperature-high,
 #cold-numbers-hunch-output h4 .fa-snowflake,
 #esoteric-hunch-output h4 .fa-wand-sparkles,
-#logic-hunch-output h4 .fa-lightbulb { /* Adicionado gerador lógico */
+#logic-hunch-output h4 .fa-lightbulb { 
     color: #4dd0e1;
 }
 #hot-numbers-hunch-output h4 .fa-temperature-high { color: #ff8c00; }
 #cold-numbers-hunch-output h4 .fa-snowflake,
 #cold-numbers-hunch-output h4 .far.fa-snowflake { color: #6495ed; }
 #esoteric-hunch-output h4 .fa-wand-sparkles { color: #be93f9; }
-#logic-hunch-output h4 .fa-lightbulb { color: #76d7c4; } /* Ícone para palpite lógico */
-
+#logic-hunch-output h4 .fa-lightbulb { color: #76d7c4; } 
 
 #esoteric-hunch-history-check {
     border-top: 1px dashed #3b3b6e; padding-top: 0.8rem; margin-top: 1rem;
