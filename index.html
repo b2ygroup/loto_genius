@@ -154,7 +154,7 @@
                     <button class="action-btn" id="promo-login-btn">Já Tenho Conta</button>
                 </div>
             </div>
-
+            
             <section id="hunch-generators-section" class="dashboard-subsection" aria-labelledby="hunch-generators-title-h3">
                 <h3 id="hunch-generators-title-h3" class="card-title-accessible">
                     <i class="fas fa-magic" aria-hidden="true"></i> Geradores de Palpites para <span id="dynamic-lottery-name-hunch">Mega-Sena</span>
@@ -215,8 +215,8 @@
                         </div>
                     </div>
 
-                    <div class="card" id="esoteric-hunch-card" style="display:none;" aria-labelledby="esoteric-title">
-                        <h3 id="esoteric-title"><i class="fas fa-hat-wizard" aria-hidden="true"></i> Palpites Cósmicos <span class="premium-tag">(Exclusivo)</span></h3>
+                    <div class="card" id="esoteric-hunch-card-original" style="display:none;" aria-labelledby="esoteric-title-original">
+                        <h3 id="esoteric-title-original"><i class="fas fa-hat-wizard" aria-hidden="true"></i> Palpites Cósmicos <span class="premium-tag">(Exclusivo)</span></h3>
                         <label for="birth-date-input" style="display:block; margin-top:1rem;">Sua Data de Nascimento (DDMMAAAA):</label>
                         <input type="text" id="birth-date-input" placeholder="Ex: 25121990" maxlength="8" inputmode="numeric" pattern="\d{8}">
                         <div class="button-group" style="margin-top:1rem;">
@@ -236,13 +236,51 @@
                 </div>
             </section>
 
+            <section id="logged-in-hunch-tabs-section" class="dashboard-subsection" style="display:none;" aria-labelledby="logged-in-hunch-title-h3">
+                <h3 id="logged-in-hunch-title-h3" class="card-title-accessible">
+                    <i class="fas fa-layer-group"></i> Nossos Palpites Inteligentes para <span id="dynamic-lottery-name-hunch-tabs">Mega-Sena</span>
+                </h3>
+                <nav class="tabs-navigation" aria-label="Tipos de Palpites">
+                    <ul>
+                        <li><a href="#tab-hot" id="tab-link-hot" class="tab-link active" role="tab" aria-selected="true" aria-controls="tab-hot-content">Palpites Quentes 🔥</a></li>
+                        <li><a href="#tab-cold" id="tab-link-cold" class="tab-link" role="tab" aria-selected="false" aria-controls="tab-cold-content">Palpites Frios ❄️</a></li>
+                        <li><a href="#tab-esoteric" id="tab-link-esoteric" class="tab-link" role="tab" aria-selected="false" aria-controls="tab-esoteric-content">Palpites Esotéricos ✨</a></li>
+                        <li><a href="#tab-algorithmic" id="tab-link-algorithmic" class="tab-link" role="tab" aria-selected="false" aria-controls="tab-algorithmic-content">Palpites Algorítmicos 💻</a></li>
+                        <li><a href="#tab-logic" id="tab-link-logic" class="tab-link" role="tab" aria-selected="false" aria-controls="tab-logic-content">Análises Lógicas 🧠</a></li>
+                    </ul>
+                </nav>
+    
+                <div class="tabs-content">
+                    <div id="tab-hot-content" class="tab-panel active" role="tabpanel" aria-labelledby="tab-link-hot">
+                    </div>
+                    <div id="tab-cold-content" class="tab-panel" role="tabpanel" aria-labelledby="tab-link-cold">
+                    </div>
+                    <div id="tab-esoteric-content" class="tab-panel" role="tabpanel" aria-labelledby="tab-link-esoteric">
+                    </div>
+                    <div id="tab-algorithmic-content" class="tab-panel" role="tabpanel" aria-labelledby="tab-link-algorithmic">
+                    </div>
+                    <div id="tab-logic-content" class="tab-panel" role="tabpanel" aria-labelledby="tab-link-logic">
+                        <h4>Análises Baseadas em Lógica Estatística</h4>
+                        <p>Veja abaixo as estatísticas de números mais sorteados e pares frequentes para inspirar seus jogos lógicos.</p>
+                         <div class="card" id="frequency-stats-card-logic-tab" aria-labelledby="frequency-stats-title-logic-tab" style="margin-top:1rem;">
+                             <h3 id="frequency-stats-title-logic-tab"><i class="fas fa-sort-numeric-up-alt"></i> Mais Sorteados (Lógica)</h3>
+                             <div id="frequency-list-container-logic-tab" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
+                        </div>
+                        <div class="card" id="pair-frequency-stats-card-logic-tab" aria-labelledby="pair-frequency-stats-title-logic-tab" style="margin-top:1rem;">
+                            <h3 id="pair-frequency-stats-title-logic-tab"><i class="fas fa-project-diagram"></i> Pares Frequentes (Lógica)</h3>
+                            <div id="pair-frequency-list-container-logic-tab" class="stats-list-container"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
+                       </div>
+                    </div>
+                </div>
+            </section>
+
             <section id="manual-tools-section" class="dashboard-subsection" aria-labelledby="manual-tools-title-h3" style="margin-top: 2rem;">
                  <h3 id="manual-tools-title-h3" class="card-title-accessible">
                     <i class="fas fa-calculator" aria-hidden="true"></i> Ferramentas Manuais para <span id="dynamic-lottery-name-manual">Mega-Sena</span>
                 </h3>
                 <div class="grid-container-tools">
                     <div class="card" id="manual-game-probability-card" aria-labelledby="manual-game-prob-title">
-                        <h3 id="manual-game-prob-title">Probabilidade do Meu Jogo</h3>
+                        <h3 id="manual-game-prob-title"><i class="fas fa-percentage"></i> Probabilidade do Meu Jogo</h3>
                         <label for="manual-prob-user-numbers" style="display:block; margin-top:1rem;">Seus números (separados por vírgula):</label>
                         <textarea id="manual-prob-user-numbers" rows="3" placeholder="Ex: 01,02,03,04,05,06"></textarea>
                         <p id="manual-prob-numbers-count-feedback" class="input-feedback" aria-live="polite">Números: 0 de X.</p>
@@ -250,6 +288,25 @@
                         <div id="manual-probability-result-display" class="result-display-box" style="margin-top:15px;" aria-live="polite">
                             Aguardando seu jogo...
                         </div>
+                    </div>
+
+                    <div class="card" id="manual-game-save-card" aria-labelledby="manual-game-save-title">
+                        <h3 id="manual-game-save-title"><i class="fas fa-keyboard"></i> Salvar Jogo Manual</h3>
+                        <label for="manual-save-user-numbers" style="display:block; margin-top:1rem;">Seus números (separados por vírgula):</label>
+                        <textarea id="manual-save-user-numbers" rows="3" placeholder="Ex: 01,02,03,04,05,06"></textarea>
+                        <p id="manual-save-numbers-count-feedback" class="input-feedback" aria-live="polite">Números: 0 de X.</p>
+                        <button id="manual-save-game-btn" class="action-btn primary-action" style="width:100%;"><i class="fas fa-save"></i> Salvar Jogo Manual</button>
+                        <div id="manual-save-game-result-display" class="result-display-box" style="margin-top:15px; display:none;" aria-live="polite"></div>
+                    </div>
+
+                    <div class="card" id="verify-past-megasena-card" aria-labelledby="verify-past-megasena-title">
+                        <h3 id="verify-past-megasena-title"><i class="fas fa-history"></i> Conferir Jogo Passado da Mega-Sena</h3>
+                        <label for="past-megasena-contest" style="display:block; margin-top:1rem;">Número do Concurso:</label>
+                        <input type="number" id="past-megasena-contest" placeholder="Ex: 2700">
+                        <label for="past-megasena-numbers" style="display:block; margin-top:1rem;">Seu Jogo (6 números separados por vírgula):</label>
+                        <textarea id="past-megasena-numbers" rows="2" placeholder="Ex: 01,02,03,04,05,06"></textarea>
+                        <button id="verify-past-megasena-btn" class="action-btn primary-action" style="width:100%; margin-top:1rem;"><i class="fas fa-search-dollar"></i> Verificar Jogo</button>
+                        <div id="verify-past-megasena-result" class="result-display-box" style="margin-top:15px; display:none;" aria-live="polite"></div>
                     </div>
                 </div>
             </section>
@@ -319,7 +376,7 @@
                 Gostou da ajuda do Loto Genius? Considere uma contribuição para mantermos a plataforma no ar e evoluindo!
             </p>
             <p style="margin-top:0.5rem;">
-                <strong>Chave PIX:</strong> <span id="pix-key-display">[SUA_CHAVE_PIX_AQUI]</span>
+                <strong>Chave PIX CPF:</strong> <span id="pix-key-display">334.021.198-11</span>
                 <button id="copy-pix-key-btn" class="action-btn small-btn" title="Copiar Chave PIX" style="margin-left: 10px;"><i class="fas fa-copy"></i> Copiar</button>
             </p>
             <button id="ok-prize-modal-btn" class="modal-btn" style="margin-top:1.5rem;">Ok, Entendi!</button>
