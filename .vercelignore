@@ -1,0 +1,5 @@
+api/lottery_data/
+api/lottery_data_temp_for_upload/
+api/arquivos_excel_caixa/
+*.xlsx
+*.csv 
