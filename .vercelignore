@@ -2,4 +2,8 @@ api/lottery_data/
 api/lottery_data_temp_for_upload/
 api/arquivos_excel_caixa/
 *.xlsx
-*.csv 
+*.csv
+__pycache__/
+.env
+# Adicione outras pastas/arquivos de desenvolvimento que não precisam ir para o deploy
+.vscode/
