@@ -25,7 +25,6 @@ body {
 }
 .card-title-accessible i { margin-right: 8px; }
 
-/* Skip Link para Acessibilidade */
 .skip-link {
     position: absolute;
     top: -50px;
@@ -43,7 +42,6 @@ body {
     top: 0;
 }
 
-/* Estilo para Foco Visível (Teclado) */
 *:focus-visible {
     outline: 3px solid #ffd700 !important;
     outline-offset: 2px;
@@ -54,7 +52,6 @@ body {
     outline: none;
 }
 
-/* TELA DE BOAS-VINDAS INCLUSIVA */
 #inclusive-welcome-screen {
     position: fixed;
     top: 0;
@@ -128,7 +125,6 @@ body {
 .welcome-btn.negative-action:hover { background-color: #c0392b; transform: translateY(-2px); }
 .voice-prompt-alternative-text { font-size: 0.85rem; color: #a7b5e8; margin-top: 15px; }
 
-/* Splash Screen Principal */
 #accessible-splash-screen {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: linear-gradient(145deg, #0d1226 0%, #111834 60%, #0a0d1f 100%);
@@ -458,12 +454,12 @@ h4 i { margin-right: 5px; }
 .error-message { color: #ff4765; font-size: 0.9rem; margin-top: 10px; text-align: center; min-height: 1.2em; }
 footer { text-align: center; padding: 2rem; background-color: #121224; color: #888; margin-top: 3rem; font-size: 0.9rem; }
 
-/* ABAS - Estilos Revisados */
+/* ABAS - Estilos */
 .tabs-navigation {
     margin-bottom: 0; 
     border-bottom: 2px solid #3b3b6e;
     position: relative; 
-    z-index: 2; 
+    z-index: 10; /* Mais alto para garantir que os links das abas estejam sobre os painéis */
 }
 .tabs-navigation ul {
     list-style-type: none;
@@ -499,12 +495,13 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     color: #82e0aa; 
     border-color: #3b3b6e #3b3b6e #1e1e3f #3b3b6e; 
     font-weight: bold;
-    z-index: 3; 
+    z-index: 11; /* Acima das abas inativas */
 }
 
-.tabs-content { /* Contêiner para todos os painéis */
+.tabs-content { 
     position: relative;
-    z-index: 1; /* Abaixo da navegação das abas */
+    z-index: 9; /* Abaixo da navegação das abas, mas acima do conteúdo geral da página */
+    clear: both; /* Garante que o conteúdo não flutue ao lado das abas se houver floats */
 }
 
 .tabs-content .tab-panel {
@@ -513,32 +510,32 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     border: 1px solid #3b3b6e;
     border-top: none; 
     border-radius: 0 0 8px 8px; 
-    padding: 0; /* O card interno terá o padding */
-    min-height: 250px; /* Garante alguma altura mínima para visualização */
+    /* O padding será aplicado pelo .card dentro do painel */
+    min-height: 250px; 
 }
 .tabs-content .tab-panel.active {
-    display: block; /* MOSTRA o painel ativo */
+    display: block; 
     animation: fadeInTabPanel 0.4s ease-out;
 }
 @keyframes fadeInTabPanel {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
 }
-/* Estilos para o card DENTRO de um painel de aba */
 .tab-panel .card {
-    margin-top: 0; /* Remove margem superior do card, pois o painel já pode ter */
-    box-shadow: none; /* Remove sombra do card se o painel já tem borda/estilo */
-    border: none; /* Remove borda do card */
-    border-radius: 0; /* Remove border-radius para se ajustar ao painel */
-    padding: 1.5rem; /* Adiciona padding interno ao card */
-    width: 100%; /* Garante que o card preencha o painel */
-    background-color: transparent; /* Faz o card ter o mesmo fundo do painel */
+    margin-top: 0;
+    box-shadow: none;
+    border: none;
+    border-radius: 0; 
+    padding: 1.5rem; 
+    width: 100%; 
+    background-color: transparent; /* Para que o fundo do .tab-panel seja visível */
+    display: flex; /* Garante que o card seja flex container e ocupe espaço */
+    flex-direction: column; /* Mantém o layout interno do card */
 }
 .tab-panel .card:first-child {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
-
 
 /* RESPONSIVIDADE */
 @media (max-width: 768px) {
@@ -570,13 +567,21 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
         font-size: 0.85rem; 
         padding: 0.6rem 0.8rem;
     }
-    /* Garante que a seção de ferramentas manuais não seja cortada em telas menores */
     #dashboard-section {
-        overflow-y: auto; /* Permite rolagem se o conteúdo exceder a altura */
-        -webkit-overflow-scrolling: touch; /* Rolagem suave em iOS */
+        overflow-y: auto; 
+        -webkit-overflow-scrolling: touch; 
     }
     #manual-tools-section {
-        padding-bottom: 2rem; /* Adiciona espaço extra no final no mobile */
+        padding-bottom: 2rem; 
+        display: block !important; /* Forçar exibição no mobile */
+        visibility: visible !important; /* Forçar visibilidade */
+        opacity: 1 !important; /* Forçar opacidade */
+    }
+    /* Certificar que os cards dentro de manual-tools-section também estejam visíveis */
+    #manual-tools-section .card {
+        display: flex !important; /* Ou block, dependendo do seu layout interno */
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 }
 @media (max-width: 480px) {
@@ -595,12 +600,6 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
         gap: 0.1rem; 
     }
 }
-
-#manual-tools-section {
-    display: block; 
-    /* background-color: rgba(0, 255, 0, 0.05); */ /* Verde leve para debug visual no mobile */
-}
-
 
 #global-error-msg { display: none; background-color: #ff4765; color: white; text-align: center; padding: 10px; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100000; font-size: 0.9rem; }
 .spinner.small-spinner { width: 25px; height: 25px; border-width: 3px; margin: 5px auto; border-top-color: #47aeff; border-radius: 50%; border-style: solid; border-color: rgba(173, 216, 230, 0.3); border-top-color: #47aeff; animation: spin 0.8s linear infinite; }
