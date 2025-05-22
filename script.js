@@ -1651,9 +1651,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }, { capture: true, once: true });
         };
 
-        if (activateVoiceGuideBtn) activateVoiceGuideBtn.addEventListener('click', () => { handleWelcomeChoice(true); });
-        if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('click', () => { handleWelcomeChoice(false); });
-        playInitialGreetingAndListen();
+        // Correção 2: Trocando 'click' por 'touchstart' para melhor responsividade mobile
+        if (activateVoiceGuideBtn) activateVoiceGuideBtn.addEventListener('touchstart', () => { handleWelcomeChoice(true); });
+        if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('touchstart', () => { handleWelcomeChoice(false); });
+        
+        // Correção 1: Comentando a chamada automática de voz que causa o erro no Android
+        // playInitialGreetingAndListen();
     }
 
     initializeVoiceCommands();
