@@ -7,13 +7,12 @@ import json
 from collections import Counter
 from itertools import combinations
 import math
-# import pandas as pd # Removido se possível - Verifique se realmente não é usado em outro lugar
 import re
 import logging
 import firebase_admin
 from firebase_admin import credentials, firestore as admin_firestore
 import requests
-from datetime import datetime
+from datetime import datetime # Necessário para admin_firestore.SERVER_TIMESTAMP se usado localmente, ou datetime.now(timezone.utc)
 
 app = Flask(__name__)
 CORS(app)
@@ -26,25 +25,35 @@ FB_ADMIN_INITIALIZED = False
 db_admin = None
 try:
     SERVICE_ACCOUNT_KEY_PATH_MAIN = os.path.join(APP_ROOT, "serviceAccountKey.json")
-    if not firebase_admin._apps:
-        if os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON'):
-            service_account_json_str = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON')
-            service_account_info = json.loads(service_account_json_str)
-            cred = credentials.Certificate(service_account_info)
-            firebase_admin.initialize_app(cred, name='lotoGeniusApiAppEnvVercel')
-            app.logger.info("Firebase Admin SDK inicializado para main.py via variável de ambiente Vercel.")
-            FB_ADMIN_INITIALIZED = True
-        elif os.path.exists(SERVICE_ACCOUNT_KEY_PATH_MAIN):
-            cred = credentials.Certificate(SERVICE_ACCOUNT_KEY_PATH_MAIN)
-            firebase_admin.initialize_app(cred, name='lotoGeniusApiAppFileLocal')
-            app.logger.info("Firebase Admin SDK inicializado para main.py via arquivo local.")
-            FB_ADMIN_INITIALIZED = True
-        else:
-            app.logger.warning("Credenciais do Firebase Admin não encontradas.")
+    # Prioriza variável de ambiente para Vercel
+    if os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON') and not firebase_admin._apps:
+        service_account_json_str = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON')
+        service_account_info = json.loads(service_account_json_str)
+        cred = credentials.Certificate(service_account_info)
+        firebase_admin.initialize_app(cred, name='lotoGeniusApiAppVercel')
+        app.logger.info("Firebase Admin SDK inicializado para main.py via variável de ambiente Vercel.")
+        FB_ADMIN_INITIALIZED = True
+    # Fallback para arquivo local (desenvolvimento)
+    elif os.path.exists(SERVICE_ACCOUNT_KEY_PATH_MAIN) and not firebase_admin._apps:
+        cred = credentials.Certificate(SERVICE_ACCOUNT_KEY_PATH_MAIN)
+        firebase_admin.initialize_app(cred, name='lotoGeniusApiAppFileLocal')
+        app.logger.info("Firebase Admin SDK inicializado para main.py via arquivo local.")
+        FB_ADMIN_INITIALIZED = True
+    elif firebase_admin._apps: # Se já inicializado por outro import ou parte do código
+        app.logger.info("Firebase Admin SDK já estava inicializado.")
+        FB_ADMIN_INITIALIZED = True
     
-    if FB_ADMIN_INITIALIZED and not db_admin:
-        app_name_to_use = list(firebase_admin._apps.keys())[0]
-        db_admin = admin_firestore.client(app=firebase_admin.get_app(name=app_name_to_use))
+    if FB_ADMIN_INITIALIZED and not db_admin :
+        if firebase_admin._apps:
+            app_name_to_use = list(firebase_admin._apps.keys())[0]
+            db_admin = admin_firestore.client(app=firebase_admin.get_app(name=app_name_to_use))
+        else:
+            app.logger.warning("Nenhum app Firebase Admin encontrado após tentativas de inicialização.")
+            FB_ADMIN_INITIALIZED = False
+
+    if not FB_ADMIN_INITIALIZED:
+         app.logger.warning("Credenciais do Firebase Admin não configuradas corretamente. Funcionalidades dependentes do Firestore Admin podem não funcionar.")
+
 except Exception as e_fb_admin_main:
     app.logger.error(f"Erro GERAL ao inicializar Firebase Admin SDK em main.py: {e_fb_admin_main}")
 
@@ -66,15 +75,13 @@ def format_currency(value):
     return "R$ 0,00"
 
 def is_na_custom(value):
-    """Checa se o valor é NaN ou None sem depender do pandas."""
-    if value is None:
-        return True
-    if isinstance(value, float) and math.isnan(value):
-        return True
+    if value is None: return True
+    if isinstance(value, float) and math.isnan(value): return True
+    if isinstance(value, str): return value.strip().lower() in ['', 'nan', '-']
     return False
 
 def parse_currency_to_float(currency_str):
-    if is_na_custom(currency_str): return 0.0 # Usando a função customizada
+    if is_na_custom(currency_str): return 0.0
     if not isinstance(currency_str, str): currency_str = str(currency_str)
     cleaned_str = currency_str.replace("R$", "").replace(".", "").replace(",", ".").strip()
     if not cleaned_str or cleaned_str == '-': return 0.0
@@ -98,18 +105,13 @@ def load_processed_lottery_data(lottery_key):
         app.logger.info(f"Carregando dados de {lottery_key.upper()} do Vercel Blob: {blob_url}")
         response = requests.get(blob_url, timeout=20); response.raise_for_status()
         data = response.json()
-        app.logger.info(f"Sucesso ao carregar {lottery_key.upper()} ({len(data)} registros) do Vercel Blob")
+        app.logger.info(f"Sucesso ao carregar {lottery_key.upper()} ({len(data) if isinstance(data, list) else 'N/A'} registros) do Vercel Blob")
         return data
-    except firebase_admin.exceptions.FirebaseError as fb_err: app.logger.error(f"Erro do Firebase ao buscar URL do Blob para {lottery_key}: {fb_err}")
+    except firebase_admin.exceptions.FirebaseError as fb_err: app.logger.error(f"Erro do Firebase ao buscar URL para {lottery_key}: {fb_err}")
     except requests.exceptions.RequestException as e: app.logger.error(f"Erro de requisição ao buscar JSON do Blob {blob_url if 'blob_url' in locals() else 'URL_DESCONHECIDO'}: {e}")
     except Exception as e_gen: app.logger.error(f"Erro genérico ao carregar dados de {blob_url if 'blob_url' in locals() else 'URL_DESCONHECIDO'}: {e_gen}")
     return None
 
-# ... (Todas as suas outras funções de endpoint e lógica como get_data_for_stats, gerar_jogo_api, etc., permanecem aqui)
-# Certifique-se que elas chamam a load_processed_lottery_data acima.
-# A função verificar_jogos_salvos_batch_main e o endpoint /api/internal/run-verification também permanecem.
-
-# Exemplo (apenas para garantir que as chamadas são feitas corretamente):
 def get_data_for_stats(lottery_name_lower):
     if lottery_name_lower not in LOTTERY_CONFIG:
         return None, {"erro": f"Loteria '{lottery_name_lower}' não configurada."}, 404
@@ -132,7 +134,7 @@ def api_base_root():
 
 @app.route('/api/main/')
 def api_main_home():
-    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.3.7 - Blob Firestore URLs - Pandas Opt"})
+    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.3.9 - Prize Check Logic"})
 
 @app.route('/api/main/platform-stats', methods=['GET'])
 def get_platform_stats():
@@ -162,6 +164,8 @@ def get_resultados_api(lottery_name):
     lottery_name_lower = lottery_name.lower()
     all_results = load_processed_lottery_data(lottery_name_lower)
     if not all_results: return jsonify({"aviso": f"Dados para {lottery_name.upper()} indisponíveis no momento."}), 404
+    if not isinstance(all_results, list) or not all_results: # Checagem adicional
+        return jsonify({"erro": f"Formato de dados inesperado para {lottery_name.upper()}."}), 500
     latest_result = all_results[0]
     return jsonify({"ultimo_concurso": latest_result.get("concurso"),"data": latest_result.get("data"),"numeros": latest_result.get("numeros"),"ganhadores_principal_contagem": latest_result.get("ganhadores_principal_contagem"),"cidades_ganhadoras_principal": latest_result.get("cidades_ganhadoras_principal"),"rateio_principal_valor": latest_result.get("rateio_principal_valor"),"fonte": f"Dados Processados - {lottery_name.upper()} (Vercel Blob)"})
 
@@ -170,7 +174,8 @@ def get_frequencia_numeros(lottery_name):
     lottery_name_lower = lottery_name.lower()
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
     if error_response: return jsonify(error_response), status_code
-    todos_numeros = [num for sorteio in all_results if "numeros" in sorteio for num in sorteio["numeros"]]
+    if not isinstance(all_results, list): return jsonify({"data": [], "mensagem": "Formato de dados de resultados inválido."}), 500
+    todos_numeros = [num for sorteio in all_results if "numeros" in sorteio and isinstance(sorteio["numeros"], list) for num in sorteio["numeros"]]
     if not todos_numeros: return jsonify({"data": [], "mensagem": "Nenhum número nos dados."}), 200
     contagem = Counter(todos_numeros); frequencia_ordenada = sorted(contagem.items(), key=lambda item: (-item[1], item[0]))
     frequencia_formatada = [{"numero": str(num).zfill(2), "frequencia": freq} for num, freq in frequencia_ordenada]
@@ -182,8 +187,9 @@ def get_pares_frequentes(lottery_name):
     if not config: return jsonify({"erro": "Loteria não configurada."}), 404
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
     if error_response: return jsonify(error_response), status_code
+    if not isinstance(all_results, list): return jsonify({"data": [], "mensagem": "Formato de dados de resultados inválido."}), 500
     numeros_por_sorteio = config.get("count_sorteadas", config.get("count"))
-    todos_os_itens_combinacao = [tuple(par) for s in all_results if s.get("numeros") and len(s["numeros"]) == numeros_por_sorteio for par in combinations(sorted(s["numeros"]), 2)]
+    todos_os_itens_combinacao = [tuple(par) for s in all_results if s.get("numeros") and isinstance(s["numeros"], list) and len(s["numeros"]) == numeros_por_sorteio for par in combinations(sorted(s["numeros"]), 2)]
     if not todos_os_itens_combinacao: return jsonify({"data": [], "mensagem": "Não foi possível gerar pares."}), 200
     contagem_itens = Counter(todos_os_itens_combinacao); itens_ordenados = sorted(contagem_itens.items(), key=lambda item: (-item[1], item[0]))
     itens_formatados = [{"par": [str(n).zfill(2) for n in item_numeros], "frequencia": freq} for item_numeros, freq in itens_ordenados]
@@ -194,6 +200,7 @@ def get_cidades_premiadas(lottery_name):
     lottery_name_lower = lottery_name.lower()
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
     if error_response: return jsonify(error_response), status_code
+    if not isinstance(all_results, list): return jsonify({"data": [], "mensagem": "Formato de dados de resultados inválido."}), 500
     contagem_cidades = Counter(); total_premios_contabilizados = 0
     for sorteio in all_results:
         cidades = sorteio.get("cidades_ganhadoras_principal", [])
@@ -211,11 +218,11 @@ def get_maiores_premios_cidade(lottery_name):
     lottery_name_lower = lottery_name.lower()
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
     if error_response: return jsonify(error_response), status_code
+    if not isinstance(all_results, list): return jsonify({"data": [], "mensagem": "Formato de dados de resultados inválido."}), 500
     soma_premios_cidade = Counter()
     for sorteio in all_results:
         cidades = sorteio.get("cidades_ganhadoras_principal", [])
         rateio_bruto = sorteio.get("rateio_principal_valor", 0.0)
-        # parse_currency_to_float já lida com string ou float
         rateio = parse_currency_to_float(rateio_bruto) 
         num_ganhadores_no_sorteio = sorteio.get("ganhadores_principal_contagem", 0)
         if rateio > 0 and cidades and num_ganhadores_no_sorteio > 0:
@@ -229,6 +236,7 @@ def get_maiores_premios_cidade(lottery_name):
 
 @app.route('/api/main/jogo-manual/probabilidade', methods=['POST'])
 def calcular_probabilidade_jogo():
+    # ... (código como antes)
     data = request.get_json();
     if not data or 'lottery_type' not in data or 'numeros_usuario' not in data: return jsonify({"erro": "Dados incompletos."}), 400
     lottery_type = data['lottery_type'].lower()
@@ -276,6 +284,7 @@ def calcular_probabilidade_jogo():
     return jsonify({"loteria": nome_loteria, "jogo_usuario": sorted(numeros_usuario), "probabilidade_decimal": prob_dec, "probabilidade_texto": prob_txt, "descricao": f"Probabilidade de acertar o prêmio máximo ({num_sorteados_premio_max} acertos) com um jogo de {len(numeros_usuario)} números."})
 
 def gerar_jogo_ia_aleatorio_rapido(lottery_name):
+    # ... (como antes) ...
     config = LOTTERY_CONFIG.get(lottery_name)
     if not config: return {"jogo": [], "estrategia_usada": "Erro: Loteria não configurada"}
     numeros_a_gerar = config.get("count_apostadas", config.get("count"))
@@ -287,6 +296,7 @@ def gerar_jogo_ia_aleatorio_rapido(lottery_name):
 
 @app.route('/api/main/gerar_jogo/<lottery_name>', methods=['GET'])
 def gerar_jogo_api(lottery_name):
+    # ... (como antes) ...
     lottery_name_lower = lottery_name.lower()
     if lottery_name_lower not in LOTTERY_CONFIG: return jsonify({"erro": f"Loteria '{lottery_name}' não configurada."}), 404
     resultado_geracao = gerar_jogo_ia_aleatorio_rapido(lottery_name_lower)
@@ -296,6 +306,7 @@ def gerar_jogo_api(lottery_name):
     return jsonify(resultado_geracao)
 
 def get_hot_numbers_strategy(all_results, num_concursos_analisar, num_numeros_gerar, lottery_min, lottery_max, lottery_name_for_log=""):
+    # ... (como antes) ...
     if not all_results: return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
     recent_results = all_results[:num_concursos_analisar]
     if not recent_results:
@@ -316,6 +327,7 @@ def get_hot_numbers_strategy(all_results, num_concursos_analisar, num_numeros_ge
 
 @app.route('/api/main/gerar_jogo/numeros_quentes/<lottery_name>', methods=['GET'])
 def gerar_jogo_numeros_quentes_api(lottery_name):
+    # ... (como antes) ...
     lottery_name_lower = lottery_name.lower(); config = LOTTERY_CONFIG.get(lottery_name_lower)
     if not config: return jsonify({"erro": f"Loteria '{lottery_name}' não configurada."}), 404
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
@@ -336,6 +348,7 @@ def gerar_jogo_numeros_quentes_api(lottery_name):
     return jsonify({"jogo": jogo_final, "estrategia_usada": estrategia_aplicada})
 
 def get_cold_numbers_strategy(all_results, num_concursos_analisar, num_numeros_gerar, lottery_min, lottery_max, lottery_name_for_log=""):
+    # ... (como antes) ...
     if not all_results: return sorted(random.sample(range(lottery_min, lottery_max + 1), num_numeros_gerar))
     recent_results_slice = all_results[:num_concursos_analisar]
     if not recent_results_slice:
@@ -354,6 +367,7 @@ def get_cold_numbers_strategy(all_results, num_concursos_analisar, num_numeros_g
 
 @app.route('/api/main/gerar_jogo/numeros_frios/<lottery_name>', methods=['GET'])
 def gerar_jogo_numeros_frios_api(lottery_name):
+    # ... (como antes) ...
     lottery_name_lower = lottery_name.lower(); config = LOTTERY_CONFIG.get(lottery_name_lower)
     if not config: return jsonify({"erro": f"Loteria '{lottery_name}' não configurada."}), 404
     all_results, error_response, status_code = get_data_for_stats(lottery_name_lower)
@@ -374,6 +388,7 @@ def gerar_jogo_numeros_frios_api(lottery_name):
     return jsonify({"jogo": jogo_final, "estrategia_usada": estrategia_aplicada})
 
 def gerar_numeros_baseados_em_data_simples(data_nascimento_str, num_numeros, min_val, max_val):
+    # ... (como antes) ...
     app.logger.info(f"Gerando palpite esotérico simples com data: {data_nascimento_str} para {num_numeros} números entre {min_val}-{max_val}")
     numeros_base = set(); soma_total_digitos = 0
     if data_nascimento_str and isinstance(data_nascimento_str, str):
@@ -394,6 +409,7 @@ def gerar_numeros_baseados_em_data_simples(data_nascimento_str, num_numeros, min
     return final_result
 
 def verificar_historico_combinacao(lottery_name_lower, combinacao_palpite):
+    # ... (como antes) ...
     app.logger.info(f"[verificar_historico] Verificando {combinacao_palpite} para {lottery_name_lower}")
     todos_resultados = load_processed_lottery_data(lottery_name_lower)
     if not todos_resultados: app.logger.warning(f"[verificar_historico] Histórico não carregado para {lottery_name_lower}"); return 0, 0.0
@@ -414,6 +430,7 @@ def verificar_historico_combinacao(lottery_name_lower, combinacao_palpite):
 
 @app.route('/api/main/palpite-esoterico/<lottery_name>', methods=['POST'])
 def gerar_palpite_esoterico_route(lottery_name):
+    # ... (como antes) ...
     app.logger.info(f"Endpoint /api/main/palpite-esoterico/{lottery_name} acessado. Path: {request.path}. JSON: {request.get_json(silent=True)}")
     lottery_name_lower = lottery_name.lower(); config = LOTTERY_CONFIG.get(lottery_name_lower)
     if not config: app.logger.warning(f"Loteria não config para palpite esotérico: {lottery_name}"); return jsonify({"erro": "Loteria não configurada."}), 404
@@ -446,26 +463,43 @@ def gerar_palpite_esoterico_route(lottery_name):
 
 # --- LÓGICA DE VERIFICAÇÃO DE JOGOS ---
 def determinar_faixa_premio_main(lottery_type, acertos):
-    # ... (como na resposta anterior)
     config_loteria = LOTTERY_CONFIG.get(lottery_type)
     if not config_loteria: return "Desconhecida", False
+    
     max_acertos_possiveis = config_loteria.get("count_sorteadas")
-    if acertos == max_acertos_possiveis: return "Prêmio Máximo!", True
-    elif lottery_type == "megasena" and acertos == 5: return "Quina da Mega", True
-    elif lottery_type == "megasena" and acertos == 4: return "Quadra da Mega", True
-    elif lottery_type == "lotofacil" and acertos >= 11: return f"{acertos} Pontos", True
-    elif lottery_type == "quina" and acertos >= 2: return f"{acertos} Pontos", True
-    elif lottery_type == "lotomania" and acertos == 0: return "0 Acertos (Premiado!)", True
-    elif lottery_type == "lotomania" and acertos >= 15 and acertos <= 20 : return f"{acertos} Pontos", True
-    if acertos > 0 and lottery_type not in ["megasena", "lotomania"]: return f"{acertos} Acertos (Verificar Faixa)", True # Genérico
-    return "Nenhum Prêmio", False
+
+    if lottery_type == "megasena":
+        if acertos == 6: return "Sena (Prêmio Máximo)", True
+        if acertos == 5: return "Quina", True
+        if acertos == 4: return "Quadra", True
+    elif lottery_type == "lotofacil":
+        if acertos == 15: return "15 Pontos (Prêmio Máximo)", True
+        if acertos == 14: return "14 Pontos", True
+        if acertos == 13: return "13 Pontos", True
+        if acertos == 12: return "12 Pontos", True
+        if acertos == 11: return "11 Pontos", True
+    elif lottery_type == "quina":
+        if acertos == 5: return "Quina (Prêmio Máximo)", True
+        if acertos == 4: return "Quadra", True
+        if acertos == 3: return "Terno", True
+        if acertos == 2: return "Duque", True
+    elif lottery_type == "lotomania":
+        if acertos == 20: return "20 Pontos (Prêmio Máximo)", True
+        if acertos == 19: return "19 Pontos", True
+        if acertos == 18: return "18 Pontos", True
+        if acertos == 17: return "17 Pontos", True
+        if acertos == 16: return "16 Pontos", True
+        if acertos == 15: return "15 Pontos", True
+        if acertos == 0: return "0 Acertos (Premiado!)", True
+        
+    return f"{acertos} Acertos", False # Default se não se encaixar nas faixas premiadas conhecidas
 
 def verificar_jogos_salvos_batch_main():
-    # ... (como na resposta anterior, usando db_admin e load_processed_lottery_data)
     global FB_ADMIN_INITIALIZED, db_admin
     if not FB_ADMIN_INITIALIZED or not db_admin:
         app.logger.error("Firebase Admin não inicializado em main.py. Abortando verificação de jogos.")
         return {"status": "error", "message": "Firebase Admin não inicializado."}
+
     app.logger.info("Iniciando verificação em lote de jogos salvos (via main.py)...")
     try:
         latest_official_results = {}
@@ -475,44 +509,95 @@ def verificar_jogos_salvos_batch_main():
                 latest_official_results[lottery_key_loop] = data[0]
             else:
                 app.logger.warning(f"Não foi possível carregar dados recentes para {lottery_key_loop} do Blob.")
+        
         if not latest_official_results:
             app.logger.warning("Nenhum resultado oficial carregado do Blob para verificação. Abortando.")
             return {"status": "warning", "message": "Nenhum resultado oficial carregado do Blob."}
+
         user_games_ref = db_admin.collection('userGames')
         docs_stream = user_games_ref.stream()
-        jogos_atualizados_count = 0; novos_premios_identificados_count = 0
+
+        jogos_atualizados_count = 0
+        novos_premios_identificados_count = 0
+
         for doc in docs_stream:
-            game_data = doc.to_dict(); game_id = doc.id
-            lottery_type = game_data.get('lottery'); user_numbers = game_data.get('game')
-            if not lottery_type or not user_numbers or lottery_type not in LOTTERY_CONFIG: continue
+            game_data = doc.to_dict()
+            game_id = doc.id
+            lottery_type = game_data.get('lottery')
+            user_numbers = game_data.get('game')
+
+            if not lottery_type or not user_numbers or lottery_type not in LOTTERY_CONFIG:
+                app.logger.warning(f"Jogo {game_id} com dados incompletos ou loteria desconhecida. Pulando.")
+                continue
+
             latest_result_for_lottery = latest_official_results.get(lottery_type)
-            if not latest_result_for_lottery: continue 
-            concurso_atual_oficial = latest_result_for_lottery.get('concurso')
-            if game_data.get('ultimoConcursoVerificado') == concurso_atual_oficial and game_data.get('isPremiado') is not None: continue
-            official_numbers = latest_result_for_lottery.get('numeros')
-            hits = 0; hit_numbers_list = []
+            if not latest_result_for_lottery:
+                app.logger.warning(f"Sem resultado recente para {lottery_type} para o jogo {game_id}. Pulando.")
+                continue 
+
+            concurso_atual_oficial_str = latest_result_for_lottery.get('concurso')
+            if concurso_atual_oficial_str is None:
+                app.logger.warning(f"Concurso atual oficial não encontrado para {lottery_type}. Pulando jogo {game_id}.")
+                continue
+            
+            try:
+                concurso_atual_oficial = int(concurso_atual_oficial_str)
+            except ValueError:
+                app.logger.warning(f"Valor de concurso inválido '{concurso_atual_oficial_str}' para {lottery_type}. Pulando jogo {game_id}.")
+                continue
+
+            ultimo_concurso_verificado_doc = game_data.get('ultimoConcursoVerificado')
+            is_premiado_doc = game_data.get('isPremiado')
+
+            if ultimo_concurso_verificado_doc == concurso_atual_oficial and is_premiado_doc is not None:
+                 continue
+
+            official_numbers_str = latest_result_for_lottery.get('numeros')
+            if not official_numbers_str or not isinstance(official_numbers_str, list):
+                app.logger.warning(f"Números oficiais não encontrados ou em formato inválido para {lottery_type} concurso {concurso_atual_oficial}. Pulando jogo {game_id}.")
+                continue
+            
+            official_numbers = [int(n) for n in official_numbers_str if isinstance(n, (int, str)) and str(n).isdigit()]
+
+
+            hits = 0
+            hit_numbers_list = []
             if official_numbers and isinstance(user_numbers, list):
                 for num_val in user_numbers:
                     try:
-                        if int(num_val) in official_numbers: hits += 1; hit_numbers_list.append(int(num_val))
-                    except (ValueError, TypeError): continue
+                        if int(num_val) in official_numbers:
+                            hits += 1
+                            hit_numbers_list.append(int(num_val))
+                    except (ValueError, TypeError):
+                        app.logger.warning(f"Valor não numérico em user_numbers para jogo {game_id}: {num_val}")
+                        continue
+            
             faixa_premio_str, is_premiado_flag = determinar_faixa_premio_main(lottery_type, hits)
+
             update_data = {
                 'ultimoConcursoVerificado': concurso_atual_oficial,
                 'dataUltimaVerificacao': admin_firestore.SERVER_TIMESTAMP,
-                'acertos': hits, 'numerosAcertados': sorted(hit_numbers_list),
-                'isPremiado': is_premiado_flag, 'faixaPremio': faixa_premio_str,
-                'notificacaoPendente': True if is_premiado_flag and (game_data.get('isPremiado') == False or game_data.get('notificacaoPendente') == True or game_data.get('isPremiado') is None) else False
+                'acertos': hits,
+                'numerosAcertados': sorted(hit_numbers_list),
+                'isPremiado': is_premiado_flag,
+                'faixaPremio': faixa_premio_str,
+                'notificacaoPendente': True if is_premiado_flag else False # Simplificado: se premiado, notificação é pendente
             }
-            user_games_ref.document(game_id).update(update_data); jogos_atualizados_count += 1
+            
+            user_games_ref.document(game_id).update(update_data)
+            jogos_atualizados_count += 1
             if is_premiado_flag and update_data['notificacaoPendente']: 
-                novos_premios_identificados_count +=1; 
+                novos_premios_identificados_count +=1
                 app.logger.info(f"Jogo PREMIADO E NOTIFICAÇÃO PENDENTE! ID: {game_id}, Loteria: {lottery_type}, Acertos: {hits}, Faixa: {faixa_premio_str}")
+        
         msg = f"Verificação em lote concluída. {jogos_atualizados_count} jogos verificados/atualizados. {novos_premios_identificados_count} prêmios marcados para notificação."
-        app.logger.info(msg); return {"status": "success", "message": msg}
+        app.logger.info(msg)
+        return {"status": "success", "message": msg}
+
     except Exception as e:
         app.logger.error(f"Erro durante a verificação em lote de jogos salvos (main.py): {e}", exc_info=True)
         return {"status": "error", "message": f"Erro interno durante a verificação: {str(e)}"}
+
 
 @app.route('/api/internal/run-verification', methods=['POST'])
 def trigger_game_verification_endpoint():
@@ -520,10 +605,12 @@ def trigger_game_verification_endpoint():
     if not INTERNAL_API_KEY:
         app.logger.error("INTERNAL_CRON_SECRET não configurado nas variáveis de ambiente da Vercel.")
         return jsonify({"error": "Configuração interna do servidor ausente."}), 500
+    
     request_api_key = request.headers.get('X-Internal-Api-Key')
     if request_api_key != INTERNAL_API_KEY:
         app.logger.warning("Tentativa de acesso não autorizado ao endpoint de verificação de jogos.")
         return jsonify({"error": "Não autorizado"}), 403
+    
     app.logger.info("Disparando verificação de jogos salvos manualmente via endpoint.")
     result = verificar_jogos_salvos_batch_main()
     if result.get("status") == "success":
