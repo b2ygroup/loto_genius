@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ],
         'banner-bottom-dashboard': [
             { imageUrl: 'images/dream.jpg', altText: 'Anúncio Parceiro 1', linkUrl: 'https://www.parceiro1.com', isExternal: true },
-            { imageUrl: 'images/genius1.png', altText: 'Anúncio Visual Lateral' }
+            { imageUrl: 'images/banner2.png', altText: 'Anúncio Visual Lateral' }
         ]
     };
 
