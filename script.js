@@ -1,18 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     const domContentLoadedTimestamp = Date.now();
 
-    const SPLASH_LOGO_ANIM_MAX_DELAY = 1300;
-    const SPLASH_LOGO_ANIM_DURATION = 600;
-    const SPLASH_TEXT_ANIM_DELAY = 2200;
-    const SPLASH_TEXT_ANIM_DURATION = 1000;
-    const SPLASH_PROGRESS_BAR_START_DELAY = 2500;
-    const SPLASH_PROGRESS_BAR_FILL_DURATION = 3000;
-    const APPROX_TOTAL_CSS_ANIM_DURATION = Math.max(
-        SPLASH_LOGO_ANIM_MAX_DELAY + SPLASH_LOGO_ANIM_DURATION,
-        SPLASH_TEXT_ANIM_DELAY + SPLASH_TEXT_ANIM_DURATION,
-        SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION
-    );
-    const SPLASH_MINIMUM_VISIBLE_TIME = APPROX_TOTAL_CSS_ANIM_DURATION + 1000;
+    const SPLASH_LOGO_ANIM_MAX_DELAY = 1300; // Constantes do Splash Screen
+    // ... (resto das constantes do Splash Screen) ...
+    const SPLASH_MINIMUM_VISIBLE_TIME = Math.max(
+        SPLASH_LOGO_ANIM_MAX_DELAY + 600,
+        2200 + 1000,
+        2500 + 3000
+    ) + 1000;
+
 
     const inclusiveWelcomeScreen = document.getElementById('inclusive-welcome-screen');
     const activateVoiceGuideBtn = document.getElementById('welcome-voice-yes-btn');
@@ -55,8 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const quickHunchCheckResultDivLoggedOut = document.getElementById('quick-hunch-check-result-logged-out');
 
     const loggedInHunchTabsSection = document.getElementById('logged-in-hunch-tabs-section');
-    const tabLinks = document.querySelectorAll('.tabs-navigation .tab-link'); // ABA CORREÇÃO: Seletor para os links das abas
-    const tabPanels = document.querySelectorAll('.tabs-content .tab-panel'); // ABA CORREÇÃO: Seletor para os painéis das abas
+    const tabLinks = document.querySelectorAll('.tabs-navigation .tab-link');
+    const tabPanels = document.querySelectorAll('.tabs-content .tab-panel');
     const dynamicLotteryNameHunchTabsSpan = document.getElementById('dynamic-lottery-name-hunch-tabs');
 
     const generateQuickHunchBtn = document.getElementById('generate-quick-hunch-btn');
@@ -384,6 +380,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { container.innerHTML = `<p class="error-message">Falha ao carregar.</p>`; }
     }
 
+    // Helper para resetar a exibição de um gerador de palpite
+    function resetHunchDisplay(elements) {
+        if (elements.outputDiv) elements.outputDiv.style.display = 'none';
+        if (elements.numbersDiv) elements.numbersDiv.innerHTML = '';
+        if (elements.strategyP) elements.strategyP.textContent = '';
+        if (elements.checkResultDiv) elements.checkResultDiv.innerHTML = '';
+        if (elements.saveButton) elements.saveButton.style.display = 'none';
+        if (elements.checkButton) elements.checkButton.style.display = 'none';
+    }
+
     function updateAllDashboardData(selectedLottery) {
         const selectedLotteryKey = selectedLottery.toLowerCase();
         const selectedLotteryConfig = LOTTERY_CONFIG_JS[selectedLotteryKey];
@@ -393,6 +399,40 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dynamicLotteryNameHunchLoggedOutSpan) dynamicLotteryNameHunchLoggedOutSpan.textContent = lotteryFriendlyName;
         if (dynamicLotteryNameHunchTabsSpan) dynamicLotteryNameHunchTabsSpan.textContent = lotteryFriendlyName;
         if (dynamicLotteryNameManualSpan) dynamicLotteryNameManualSpan.textContent = lotteryFriendlyName;
+
+        // Limpar/Resetar exibições de palpites anteriores
+        resetHunchDisplay({ // Logged-out quick hunch
+            outputDiv: quickHunchOutputDivLoggedOut, numbersDiv: quickHunchNumbersDivLoggedOut,
+            strategyP: quickHunchStrategyPLoggedOut, checkResultDiv: quickHunchCheckResultDivLoggedOut,
+            checkButton: checkQuickHunchBtnLoggedOut
+        });
+        lastGeneratedHunchLoggedOut = { type: null };
+
+        resetHunchDisplay({ // Logged-in quick/algorithmic hunch
+            outputDiv: quickHunchOutputDiv, numbersDiv: quickHunchNumbersDiv,
+            strategyP: quickHunchStrategyP, checkResultDiv: quickHunchCheckResultDiv,
+            saveButton: saveQuickHunchBtn, checkButton: checkQuickHunchBtn
+        });
+        resetHunchDisplay({ // Logged-in hot hunch
+            outputDiv: hotNumbersHunchOutputDiv, numbersDiv: hotNumbersHunchNumbersDiv,
+            strategyP: hotNumbersHunchStrategyP, checkResultDiv: hotHunchCheckResultDiv,
+            saveButton: saveHotHunchBtn, checkButton: checkHotHunchBtn
+        });
+        resetHunchDisplay({ // Logged-in cold hunch
+            outputDiv: coldNumbersHunchOutputDiv, numbersDiv: coldNumbersHunchNumbersDiv,
+            strategyP: coldNumbersHunchStrategyP, checkResultDiv: coldHunchCheckResultDiv,
+            saveButton: saveColdHunchBtn, checkButton: checkColdHunchBtn
+        });
+        resetHunchDisplay({ // Logged-in esoteric hunch
+            outputDiv: esotericHunchOutputDiv, numbersDiv: esotericHunchNumbersDiv,
+            strategyP: esotericHunchMethodP, checkResultDiv: esotericHunchHistoryCheckDiv,
+            saveButton: saveEsotericHunchBtn, checkButton: checkEsotericHunchBtn
+        });
+         if (esotericHunchHistoryCheckDiv) { // O histórico do esotérico pode ser diferente
+            esotericHunchHistoryCheckDiv.innerHTML = 'Gere um palpite para ver o histórico.';
+        }
+        lastGeneratedHunch = { type: null };
+
 
         if (typeof fetchAndDisplayResults === "function") fetchAndDisplayResults(selectedLottery);
         if (typeof fetchAndDisplayStatsGeneric === "function") {
@@ -416,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const activeTabLink = document.querySelector('.tabs-navigation .tab-link.active');
-        if (currentUser && activeTabLink && activeTabLink.getAttribute('aria-controls') === 'tab-logic-content-panel') { // ABA CORREÇÃO: Usar aria-controls
+        if (currentUser && activeTabLink && activeTabLink.getAttribute('aria-controls') === 'tab-logic-content-panel') {
             const logicFreqContainer = document.getElementById('frequency-list-container-logic-tab');
             if (logicFreqContainer) {
                 fetchAndDisplayStatsGeneric(selectedLottery, "Mais Sorteados (Lógica)", logicFreqContainer, "frequencia");
@@ -429,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
         apiResultsPre.innerHTML = '<div class="spinner small-spinner"></div> Carregando...';
         try {
             const data = await fetchData(`api/main/resultados/${lotteryName}`);
-            lastFetchedResults[lotteryName] = data; // Armazena para conferência rápida
+            lastFetchedResults[lotteryName] = data;
             if (data.aviso) { apiResultsPre.textContent = data.aviso; return; }
             if (data.erro) { apiResultsPre.textContent = `Erro: ${data.erro}`; return; }
             let content = `Concurso: ${data.ultimo_concurso || 'N/A'}\n`;
@@ -626,8 +666,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((command.includes('gerar') || command.includes('palpite')) && (command.includes('mega sena') || command.includes('mega'))) {
              if(mainLotterySelect) mainLotterySelect.value = 'megasena';
              if (typeof updateAllDashboardData === 'function') updateAllDashboardData('megasena');
-             const activeHotTabLink = document.querySelector('.tab-link[aria-controls="tab-hot-content-panel"]'); // ABA CORREÇÃO
-             const activeAlgoTabLink = document.querySelector('.tab-link[aria-controls="tab-algorithmic-content-panel"]'); // ABA CORREÇÃO
+             const activeHotTabLink = document.querySelector('.tab-link[aria-controls="tab-hot-content-panel"]');
+             const activeAlgoTabLink = document.querySelector('.tab-link[aria-controls="tab-algorithmic-content-panel"]');
 
              if (currentUser) {
                 if (command.includes('quente') && generateHotNumbersHunchBtn && activeHotTabLink) { if(typeof setActiveTab === "function") setActiveTab(activeHotTabLink); generateHotNumbersHunchBtn.click(); speak("Gerando palpite de números quentes para Mega-Sena.");}
@@ -641,8 +681,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((command.includes('gerar') || command.includes('palpite')) && (command.includes('lotofácil') || command.includes('fácil'))) {
             if(mainLotterySelect) mainLotterySelect.value = 'lotofacil';
             if (typeof updateAllDashboardData === 'function') updateAllDashboardData('lotofacil');
-            const activeHotTabLink = document.querySelector('.tab-link[aria-controls="tab-hot-content-panel"]'); // ABA CORREÇÃO
-            const activeAlgoTabLink = document.querySelector('.tab-link[aria-controls="tab-algorithmic-content-panel"]'); // ABA CORREÇÃO
+            const activeHotTabLink = document.querySelector('.tab-link[aria-controls="tab-hot-content-panel"]');
+            const activeAlgoTabLink = document.querySelector('.tab-link[aria-controls="tab-algorithmic-content-panel"]');
             if (currentUser) {
                 if (command.includes('quente') && generateHotNumbersHunchBtn && activeHotTabLink) { if(typeof setActiveTab === "function") setActiveTab(activeHotTabLink); generateHotNumbersHunchBtn.click(); speak("Gerando palpite de números quentes para Lotofácil.");}
                 else if (activeAlgoTabLink && generateQuickHunchBtn) { if(typeof setActiveTab === "function") setActiveTab(activeAlgoTabLink); generateQuickHunchBtn.click(); speak("Gerando palpite algorítmico para Lotofácil.");}
@@ -703,9 +743,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else { if (voiceCommandBtn) voiceCommandBtn.style.display = 'none'; }
     }
 
-    // ABA CORREÇÃO: Função setActiveTab atualizada
+    // Função setActiveTab revisada para usar aria-controls
     function setActiveTab(clickedLinkElement) {
-        if (!clickedLinkElement) return;
+        if (!clickedLinkElement || !tabLinks.length || !tabPanels.length) return;
+
         const targetPanelId = clickedLinkElement.getAttribute('aria-controls');
 
         tabLinks.forEach(link => {
@@ -717,12 +758,13 @@ document.addEventListener('DOMContentLoaded', () => {
         clickedLinkElement.setAttribute('aria-selected', 'true');
 
         tabPanels.forEach(panel => {
-            panel.classList.remove('active');
+            panel.classList.remove('active'); // Garante que todos os painéis estão escondidos
             if (panel.id === targetPanelId) {
-                panel.classList.add('active');
+                panel.classList.add('active'); // Mostra o painel correto
             }
         });
-
+        
+        // Carregar dados específicos da aba de lógica, se for o caso
         if (targetPanelId === 'tab-logic-content-panel' && mainLotterySelect) {
             const logicFreqContainer = document.getElementById('frequency-list-container-logic-tab');
             if (logicFreqContainer) {
@@ -731,12 +773,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // ABA CORREÇÃO: Event listener para os links das abas
     if (tabLinks.length > 0) {
         tabLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                setActiveTab(e.currentTarget); // Passa o próprio elemento do link clicado
+                setActiveTab(e.currentTarget);
             });
         });
     }
@@ -759,7 +800,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
             if (typeof checkForPrizesAndNotify === 'function') checkForPrizesAndNotify(user.uid);
             
-            // ABA CORREÇÃO: Ativar a primeira aba ao logar
             const firstTabLink = document.querySelector('.tabs-navigation .tab-link[aria-controls="tab-hot-content-panel"]');
             if (firstTabLink && typeof setActiveTab === 'function') {
                 setActiveTab(firstTabLink);
@@ -939,9 +979,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.erro) { throw new Error(data.erro); } if (!data.palpite_gerado) { throw new Error("API não retornou palpite."); }
             renderGameNumbers(esotericHunchNumbersDiv, data.palpite_gerado, [], [], lotteryName);
             esotericHunchMethodP.textContent = `Método: ${data.metodo_geracao || 'N/A'}`;
-            let historyHtml = `<strong>Histórico desta combinação (último resultado):</strong><br>`; // Ajustado o texto
+            let historyHtml = `<strong>Histórico desta combinação (último resultado):</strong><br>`;
             if (data.historico_desta_combinacao) { const hist = data.historico_desta_combinacao; historyHtml += `Premiada? <span style="color: ${hist.ja_foi_premiada_faixa_principal ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${hist.ja_foi_premiada_faixa_principal ? 'Sim' : 'Não'}</span> (${hist.vezes_premiada_faixa_principal}x) - Valor Total Histórico: ${hist.valor_total_ganho_faixa_principal_formatado}`; } else { historyHtml += "Não verificado."; }
-            esotericHunchHistoryCheckDiv.innerHTML = historyHtml; // Este é o histórico, não o resultado da conferência atual.
+            esotericHunchHistoryCheckDiv.innerHTML = historyHtml;
             lastGeneratedHunch = { type: 'esoteric', lottery: lotteryName, jogo: data.palpite_gerado, estrategia_metodo: data.metodo_geracao || 'N/A', outputDiv: esotericHunchOutputDiv, numbersDiv: esotericHunchNumbersDiv, checkResultDiv: esotericHunchHistoryCheckDiv, saveButton: saveEsotericHunchBtn, checkButton: checkEsotericHunchBtn };
             if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('esoteric'); if (checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'inline-block';
         } catch (error) {
@@ -1003,7 +1043,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else { 
             currentHunchData = lastGeneratedHunch;
             if (expectedHunchType === 'quick') { targetCheckResultDiv = quickHunchCheckResultDiv; targetNumbersDiv = quickHunchNumbersDiv; }
-            else if (expectedHunchType === 'esoteric') { targetCheckResultDiv = esotericHunchHistoryCheckDiv; targetNumbersDiv = esotericHunchNumbersDiv; } // Note: Esoteric might display differently
+            else if (expectedHunchType === 'esoteric') { targetCheckResultDiv = esotericHunchHistoryCheckDiv; targetNumbersDiv = esotericHunchNumbersDiv; }
             else if (expectedHunchType === 'hot') { targetCheckResultDiv = hotHunchCheckResultDiv; targetNumbersDiv = hotNumbersHunchNumbersDiv; }
             else if (expectedHunchType === 'cold') { targetCheckResultDiv = coldHunchCheckResultDiv; targetNumbersDiv = coldNumbersHunchNumbersDiv; }
         }
@@ -1025,7 +1065,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const result = checkGame(currentHunchData.jogo, resultsToUse);
         
-        // Para esotérico, o div de 'check' é o mesmo do 'histórico'. Atualizamos para mostrar a conferência.
         if (expectedHunchType === 'esoteric') {
              let conferenceHtml = `<strong>Conferência com Último Resultado:</strong><br>`;
              conferenceHtml += `Acertos: <span class="${result.hits > 0 ? 'hits' : 'misses'}">${result.hits}</span>. ${result.message}`;
@@ -1073,7 +1112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let message = `Você acertou ${hits} número(s).`;
         if (hits > 0) {
             message += ` Acertos: ${hitNumbers.join(', ')}.`;
-            const lotteryConfig = LOTTERY_CONFIG_JS[officialResults.loteria_tipo.toLowerCase()]; // Assume que loteria_tipo está em officialResults
+            const lotteryConfig = LOTTERY_CONFIG_JS[officialResults.loteria_tipo.toLowerCase()];
             const numbersToWin = lotteryConfig?.count_sorteadas || lotteryConfig?.count || 0;
             if (hits === numbersToWin && numbersToWin > 0) {
                 message += " Parabéns, você GANHOU o prêmio máximo!";
@@ -1359,8 +1398,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mainLotterySelect) {
                  updateAllDashboardData(mainLotterySelect.value);
             }
-             // ABA CORREÇÃO: Chamar setActiveTab para a aba inicial se o usuário já estiver logado
-            if (currentUser) {
+            if (currentUser) { // Assegura que a aba correta é mostrada se o usuário já estiver logado ao carregar.
                 const firstTabLink = document.querySelector('.tabs-navigation .tab-link[aria-controls="tab-hot-content-panel"]');
                 if (firstTabLink && typeof setActiveTab === 'function') {
                     setActiveTab(firstTabLink);
@@ -1376,7 +1414,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mainSplashScreen) mainSplashScreen.style.display = 'flex';
 
         if (splashProgressBarFill && splashProgressContainer && mainSplashScreen && !mainSplashScreen.classList.contains('hidden')) {
-            let progress = 0; const totalVisualBarTime = SPLASH_PROGRESS_BAR_START_DELAY + SPLASH_PROGRESS_BAR_FILL_DURATION; const intervalTime = Math.max(10, totalVisualBarTime / 100);
+            let progress = 0; const totalVisualBarTime = SPLASH_MINIMUM_VISIBLE_TIME - 1000; const intervalTime = Math.max(10, totalVisualBarTime / 100);
             const progressInterval = setInterval(() => { progress++; if (splashProgressContainer) splashProgressContainer.setAttribute('aria-valuenow', progress); if (progress >= 100) { clearInterval(progressInterval); } }, intervalTime);
         }
 
@@ -1388,7 +1426,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
              if (!firebaseApp && typeof showGlobalError === "function") { showGlobalError("Falha crítica na inicialização."); if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();}
              criticalSplashTimeout = null;
-        }, SPLASH_MINIMUM_VISIBLE_TIME + 1000);
+        }, SPLASH_MINIMUM_VISIBLE_TIME + 500); // Adicionado um pequeno buffer
 
         if (typeof attemptFirebaseInit === "function") {
             setTimeout(attemptFirebaseInit, 100);
@@ -1446,7 +1484,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (speechSynthesis.onvoiceschanged !== undefined) {
                 speechSynthesis.onvoiceschanged = () => {
-                    speechSynthesis.onvoiceschanged = null;
+                    speechSynthesis.onvoiceschanged = null; 
                     setTimeout(checkVoicesAndSpeak, 100);
                 };
             } else {
