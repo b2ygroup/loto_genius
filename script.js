@@ -43,10 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainLotterySelect = document.getElementById('main-lottery-select');
     const refreshAllDashboardDataBtn = document.getElementById('refresh-all-dashboard-data-btn');
     const dynamicLotteryNameInfoSpan = document.getElementById('dynamic-lottery-name-info');
-    const dynamicLotteryNameHunchLoggedOutSpan = document.getElementById('dynamic-lottery-name-hunch-logged-out'); // For logged out
+    const dynamicLotteryNameHunchLoggedOutSpan = document.getElementById('dynamic-lottery-name-hunch-logged-out');
     const dynamicLotteryNameManualSpan = document.getElementById('dynamic-lottery-name-manual');
 
-    // Geradores Logged Out
     const hunchGeneratorsSectionLoggedOut = document.getElementById('hunch-generators-section-logged-out');
     const generateQuickHunchBtnLoggedOut = document.getElementById('generate-quick-hunch-btn-logged-out');
     const quickHunchOutputDivLoggedOut = document.getElementById('quick-hunch-output-logged-out');
@@ -55,14 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkQuickHunchBtnLoggedOut = document.getElementById('check-quick-hunch-btn-logged-out');
     const quickHunchCheckResultDivLoggedOut = document.getElementById('quick-hunch-check-result-logged-out');
 
-
-    // Referências para Abas e Geradores (Logado)
     const loggedInHunchTabsSection = document.getElementById('logged-in-hunch-tabs-section');
-    const tabLinks = document.querySelectorAll('.tabs-navigation .tab-link');
-    const tabPanels = document.querySelectorAll('.tabs-content .tab-panel');
+    const tabLinks = document.querySelectorAll('.tabs-navigation .tab-link'); // ABA CORREÇÃO: Seletor para os links das abas
+    const tabPanels = document.querySelectorAll('.tabs-content .tab-panel'); // ABA CORREÇÃO: Seletor para os painéis das abas
     const dynamicLotteryNameHunchTabsSpan = document.getElementById('dynamic-lottery-name-hunch-tabs');
 
-    const generateQuickHunchBtn = document.getElementById('generate-quick-hunch-btn'); // Dentro da aba "Algorítmicos"
+    const generateQuickHunchBtn = document.getElementById('generate-quick-hunch-btn');
     const quickHunchOutputDiv = document.getElementById('quick-hunch-output');
     const quickHunchNumbersDiv = document.getElementById('quick-hunch-numbers');
     const quickHunchStrategyP = document.getElementById('quick-hunch-strategy');
@@ -88,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkColdHunchBtn = document.getElementById('check-cold-hunch-btn');
     const coldHunchCheckResultDiv = document.getElementById('cold-hunch-check-result');
 
-    const esotericHunchCard = document.getElementById('esoteric-hunch-card'); // O card em si, dentro da aba
+    const esotericHunchCard = document.getElementById('esoteric-hunch-card');
     const birthDateInput = document.getElementById('birth-date-input');
     const generateEsotericHunchBtn = document.getElementById('generate-esoteric-hunch-btn');
     const esotericHunchOutputDiv = document.getElementById('esoteric-hunch-output');
@@ -134,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const cityListContainer = document.getElementById('city-list-container');
     const cityPrizeSumListContainer = document.getElementById('city-prize-sum-list-container');
 
-    // Ferramentas Manuais
     const manualProbUserNumbersInput = document.getElementById('manual-prob-user-numbers');
     const manualCalculateProbBtn = document.getElementById('manual-calculate-prob-btn');
     const manualProbabilityResultDisplay = document.getElementById('manual-probability-result-display');
@@ -311,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
             numDiv.style.borderColor = numberColor;
             numDiv.style.color = '#1a1a2e';
 
-            if (hitNumbers.includes(parseInt(num))) { // Ensure hitNumbers are compared as numbers
+            if (hitNumbers.includes(parseInt(num))) {
                 numDiv.classList.add('hit');
                 numDiv.style.backgroundColor = '#2ecc71';
                 numDiv.style.color = '#fff';
@@ -419,10 +415,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof updateManualSaveNumbersFeedback === "function") updateManualSaveNumbersFeedback();
         }
 
-        // Se a aba de lógica estiver ativa, atualize seus dados também
         const activeTabLink = document.querySelector('.tabs-navigation .tab-link.active');
-        if (activeTabLink && activeTabLink.getAttribute('href') === '#tab-logic-content-panel') {
-            const logicFreqContainer = document.getElementById('frequency-list-container-logic-tab'); // Exemplo para frequência
+        if (currentUser && activeTabLink && activeTabLink.getAttribute('aria-controls') === 'tab-logic-content-panel') { // ABA CORREÇÃO: Usar aria-controls
+            const logicFreqContainer = document.getElementById('frequency-list-container-logic-tab');
             if (logicFreqContainer) {
                 fetchAndDisplayStatsGeneric(selectedLottery, "Mais Sorteados (Lógica)", logicFreqContainer, "frequencia");
             }
@@ -434,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
         apiResultsPre.innerHTML = '<div class="spinner small-spinner"></div> Carregando...';
         try {
             const data = await fetchData(`api/main/resultados/${lotteryName}`);
-            lastFetchedResults[lotteryName] = data;
+            lastFetchedResults[lotteryName] = data; // Armazena para conferência rápida
             if (data.aviso) { apiResultsPre.textContent = data.aviso; return; }
             if (data.erro) { apiResultsPre.textContent = `Erro: ${data.erro}`; return; }
             let content = `Concurso: ${data.ultimo_concurso || 'N/A'}\n`;
@@ -442,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
             content += `Números: ${data.numeros ? data.numeros.join(', ') : 'N/A'}\n`;
             if (data.ganhadores_principal_contagem !== undefined) { content += `Ganhadores: ${data.ganhadores_principal_contagem}\n`; }
             if (data.cidades_ganhadoras_principal && data.cidades_ganhadoras_principal.length > 0) { content += `Cidades: ${data.cidades_ganhadoras_principal.join('; ')}\n`; }
-            if (data.rateio_principal_valor !== undefined && data.rateio_principal_valor !== null) { // Check for null
+             if (data.rateio_principal_valor !== undefined && data.rateio_principal_valor !== null) {
                  content += `Rateio: R$ ${parseFloat(data.rateio_principal_valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
             } else {
                  content += `Rateio: N/A\n`;
@@ -631,14 +626,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((command.includes('gerar') || command.includes('palpite')) && (command.includes('mega sena') || command.includes('mega'))) {
              if(mainLotterySelect) mainLotterySelect.value = 'megasena';
              if (typeof updateAllDashboardData === 'function') updateAllDashboardData('megasena');
-             const activeHotTabLink = document.getElementById('tab-hot');
-             const activeAlgoTabLink = document.getElementById('tab-algorithmic'); // Assumindo que o rápido está em algorítmico
-             if (currentUser) { // Se logado, usar geradores das abas
-                if (command.includes('quente') && generateHotNumbersHunchBtn && activeHotTabLink) { activeHotTabLink.click(); generateHotNumbersHunchBtn.click(); speak("Gerando palpite de números quentes para Mega-Sena.");}
-                // Adicionar outros geradores de abas aqui (frio, esotérico)
-                else if (activeAlgoTabLink && generateQuickHunchBtn) { activeAlgoTabLink.click(); generateQuickHunchBtn.click(); speak("Gerando palpite algorítmico para Mega-Sena.");}
+             const activeHotTabLink = document.querySelector('.tab-link[aria-controls="tab-hot-content-panel"]'); // ABA CORREÇÃO
+             const activeAlgoTabLink = document.querySelector('.tab-link[aria-controls="tab-algorithmic-content-panel"]'); // ABA CORREÇÃO
 
-             } else if (generateQuickHunchBtnLoggedOut) { // Se não logado, usar o gerador simples
+             if (currentUser) {
+                if (command.includes('quente') && generateHotNumbersHunchBtn && activeHotTabLink) { if(typeof setActiveTab === "function") setActiveTab(activeHotTabLink); generateHotNumbersHunchBtn.click(); speak("Gerando palpite de números quentes para Mega-Sena.");}
+                else if (activeAlgoTabLink && generateQuickHunchBtn) { if(typeof setActiveTab === "function") setActiveTab(activeAlgoTabLink); generateQuickHunchBtn.click(); speak("Gerando palpite algorítmico para Mega-Sena.");}
+
+             } else if (generateQuickHunchBtnLoggedOut) {
                  generateQuickHunchBtnLoggedOut.click(); speak("Gerando palpite rápido para Mega-Sena.");
              }
              return;
@@ -646,11 +641,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((command.includes('gerar') || command.includes('palpite')) && (command.includes('lotofácil') || command.includes('fácil'))) {
             if(mainLotterySelect) mainLotterySelect.value = 'lotofacil';
             if (typeof updateAllDashboardData === 'function') updateAllDashboardData('lotofacil');
-            const activeHotTabLink = document.getElementById('tab-hot');
-            const activeAlgoTabLink = document.getElementById('tab-algorithmic');
+            const activeHotTabLink = document.querySelector('.tab-link[aria-controls="tab-hot-content-panel"]'); // ABA CORREÇÃO
+            const activeAlgoTabLink = document.querySelector('.tab-link[aria-controls="tab-algorithmic-content-panel"]'); // ABA CORREÇÃO
             if (currentUser) {
-                if (command.includes('quente') && generateHotNumbersHunchBtn && activeHotTabLink) { activeHotTabLink.click(); generateHotNumbersHunchBtn.click(); speak("Gerando palpite de números quentes para Lotofácil.");}
-                else if (activeAlgoTabLink && generateQuickHunchBtn) { activeAlgoTabLink.click(); generateQuickHunchBtn.click(); speak("Gerando palpite algorítmico para Lotofácil.");}
+                if (command.includes('quente') && generateHotNumbersHunchBtn && activeHotTabLink) { if(typeof setActiveTab === "function") setActiveTab(activeHotTabLink); generateHotNumbersHunchBtn.click(); speak("Gerando palpite de números quentes para Lotofácil.");}
+                else if (activeAlgoTabLink && generateQuickHunchBtn) { if(typeof setActiveTab === "function") setActiveTab(activeAlgoTabLink); generateQuickHunchBtn.click(); speak("Gerando palpite algorítmico para Lotofácil.");}
             } else if (generateQuickHunchBtnLoggedOut) {
                 generateQuickHunchBtnLoggedOut.click(); speak("Gerando palpite rápido para Lotofácil.");
             }
@@ -708,6 +703,44 @@ document.addEventListener('DOMContentLoaded', () => {
         } else { if (voiceCommandBtn) voiceCommandBtn.style.display = 'none'; }
     }
 
+    // ABA CORREÇÃO: Função setActiveTab atualizada
+    function setActiveTab(clickedLinkElement) {
+        if (!clickedLinkElement) return;
+        const targetPanelId = clickedLinkElement.getAttribute('aria-controls');
+
+        tabLinks.forEach(link => {
+            link.classList.remove('active');
+            link.setAttribute('aria-selected', 'false');
+        });
+
+        clickedLinkElement.classList.add('active');
+        clickedLinkElement.setAttribute('aria-selected', 'true');
+
+        tabPanels.forEach(panel => {
+            panel.classList.remove('active');
+            if (panel.id === targetPanelId) {
+                panel.classList.add('active');
+            }
+        });
+
+        if (targetPanelId === 'tab-logic-content-panel' && mainLotterySelect) {
+            const logicFreqContainer = document.getElementById('frequency-list-container-logic-tab');
+            if (logicFreqContainer) {
+                 fetchAndDisplayStatsGeneric(mainLotterySelect.value, "Mais Sorteados (Lógica)", logicFreqContainer, "frequencia");
+            }
+        }
+    }
+    
+    // ABA CORREÇÃO: Event listener para os links das abas
+    if (tabLinks.length > 0) {
+        tabLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                setActiveTab(e.currentTarget); // Passa o próprio elemento do link clicado
+            });
+        });
+    }
+
     function updateLoginUI(user) {
         const navItems = document.querySelectorAll('#main-nav .nav-item');
         if (user) {
@@ -721,14 +754,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (loggedInHunchTabsSection) loggedInHunchTabsSection.style.display = 'block';
             if (hunchGeneratorsSectionLoggedOut) hunchGeneratorsSectionLoggedOut.style.display = 'none';
-            if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'none'; // Esconder promo se logado
+            if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'none'; 
 
             if (typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
             if (typeof checkForPrizesAndNotify === 'function') checkForPrizesAndNotify(user.uid);
-            // Garante que a primeira aba (Quentes) seja exibida ao logar
-            setActiveTab('#tab-hot-content-panel');
+            
+            // ABA CORREÇÃO: Ativar a primeira aba ao logar
+            const firstTabLink = document.querySelector('.tabs-navigation .tab-link[aria-controls="tab-hot-content-panel"]');
+            if (firstTabLink && typeof setActiveTab === 'function') {
+                setActiveTab(firstTabLink);
+            }
 
-        } else { // Não logado
+        } else { 
             if (loginModalBtn) loginModalBtn.style.display = 'inline-block';
             if (registerModalBtn) registerModalBtn.style.display = 'inline-block';
             if (userInfoDiv) userInfoDiv.style.display = 'none';
@@ -752,7 +789,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Gerador Rápido para Usuários NÃO LOGADOS
     async function generateAndDisplayQuickHunchLoggedOut() {
         if (!mainLotterySelect || !generateQuickHunchBtnLoggedOut || !quickHunchOutputDivLoggedOut || !quickHunchNumbersDivLoggedOut || !quickHunchStrategyPLoggedOut) return;
         const lottery = mainLotterySelect.value;
@@ -783,8 +819,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
-    async function generateAndDisplayQuickHunch() { // Para usuários LOGADOS (dentro da aba)
+    async function generateAndDisplayQuickHunch() { 
         if (!mainLotterySelect || !generateQuickHunchBtn || !quickHunchOutputDiv || !quickHunchNumbersDiv || !quickHunchStrategyP) { return; }
         const lottery = mainLotterySelect.value;
         generateQuickHunchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...'; generateQuickHunchBtn.disabled = true;
@@ -904,9 +939,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.erro) { throw new Error(data.erro); } if (!data.palpite_gerado) { throw new Error("API não retornou palpite."); }
             renderGameNumbers(esotericHunchNumbersDiv, data.palpite_gerado, [], [], lotteryName);
             esotericHunchMethodP.textContent = `Método: ${data.metodo_geracao || 'N/A'}`;
-            let historyHtml = `<strong>Histórico:</strong><br>`;
-            if (data.historico_desta_combinacao) { const hist = data.historico_desta_combinacao; historyHtml += `Premiada? <span style="color: ${hist.ja_foi_premiada_faixa_principal ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${hist.ja_foi_premiada_faixa_principal ? 'Sim' : 'Não'}</span> (${hist.vezes_premiada_faixa_principal}x) - Valor: ${hist.valor_total_ganho_faixa_principal_formatado}`; } else { historyHtml += "Não verificado."; }
-            esotericHunchHistoryCheckDiv.innerHTML = historyHtml;
+            let historyHtml = `<strong>Histórico desta combinação (último resultado):</strong><br>`; // Ajustado o texto
+            if (data.historico_desta_combinacao) { const hist = data.historico_desta_combinacao; historyHtml += `Premiada? <span style="color: ${hist.ja_foi_premiada_faixa_principal ? '#2ecc71' : '#ff4765'}; font-weight: bold;">${hist.ja_foi_premiada_faixa_principal ? 'Sim' : 'Não'}</span> (${hist.vezes_premiada_faixa_principal}x) - Valor Total Histórico: ${hist.valor_total_ganho_faixa_principal_formatado}`; } else { historyHtml += "Não verificado."; }
+            esotericHunchHistoryCheckDiv.innerHTML = historyHtml; // Este é o histórico, não o resultado da conferência atual.
             lastGeneratedHunch = { type: 'esoteric', lottery: lotteryName, jogo: data.palpite_gerado, estrategia_metodo: data.metodo_geracao || 'N/A', outputDiv: esotericHunchOutputDiv, numbersDiv: esotericHunchNumbersDiv, checkResultDiv: esotericHunchHistoryCheckDiv, saveButton: saveEsotericHunchBtn, checkButton: checkEsotericHunchBtn };
             if (typeof updateSaveButtonVisibility === "function") updateSaveButtonVisibility('esoteric'); if (checkEsotericHunchBtn) checkEsotericHunchBtn.style.display = 'inline-block';
         } catch (error) {
@@ -949,7 +984,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setupCheckHunchButtonListeners() {
         if (checkQuickHunchBtnLoggedOut && mainLotterySelect) checkQuickHunchBtnLoggedOut.addEventListener('click', () => checkLastGeneratedHunch('quick-logged-out', mainLotterySelect));
-
         if (checkQuickHunchBtn && mainLotterySelect) checkQuickHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('quick', mainLotterySelect));
         if (checkEsotericHunchBtn && mainLotterySelect) checkEsotericHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('esoteric', mainLotterySelect));
         if (checkHotHunchBtn && mainLotterySelect) checkHotHunchBtn.addEventListener('click', () => checkLastGeneratedHunch('hot', mainLotterySelect));
@@ -966,37 +1000,38 @@ document.addEventListener('DOMContentLoaded', () => {
             currentHunchData = lastGeneratedHunchLoggedOut;
             targetCheckResultDiv = quickHunchCheckResultDivLoggedOut;
             targetNumbersDiv = quickHunchNumbersDivLoggedOut;
-        } else { // Hunches para usuários logados
+        } else { 
             currentHunchData = lastGeneratedHunch;
             if (expectedHunchType === 'quick') { targetCheckResultDiv = quickHunchCheckResultDiv; targetNumbersDiv = quickHunchNumbersDiv; }
-            else if (expectedHunchType === 'esoteric') { targetCheckResultDiv = esotericHunchHistoryCheckDiv; targetNumbersDiv = esotericHunchNumbersDiv; }
+            else if (expectedHunchType === 'esoteric') { targetCheckResultDiv = esotericHunchHistoryCheckDiv; targetNumbersDiv = esotericHunchNumbersDiv; } // Note: Esoteric might display differently
             else if (expectedHunchType === 'hot') { targetCheckResultDiv = hotHunchCheckResultDiv; targetNumbersDiv = hotNumbersHunchNumbersDiv; }
             else if (expectedHunchType === 'cold') { targetCheckResultDiv = coldHunchCheckResultDiv; targetNumbersDiv = coldNumbersHunchNumbersDiv; }
         }
-
 
         if (!currentHunchData.jogo || !Array.isArray(currentHunchData.jogo) || currentHunchData.jogo.length === 0 || currentHunchData.lottery !== currentLottery || currentHunchData.type !== expectedHunchType || !targetCheckResultDiv || !targetNumbersDiv ) {
             if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = '<span class="misses">Gere um palpite deste tipo para esta loteria primeiro.</span>'; return;
         }
         let resultsToUse = lastFetchedResults[currentLottery];
         if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) {
-            targetCheckResultDiv.innerHTML = `<div class="spinner small-spinner"></div> Buscando resultados...`;
+            if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = `<div class="spinner small-spinner"></div> Buscando resultados...`;
             try { resultsToUse = await fetchData(`api/main/resultados/${currentLottery}`); if(resultsToUse) resultsToUse.loteria_tipo = currentLottery; lastFetchedResults[currentLottery] = resultsToUse; }
-            catch (e) { targetCheckResultDiv.innerHTML = `<span class="misses">Falha ao buscar resultados.</span>`; return; }
+            catch (e) { if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = `<span class="misses">Falha ao buscar resultados.</span>`; return; }
         }
-        if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) { targetCheckResultDiv.innerHTML = `<span class="misses">Resultados oficiais indisponíveis.</span>`; return; }
+        if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) { if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = `<span class="misses">Resultados oficiais indisponíveis.</span>`; return; }
 
         if(typeof checkGame !== "function" || typeof renderGameNumbers !== "function") {
-             targetCheckResultDiv.innerHTML = "Erro interno (checkGame ou renderGameNumbers não definida).";
+             if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = "Erro interno (checkGame ou renderGameNumbers não definida).";
              return;
         }
         const result = checkGame(currentHunchData.jogo, resultsToUse);
+        
+        // Para esotérico, o div de 'check' é o mesmo do 'histórico'. Atualizamos para mostrar a conferência.
         if (expectedHunchType === 'esoteric') {
-             let historyHtml = `<strong>Conferência com Último Resultado:</strong><br>`;
-             historyHtml += `Acertos: ${result.hits}. ${result.message}`;
-             targetCheckResultDiv.innerHTML = historyHtml; // Sobrescreve o histórico anterior com a conferência atual
+             let conferenceHtml = `<strong>Conferência com Último Resultado:</strong><br>`;
+             conferenceHtml += `Acertos: <span class="${result.hits > 0 ? 'hits' : 'misses'}">${result.hits}</span>. ${result.message}`;
+             if (targetCheckResultDiv) targetCheckResultDiv.innerHTML = conferenceHtml;
         } else {
-            targetCheckResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers && result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`;
+            if (targetCheckResultDiv) targetCheckResultDiv.innerHTML = `<span class="${result.hits > 0 ? 'hits' : (result.almostNumbers && result.almostNumbers.length > 0 ? 'almost-text' : 'misses')}">${result.message}</span>`;
         }
         renderGameNumbers(targetNumbersDiv, currentHunchData.jogo, result.hitNumbers, result.almostNumbers || [], currentLottery);
     }
@@ -1038,7 +1073,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let message = `Você acertou ${hits} número(s).`;
         if (hits > 0) {
             message += ` Acertos: ${hitNumbers.join(', ')}.`;
-            const lotteryConfig = LOTTERY_CONFIG_JS[officialResults.loteria_tipo.toLowerCase()];
+            const lotteryConfig = LOTTERY_CONFIG_JS[officialResults.loteria_tipo.toLowerCase()]; // Assume que loteria_tipo está em officialResults
             const numbersToWin = lotteryConfig?.count_sorteadas || lotteryConfig?.count || 0;
             if (hits === numbersToWin && numbersToWin > 0) {
                 message += " Parabéns, você GANHOU o prêmio máximo!";
@@ -1067,9 +1102,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createGameCardElement(docId, gameData) {
         const card = document.createElement('div');
-        card.classList.add('card', 'game-card-item'); // Usando game-card-item para estilos específicos
+        card.classList.add('card', 'game-card-item');
         if (gameData.isPremiado) {
-            card.classList.add('premiado'); // Adiciona classe se premiado
+            card.classList.add('premiado');
         }
         card.dataset.id = docId;
         const lotteryName = LOTTERY_CONFIG_JS[gameData.lottery]?.name || gameData.lottery.toUpperCase();
@@ -1085,15 +1120,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameData.ultimoConcursoVerificado) {
             if (gameData.isPremiado) {
                 verificationStatusP.innerHTML = `<i class="fas fa-trophy" style="color:gold;"></i> Premiado! ${gameData.acertos || '?'} acertos (${gameData.faixaPremio || 'Verifique detalhes'}). Verificado: Conc. ${gameData.ultimoConcursoVerificado}`;
-                verificationStatusP.style.color = '#2ecc71'; // Verde para premiado
+                verificationStatusP.style.color = '#2ecc71';
             } else {
                 verificationStatusP.innerHTML = `<i class="fas fa-check-circle" style="color: #a2d2ff;"></i> Não premiado. ${gameData.acertos || '0'} acertos. Verificado: Conc. ${gameData.ultimoConcursoVerificado}`;
-                verificationStatusP.style.color = '#a2d2ff'; // Cor padrão para não premiado mas verificado
+                verificationStatusP.style.color = '#a2d2ff';
             }
         } else {
             verificationStatusP.textContent = "Aguardando verificação do resultado.";
             verificationStatusP.style.fontStyle = 'italic';
-            verificationStatusP.style.color = '#8899aa'; // Cor para não verificado
+            verificationStatusP.style.color = '#8899aa';
         }
 
         const actionsDiv = document.createElement('div'); actionsDiv.classList.add('game-card-actions');
@@ -1101,7 +1136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteBtn.addEventListener('click', async () => { if (confirm("Excluir este jogo?")) { try { await firestoreDB.collection('userGames').doc(docId).delete(); card.remove(); if (savedGamesContainer.children.length === 0) noSavedGamesP.style.display = 'block'; } catch (e) { alert("Erro ao excluir.");}}});
         
         actionsDiv.appendChild(deleteBtn);
-        card.innerHTML = `<h4>${lotteryName}</h4>`; // Título primeiro
+        card.innerHTML = `<h4>${lotteryName}</h4>`;
         card.appendChild(gameNumbersDiv);
         card.appendChild(strategyP);
         card.appendChild(dateP);
@@ -1109,7 +1144,6 @@ document.addEventListener('DOMContentLoaded', () => {
         card.appendChild(actionsDiv);
         return card;
     }
-
 
     async function checkForPrizesAndNotify(userId) {
         if (!firestoreDB || !userId) return;
@@ -1325,6 +1359,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mainLotterySelect) {
                  updateAllDashboardData(mainLotterySelect.value);
             }
+             // ABA CORREÇÃO: Chamar setActiveTab para a aba inicial se o usuário já estiver logado
+            if (currentUser) {
+                const firstTabLink = document.querySelector('.tabs-navigation .tab-link[aria-controls="tab-hot-content-panel"]');
+                if (firstTabLink && typeof setActiveTab === 'function') {
+                    setActiveTab(firstTabLink);
+                }
+            }
         }
     }
 
@@ -1443,43 +1484,6 @@ document.addEventListener('DOMContentLoaded', () => {
         playInitialGreetingAndListen();
     }
 
-
-    // Função para configurar abas
-    function setActiveTab(targetTabId) {
-        tabLinks.forEach(link => {
-            link.classList.remove('active');
-            link.setAttribute('aria-selected', 'false');
-            if (link.getAttribute('href') === targetTabId) {
-                link.classList.add('active');
-                link.setAttribute('aria-selected', 'true');
-            }
-        });
-        tabPanels.forEach(panel => {
-            panel.classList.remove('active');
-            if (panel.id === targetTabId.substring(1) + '-panel') { // Adicionado '-panel' ao ID do painel
-                panel.classList.add('active');
-            }
-        });
-        // Carregar dados específicos da aba de lógica, se for o caso
-        if (targetTabId === '#tab-logic-content' && mainLotterySelect) {
-            const logicFreqContainer = document.getElementById('frequency-list-container-logic-tab');
-            if (logicFreqContainer) {
-                 fetchAndDisplayStatsGeneric(mainLotterySelect.value, "Mais Sorteados (Lógica)", logicFreqContainer, "frequencia");
-            }
-        }
-    }
-    if (tabLinks.length > 0) {
-        tabLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetTabId = link.getAttribute('href');
-                setActiveTab(targetTabId);
-            });
-        });
-    }
-
-
-    // --- INICIALIZAÇÕES E EVENT LISTENERS GERAIS ---
     initializeVoiceCommands();
     initializeInclusiveWelcome();
 
@@ -1503,7 +1507,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Geradores (os botões principais das abas e o de logged-out)
     if (generateQuickHunchBtnLoggedOut) generateQuickHunchBtnLoggedOut.addEventListener('click', generateAndDisplayQuickHunchLoggedOut);
     if (generateQuickHunchBtn) generateQuickHunchBtn.addEventListener('click', generateAndDisplayQuickHunch);
     if (generateEsotericHunchBtn) generateEsotericHunchBtn.addEventListener('click', generateAndDisplayEsotericHunch);
@@ -1522,11 +1525,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (filterLotteryMyGamesSelect) { filterLotteryMyGamesSelect.addEventListener('change', (e) => { if (currentUser && typeof loadUserGames === "function") loadUserGames(e.target.value); });}
 
-    // Ferramentas Manuais - Probabilidade
     if (manualProbUserNumbersInput && mainLotterySelect) {
         manualProbUserNumbersInput.addEventListener('input', updateManualProbNumbersFeedback);
-        mainLotterySelect.addEventListener('change', updateManualProbNumbersFeedback); // Atualiza ao trocar loteria
+        mainLotterySelect.addEventListener('change', updateManualProbNumbersFeedback);
     }
+
     if (manualCalculateProbBtn) {
         manualCalculateProbBtn.addEventListener('click', async () => {
             if (!mainLotterySelect || !manualProbUserNumbersInput || !manualProbabilityResultDisplay || typeof fetchData !== 'function') return;
@@ -1560,11 +1563,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Erro: ${error.message}</p>`; }
         });
     }
-
-    // Ferramentas Manuais - Salvar Jogo Manual
     if (manualSaveUserNumbersInput && mainLotterySelect) {
         manualSaveUserNumbersInput.addEventListener('input', updateManualSaveNumbersFeedback);
-        mainLotterySelect.addEventListener('change', updateManualSaveNumbersFeedback); // Atualiza ao trocar loteria
+        mainLotterySelect.addEventListener('change', updateManualSaveNumbersFeedback);
     }
     if (manualSaveGameBtn) {
         manualSaveGameBtn.addEventListener('click', async () => {
@@ -1632,7 +1633,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 manualSaveGameResultDisplay.innerHTML = '<p style="color:#2ecc71;">Jogo manual salvo com sucesso!</p>';
                 manualSaveGameResultDisplay.style.display = 'block';
                 manualSaveUserNumbersInput.value = '';
-                updateManualSaveNumbersFeedback(); // Resetar contador
+                updateManualSaveNumbersFeedback();
                 if (myGamesSection && myGamesSection.classList.contains('active-section') && typeof loadUserGames === "function") {
                     loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
                 }
@@ -1646,14 +1647,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Ferramentas Manuais - Verificar Jogo Passado Mega-Sena
     if (verifyPastMegasenaBtn) {
         verifyPastMegasenaBtn.addEventListener('click', async () => {
             const contestNumberStr = pastMegasenaContestInput.value.trim();
             const numbersStr = pastMegasenaNumbersInput.value.trim();
             verifyPastMegasenaResultDiv.style.display = 'none';
             verifyPastMegasenaResultDiv.innerHTML = '';
-
 
             if (!contestNumberStr) {
                 verifyPastMegasenaResultDiv.innerHTML = '<p class="error-message">Informe o número do concurso.</p>';
@@ -1734,5 +1733,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
 });
