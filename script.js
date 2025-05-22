@@ -287,14 +287,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchRecentWinningPools() { 
         if (!recentPoolsList) { return; }
+        const poolsErrorMessage = document.getElementById('pools-error-message');
         recentPoolsList.innerHTML = '<li><div class="spinner small-spinner"></div> Carregando...</li>';
+        if(poolsErrorMessage) poolsErrorMessage.style.display = 'none';
+
         try {
             const pools = await fetchData('api/main/recent-winning-pools');
             recentPoolsList.innerHTML = '';
             if (pools && pools.length > 0) { pools.forEach(pool => { const li = document.createElement('li'); li.innerHTML = `<span><i class="fas fa-trophy pool-icon"></i> ${pool.name} (${pool.lottery})</span> <span class="pool-prize">${pool.prize}</span> <small>${pool.date}</small>`; recentPoolsList.appendChild(li); }); }
             else { recentPoolsList.innerHTML = '<li>Nenhum bolão premiado recentemente.</li>'; }
         } catch (error) { 
-            recentPoolsList.innerHTML = '<li>Erro ao carregar bolões. Tente novamente mais tarde.</li>';
+            recentPoolsList.innerHTML = ''; // Limpa o loading
+            if (poolsErrorMessage) {
+                poolsErrorMessage.textContent = 'Erro ao carregar informações dos bolões. Por favor, tente mais tarde.';
+                poolsErrorMessage.style.display = 'block';
+            } else {
+                recentPoolsList.innerHTML = '<li>Erro ao carregar bolões. Tente novamente mais tarde.</li>';
+            }
             console.error("Erro em fetchRecentWinningPools:", error.status, error.message, error.data);
         }
     }
@@ -317,7 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
             else { topWinnersList.innerHTML = '<li>Ranking de ganhadores indisponível ou ainda não populado.</li>'; }
         } catch (error) { 
             topWinnersList.innerHTML = '<li>Erro ao carregar ranking de ganhadores.</li>';
-            console.error("Erro em fetchTopWinners:", error.status, error.message, error.data);
         }
     }
 
@@ -437,11 +445,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dynamicLotteryNameHunchTabsSpan) dynamicLotteryNameHunchTabsSpan.textContent = lotteryFriendlyName;
         if (dynamicLotteryNameManualSpan) dynamicLotteryNameManualSpan.textContent = lotteryFriendlyName;
         
-        // Atualiza título e placeholders do card "Conferir Jogo Passado"
-        if (verifyPastGameCardTitleDynamicSpan) {
+        if (verifyPastGameCardTitleDynamicSpan) { // Atualiza título do card "Conferir Jogo Passado"
             verifyPastGameCardTitleDynamicSpan.textContent = lotteryFriendlyName;
         }
-        if (pastGameNumbersInput && selectedLotteryConfig) { 
+        if (pastGameNumbersInput && selectedLotteryConfig) { // Atualiza placeholder e label do "Conferir Jogo Passado"
             const expectedCount = selectedLotteryConfig.count_sorteadas || selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count; 
             const placeholderText = `Ex: 01,... (${expectedCount} números de ${selectedLotteryConfig.min}-${selectedLotteryConfig.max})`;
             pastGameNumbersInput.placeholder = placeholderText;
@@ -1897,9 +1904,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     htmlResult += `<p><strong>Faixa do Prêmio:</strong> ${resultData.faixa_premio}</p>`;
                     if (resultData.valor_premio_formatado && resultData.valor_premio_formatado !== "N/A" && resultData.valor_premio_formatado !== "R$ 0,00") {
                         htmlResult += `<p><strong>Valor do Prêmio (na época):</strong> <span class="highlight">${resultData.valor_premio_formatado}</span></p>`;
-                    } else if (resultData.aviso) {
+                    } else if (resultData.aviso && resultData.valor_premio_formatado !== "R$ 0,00" ) { // Mostra aviso se premiado mas sem valor
                         htmlResult += `<p><small><i>Aviso sobre o valor: ${resultData.aviso}</i></small></p>`;
                     }
+                    // Confetti para qualquer prêmio na faixa principal da loteria
                     if (resultData.acertos === (selectedLotteryConfig.count_sorteadas || selectedLotteryConfig.count)) triggerConfetti();
                 } else {
                     htmlResult += `<p style="color:#ff4765;">Jogo não premiado neste concurso.</p>`;
