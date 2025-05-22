@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 recentPoolsList.innerHTML = '<li>Erro ao carregar bolões. Tente novamente mais tarde.</li>';
             }
-            console.error("Erro em fetchRecentWinningPools:", error.status, error.message, error.data);
+            console.error("Erro em fetchRecentWinningPools:", error.status, error.message, error.data); // Linha 307 original
         }
     }
 
@@ -1525,7 +1525,7 @@ document.addEventListener('DOMContentLoaded', () => {
             appContent.style.display = 'block';
             if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
             if (typeof fetchPlatformStats === "function") fetchPlatformStats();
-            if (typeof fetchRecentWinningPools === "function") fetchRecentWinningPools();
+            // if (typeof fetchRecentWinningPools === "function") fetchRecentWinningPools(); // <--- ALTERAÇÃO: Linha comentada para teste do Android
             if (typeof fetchTopWinners === "function") fetchTopWinners();
             if (typeof renderBanners === "function") renderBanners();
             if (typeof initializeCarousels === "function") initializeCarousels();
@@ -1651,7 +1651,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, { capture: true, once: true });
         };
 
-        // Correção Definitiva: Usando 'click' que funciona em todas as plataformas.
+        // Usando 'click' que funciona em todas as plataformas.
         if (activateVoiceGuideBtn) activateVoiceGuideBtn.addEventListener('click', () => { handleWelcomeChoice(true); });
         if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('click', () => { handleWelcomeChoice(false); });
         
