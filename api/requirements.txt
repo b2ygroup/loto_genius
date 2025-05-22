@@ -4,3 +4,4 @@ pandas
 openpyxl
 requests
 firebase-admin
+python-dotenv # Se for usar .env para rodar o processador localmente
