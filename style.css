@@ -191,17 +191,19 @@ header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; letter-spaci
     margin-bottom: 1rem;
     background-color: #121220;
 }
-#banner-top-dashboard.carousel-ad {
-    max-width: 970px;
-    height: 250px;
-    margin: 0 auto;
+/* Estilo unificado para ambos os carrosséis */
+.banner-top-dashboard, .banner-bottom-dashboard {
+    max-width: 970px; /* Largura do banner maior */
+    height: 250px;    /* Altura do banner maior */
+    margin: 0 auto;   /* Centralizado */
     border-radius: 6px;
-    background-color: #18192a;
+    background-color: #18192a; /* Cor de fundo placeholder */
     position: relative;
     overflow: hidden;
     border: 1px solid #303256;
 }
-#banner-top-dashboard .carousel-item {
+.banner-top-dashboard .carousel-item, 
+.banner-bottom-dashboard .carousel-item {
     width: 100%;
     height: 100%;
     border-radius: 6px;
@@ -210,13 +212,20 @@ header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; letter-spaci
     justify-content: center;
     overflow: hidden;
 }
-#banner-top-dashboard .carousel-item img {
+.banner-top-dashboard .carousel-item img,
+.banner-bottom-dashboard .carousel-item img {
     display: block;
     max-width: 100%;
     max-height: 100%;
-    object-fit: contain;
+    object-fit: contain; /* Para não cortar a imagem, ajusta dentro do espaço */
     object-position: center center;
 }
+/* Ajuste específico para o carrossel inferior se necessário, como margem */
+.banner-bottom-dashboard {
+    margin-top: 2rem; /* Mantém a margem que já tinha */
+    /* Removido min-height e border-dashed, pois agora segue o estilo do de cima */
+}
+
 
 main { padding: 1.5rem; max-width: 1200px; margin: 0 auto 20px auto; }
 .main-section { display: none; }
@@ -403,24 +412,6 @@ h4 i { margin-right: 5px; }
 .carousel-ad > p { color: #8a9ac4; font-size: 1rem; text-align: center; }
 .carousel-ad:not(:empty) > p { display: none; }
 
-.ad-placeholder.banner-bottom-dashboard {
-    min-height: 250px;
-    max-width: 300px;
-    height: 250px;
-    margin: 1.5rem auto;
-    border: 2px dashed #3b3b6e;
-    background-color: #2a2a50;
-}
-#banner-bottom-dashboard .carousel-item img {
-    object-fit: cover;
-}
-
-#winning-pools-preview ul, #top-winners-preview ol { list-style-type: none; padding-left: 0; max-height: 250px; overflow-y: auto; }
-#winning-pools-preview li, #top-winners-preview li { background-color: #2a2a50; padding: 0.8rem 1rem; margin-bottom: 0.5rem; border-radius: 6px; border-left: 4px solid #47aeff; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
-#top-winners-preview li .winner-prize { font-weight: bold; color: #2ecc71; }
-#winning-pools-preview li .pool-prize { font-weight: bold; color: #f1c40f; }
-#winning-pools-preview li small, #top-winners-preview li small { display: block; font-size: 0.75rem; color: #888; }
-.pool-icon { color: #f1c40f; margin-right: 5px; } .winner-icon { color: #ffd700; margin-right: 5px; }
 .stats-list-container { max-height: 280px; overflow-y: auto; padding-right: 10px; margin-top: 0.8rem; }
 .stats-list-container .loading-stats, .stats-list-container .no-stats, .stats-list-container .error-message { text-align: center; padding: 20px; color: #a7b5e8; font-style: italic; }
 .stats-list-container .error-message { color: #ff4765; font-style: normal; }
@@ -454,12 +445,11 @@ h4 i { margin-right: 5px; }
 .error-message { color: #ff4765; font-size: 0.9rem; margin-top: 10px; text-align: center; min-height: 1.2em; }
 footer { text-align: center; padding: 2rem; background-color: #121224; color: #888; margin-top: 3rem; font-size: 0.9rem; }
 
-/* ABAS - Estilos */
 .tabs-navigation {
     margin-bottom: 0; 
     border-bottom: 2px solid #3b3b6e;
     position: relative; 
-    z-index: 10; /* Mais alto para garantir que os links das abas estejam sobre os painéis */
+    z-index: 10; 
 }
 .tabs-navigation ul {
     list-style-type: none;
@@ -495,13 +485,13 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     color: #82e0aa; 
     border-color: #3b3b6e #3b3b6e #1e1e3f #3b3b6e; 
     font-weight: bold;
-    z-index: 11; /* Acima das abas inativas */
+    z-index: 11; 
 }
 
 .tabs-content { 
     position: relative;
-    z-index: 9; /* Abaixo da navegação das abas, mas acima do conteúdo geral da página */
-    clear: both; /* Garante que o conteúdo não flutue ao lado das abas se houver floats */
+    z-index: 9; 
+    clear: both; 
 }
 
 .tabs-content .tab-panel {
@@ -510,7 +500,6 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     border: 1px solid #3b3b6e;
     border-top: none; 
     border-radius: 0 0 8px 8px; 
-    /* O padding será aplicado pelo .card dentro do painel */
     min-height: 250px; 
 }
 .tabs-content .tab-panel.active {
@@ -528,16 +517,15 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     border-radius: 0; 
     padding: 1.5rem; 
     width: 100%; 
-    background-color: transparent; /* Para que o fundo do .tab-panel seja visível */
-    display: flex; /* Garante que o card seja flex container e ocupe espaço */
-    flex-direction: column; /* Mantém o layout interno do card */
+    background-color: transparent; 
+    display: flex; 
+    flex-direction: column; 
 }
 .tab-panel .card:first-child {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
 
-/* RESPONSIVIDADE */
 @media (max-width: 768px) {
     header { padding: 0.8rem 1rem; flex-direction: column; align-items: center; }
     .logo-container { margin-bottom: 0.8rem; }
@@ -573,15 +561,15 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     }
     #manual-tools-section {
         padding-bottom: 2rem; 
-        display: block !important; /* Forçar exibição no mobile */
-        visibility: visible !important; /* Forçar visibilidade */
-        opacity: 1 !important; /* Forçar opacidade */
+        display: block !important; 
+        visibility: visible !important;
+        opacity: 1 !important; 
     }
-    /* Certificar que os cards dentro de manual-tools-section também estejam visíveis */
     #manual-tools-section .card {
-        display: flex !important; /* Ou block, dependendo do seu layout interno */
+        display: flex !important; 
         visibility: visible !important;
         opacity: 1 !important;
+        margin-bottom: 1.5rem; 
     }
 }
 @media (max-width: 480px) {
@@ -639,7 +627,8 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
 #quick-hunch-output.game-card,
 #hot-numbers-hunch-output.game-card,
 #cold-numbers-hunch-output.game-card,
-#esoteric-hunch-output.game-card {
+#esoteric-hunch-output.game-card,
+#logic-hunch-output.game-card { /* Adicionado gerador lógico */
     margin-top: 1.5rem;
     background-color: rgba(28, 28, 54, 0.878);
     border-left: 4px solid #4dd0e1;
@@ -653,17 +642,24 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
 #esoteric-hunch-output.game-card {
     border-left-color: #be93f9;
 }
+#logic-hunch-output.game-card { /* Estilo para o novo gerador lógico */
+    border-left-color: #76d7c4; /* Uma cor verde-água diferente */
+}
+
 
 #quick-hunch-output h4 .fa-lightbulb,
 #hot-numbers-hunch-output h4 .fa-temperature-high,
 #cold-numbers-hunch-output h4 .fa-snowflake,
-#esoteric-hunch-output h4 .fa-wand-sparkles {
+#esoteric-hunch-output h4 .fa-wand-sparkles,
+#logic-hunch-output h4 .fa-lightbulb { /* Adicionado gerador lógico */
     color: #4dd0e1;
 }
 #hot-numbers-hunch-output h4 .fa-temperature-high { color: #ff8c00; }
 #cold-numbers-hunch-output h4 .fa-snowflake,
 #cold-numbers-hunch-output h4 .far.fa-snowflake { color: #6495ed; }
 #esoteric-hunch-output h4 .fa-wand-sparkles { color: #be93f9; }
+#logic-hunch-output h4 .fa-lightbulb { color: #76d7c4; } /* Ícone para palpite lógico */
+
 
 #esoteric-hunch-history-check {
     border-top: 1px dashed #3b3b6e; padding-top: 0.8rem; margin-top: 1rem;
