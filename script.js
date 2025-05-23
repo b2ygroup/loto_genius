@@ -1363,22 +1363,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const editBtn = document.createElement('button');
         editBtn.classList.add('action-btn', 'small-btn', 'edit-game-btn');
         editBtn.innerHTML = '<i class="fas fa-edit"></i> Editar';
-        editBtn.title = "Editar os números deste jogo";
-    
+        
         const playAgainBtn = document.createElement('button');
         playAgainBtn.classList.add('action-btn', 'small-btn', 'play-again-btn');
         playAgainBtn.innerHTML = '<i class="fas fa-redo"></i> Jogar Novamente';
             
         if (gameData.faixaPremio === "Aguardando novo concurso" && gameData.ultimoConcursoVerificado === null) {
-            playAgainBtn.title = "Este jogo foi marcado para jogar novamente e está aguardando o próximo sorteio.";
+            playAgainBtn.title = "Este jogo já está ativo e aguardando o próximo sorteio.";
             playAgainBtn.disabled = true;
             playAgainBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> Aguardando';
             playAgainBtn.classList.add('awaiting-draw'); 
-            editBtn.disabled = true; 
+            
             editBtn.title = "Não é possível editar um jogo que está aguardando o próximo sorteio.";
+            editBtn.addEventListener('click', () => {
+                alert("Este jogo está ativo para o próximo concurso e não pode ser editado até ser conferido.");
+            });
         } else {
             playAgainBtn.title = "Exclui este jogo e o joga novamente no próximo concurso";
             playAgainBtn.addEventListener('click', () => handlePlayAgain(docId, gameData, card));
+            editBtn.title = "Editar os números deste jogo";
             editBtn.addEventListener('click', () => openEditGameModal(docId, gameData));
         }
     
@@ -1472,7 +1475,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openEditGameModal(docId, gameData) {
         if (!editGameModal || !editGameDocIdInput || !editGameLotteryDisplay || !editGameNumbersInput || !editGameNumbersLabel || !editGameNumbersFeedback || !editGameErrorP) {
-            console.error("Elementos do modal de edição não encontrados.");
+            console.error("Elementos do modal de edição não encontrados."); 
             return;
         }
 
