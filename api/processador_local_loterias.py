@@ -7,6 +7,9 @@ from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
 
+# Importa a função de verificação do outro arquivo
+from verificador_jogos import verificar_jogos_para_novo_resultado, initialize_firebase_admin_verificador as init_fb_verificador
+
 load_dotenv()
 
 DIRETORIO_SCRIPT_ATUAL = os.path.dirname(os.path.abspath(__file__))
@@ -22,25 +25,37 @@ BLOB_ACCESS_TOKEN = os.environ.get("BLOB_READ_WRITE_TOKEN")
 
 SERVICE_ACCOUNT_KEY_PATH_PROCESSOR = os.path.join(DIRETORIO_SCRIPT_ATUAL, "serviceAccountKey.json")
 db_firestore = None
+firebase_app_processor = None # Guardar a instância da app
+
 try:
-    if os.path.exists(SERVICE_ACCOUNT_KEY_PATH_PROCESSOR):
-        if not firebase_admin._apps:
-            cred = credentials.Certificate(SERVICE_ACCOUNT_KEY_PATH_PROCESSOR)
-            firebase_admin.initialize_app(cred, name='lotteryProcessorApp')
-            print("Firebase Admin SDK inicializado para processador.")
-        db_firestore = firestore.client(app=firebase_admin.get_app(name='lotteryProcessorApp'))
-    elif os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON'):
-         if not firebase_admin._apps:
-            service_account_json_str = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON')
-            service_account_info = json.loads(service_account_json_str)
-            cred = credentials.Certificate(service_account_info)
-            firebase_admin.initialize_app(cred, name='lotteryProcessorAppEnv')
-            print("Firebase Admin SDK inicializado para processador via ENV VAR.")
-         db_firestore = firestore.client(app=firebase_admin.get_app(name='lotteryProcessorAppEnv'))
-    else:
-        print("AVISO: serviceAccountKey.json ou FIREBASE_SERVICE_ACCOUNT_JSON não encontrados.")
+    app_name_proc = 'lotteryProcessorAppMain'
+    if app_name_proc not in firebase_admin._apps:
+        service_account_json_str_env = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON')
+        if service_account_json_str_env:
+            service_account_info_env = json.loads(service_account_json_str_env)
+            cred_proc = credentials.Certificate(service_account_info_env)
+            print(f"Inicializando Firebase Admin SDK para {app_name_proc} (Processador) via ENV VAR.")
+            firebase_app_processor = firebase_admin.initialize_app(cred_proc, name=app_name_proc)
+        elif os.path.exists(SERVICE_ACCOUNT_KEY_PATH_PROCESSOR):
+            cred_proc = credentials.Certificate(SERVICE_ACCOUNT_KEY_PATH_PROCESSOR)
+            print(f"Inicializando Firebase Admin SDK para {app_name_proc} (Processador) via arquivo local.")
+            firebase_app_processor = firebase_admin.initialize_app(cred_proc, name=app_name_proc)
+        else:
+            print(f"ALERTA [{app_name_proc}]: Nem FIREBASE_SERVICE_ACCOUNT_JSON (ENV VAR) nem '{SERVICE_ACCOUNT_KEY_PATH_PROCESSOR}' (local) encontrados.")
+    else: # App já existe
+        print(f"Firebase Admin SDK ({app_name_proc}) já inicializado (Processador). Reutilizando.")
+        firebase_app_processor = firebase_admin.get_app(name=app_name_proc)
+
+    if firebase_app_processor:
+        db_firestore = firestore.client(app=firebase_app_processor)
+        print(f"Cliente Firestore obtido para {app_name_proc} (Processador).")
+        # Tenta inicializar o verificador também, passando o nome da app se necessário
+        # para que ele possa tentar reutilizar ou coexistir.
+        init_fb_verificador(app_name_suffix=f'VerifViaProc')
+
 except Exception as e_fb_admin_proc:
-    print(f"Erro ao inicializar Firebase Admin SDK no processador: {e_fb_admin_proc}")
+    print(f"Erro GERAL ao inicializar Firebase Admin SDK no processador: {e_fb_admin_proc}")
+
 
 MASTER_FILES_LOCAL_NAMES = {
     "lotofacil": "Lotofácil_Resultados.xlsx",
@@ -63,8 +78,8 @@ LOTTERY_CONFIG_PROCESSAMENTO = {
         "col_ganhadores_principal": "Ganhadores 6 acertos",
         "col_cidade_uf_principal": "Cidade / UF",
         "col_rateio_principal": "Rateio 6 acertos",
-        "col_rateio_quina": "Rateio 5 acertos", # Nome exato da coluna do seu arquivo
-        "col_rateio_quadra": "Rateio 4 acertos"  # Nome exato da coluna do seu arquivo
+        "col_rateio_quina": "Rateio 5 acertos",
+        "col_rateio_quadra": "Rateio 4 acertos"
     },
     "lotofacil": {
         "modalidade_param_value": "Lotofácil",
@@ -204,6 +219,7 @@ def upload_json_to_vercel_blob(pathname_in_blob, json_content_str, loteria_key_f
     return None
 
 def processar_e_salvar_loteria_json(loteria_key_func, config_loteria_func):
+    global db_firestore # Acessa o db_firestore inicializado no escopo do módulo
     print(f"Iniciando processamento JSON para {loteria_key_func.upper()}")
     json_file_name_for_blob = config_loteria_func["processed_json_name"]
     df = None
@@ -236,8 +252,8 @@ def processar_e_salvar_loteria_json(loteria_key_func, config_loteria_func):
     col_cidade_uf_principal = config_loteria_func.get("col_cidade_uf_principal")
     col_rateio_principal = config_loteria_func.get("col_rateio_principal")
     
-    col_rateio_quina_ms = config_loteria_func.get("col_rateio_quina") # Para Mega-Sena
-    col_rateio_quadra_ms = config_loteria_func.get("col_rateio_quadra") # Para Mega-Sena
+    col_rateio_quina_ms = config_loteria_func.get("col_rateio_quina")
+    col_rateio_quadra_ms = config_loteria_func.get("col_rateio_quadra")
 
     results_list = []
 
@@ -268,15 +284,17 @@ def processar_e_salvar_loteria_json(loteria_key_func, config_loteria_func):
                     
                     sorteio_data["ganhadores_principal_contagem"] = num_ganhadores_parsed
                     sorteio_data["cidades_ganhadoras_principal"] = cidades_lista
-                    sorteio_data["rateio_principal_valor"] = parse_currency_to_float(str(rateio_val_str)) if num_ganhadores_parsed > 0 else 0.0
+                    # Salva o rateio como string formatada, a conversão para float ocorre no main.py ou verificador
+                    sorteio_data["rateio_principal_valor"] = f"R$ {parse_currency_to_float(str(rateio_val_str)):_.2f}".replace('.', ',').replace('_', '.') if num_ganhadores_parsed > 0 else "R$ 0,00"
+
 
                     if loteria_key_func == 'megasena':
                         if col_rateio_quina_ms:
                             rateio_quina_val_str = row.get(col_rateio_quina_ms, '0')
-                            sorteio_data["rateio_quina_valor"] = parse_currency_to_float(str(rateio_quina_val_str))
+                            sorteio_data["rateio_quina_valor"] = f"R$ {parse_currency_to_float(str(rateio_quina_val_str)):_.2f}".replace('.', ',').replace('_', '.')
                         if col_rateio_quadra_ms:
                             rateio_quadra_val_str = row.get(col_rateio_quadra_ms, '0')
-                            sorteio_data["rateio_quadra_valor"] = parse_currency_to_float(str(rateio_quadra_val_str))
+                            sorteio_data["rateio_quadra_valor"] = f"R$ {parse_currency_to_float(str(rateio_quadra_val_str)):_.2f}".replace('.', ',').replace('_', '.')
                 
                 results_list.append(sorteio_data)
         except Exception as e_row: print(f"ERRO ao processar linha {index+1} ({loteria_key_func.upper()}): {e_row}")
@@ -293,11 +311,21 @@ def processar_e_salvar_loteria_json(loteria_key_func, config_loteria_func):
                 doc_ref.set({
                     'lottery_name': loteria_key_func,
                     'blob_url': blob_url_retornado,
-                    'updated_at': firestore.SERVER_TIMESTAMP
+                    'updated_at': firestore.SERVER_TIMESTAMP,
+                    'latest_contest_number': results_list[0]['concurso'] if results_list else None
                 })
                 print(f"URL do Blob para {loteria_key_func.upper()} salvo no Firestore.")
+
+                # >>> INÍCIO DA INTEGRAÇÃO COM VERIFICADOR_JOGOS <<<
+                if results_list: # Se há resultados, o primeiro é o mais novo
+                    novo_resultado_oficial_para_verificar = results_list[0]
+                    print(f"Disparando verificação de jogos para {loteria_key_func.upper()}, concurso {novo_resultado_oficial_para_verificar.get('concurso')}")
+                    verificar_jogos_para_novo_resultado(loteria_key_func, novo_resultado_oficial_para_verificar, db_client=db_firestore)
+                # >>> FIM DA INTEGRAÇÃO COM VERIFICADOR_JOGOS <<<
+
             except Exception as e_firestore:
-                print(f"ERRO ao salvar URL do Blob no Firestore para {loteria_key_func.upper()}: {e_firestore}")
+                print(f"ERRO ao salvar URL do Blob ou ao chamar verificação para {loteria_key_func.upper()}: {e_firestore}")
+
         elif not blob_url_retornado:
             processed_json_path_local_temp = os.path.join(DIRETORIO_JSON_SAIDA_LOCAL_TEMP, json_file_name_for_blob)
             try:
@@ -313,8 +341,10 @@ if __name__ == '__main__':
     if not BLOB_ACCESS_TOKEN:
         print("ERRO CRÍTICO: A variável de ambiente BLOB_READ_WRITE_TOKEN não está configurada.")
         exit()
-    if not db_firestore:
-        print("AVISO: Firebase Admin não foi inicializado. URLs dos Blobs não serão salvos no Firestore.")
+    if not db_firestore: # Verifica se db_firestore foi inicializado
+        print("ERRO CRÍTICO: Firebase Admin (db_firestore) não foi inicializado no processador. URLs dos Blobs não serão salvos e a verificação automática não ocorrerá.")
+        # Você pode optar por sair ou continuar sem a funcionalidade do Firestore
+        # exit() 
 
     print("Iniciando script de download, processamento e UPLOAD para Vercel Blob...")
     
@@ -323,8 +353,11 @@ if __name__ == '__main__':
 
     for loteria_key_loop, config_loop in LOTTERY_CONFIG_PROCESSAMENTO.items():
         print(f"\n--- Processando {loteria_key_loop.upper()} ---")
-        if fazer_download:
+        if fazer_download and loteria_key_loop != 'lotomania': # Lotomania usa CSV manual
             baixar_arquivo_loteria(loteria_key_loop, config_loop)
+        elif fazer_download and loteria_key_loop == 'lotomania':
+            print(f"AVISO [{loteria_key_loop.upper()}]: Download automático não aplicável. Use o CSV manual.")
+
         processar_e_salvar_loteria_json(loteria_key_loop, config_loop)
             
-    print("\nProcessamento e tentativas de uploads concluídos.")
+    print("\nProcessamento, tentativas de uploads e verificações de jogos concluídos.")
