@@ -231,7 +231,7 @@
                                     <button id="check-cold-hunch-btn" class="action-btn small-btn" title="Conferir este jogo" style="display:none;"><i class="fas fa-check-circle"></i> Conferir</button>
                                 </div>
                                 <div id="cold-hunch-check-result" class="check-result-display" aria-live="polite"></div>
-                                </div>
+                            </div>
                         </div>
                     </div>
                     <div id="tab-esoteric" class="tab-panel" role="tabpanel" aria-labelledby="tab-esoteric-link">
@@ -424,6 +424,23 @@
                 <button id="copy-pix-key-btn" class="action-btn small-btn" title="Copiar Chave PIX" style="margin-left: 10px;"><i class="fas fa-copy"></i> Copiar</button>
             </p>
             <button id="ok-prize-modal-btn" class="modal-btn" style="margin-top:1.5rem;">Ok, Entendi!</button>
+        </div>
+    </div>
+
+    <div id="edit-game-modal" class="modal" role="dialog" aria-labelledby="edit-game-modal-title" aria-modal="true" style="display:none;">
+        <div class="modal-content">
+            <button class="close-btn" id="close-edit-game-modal" aria-label="Fechar modal de edição">&times;</button>
+            <h2 id="edit-game-modal-title">Editar Jogo</h2>
+            <input type="hidden" id="edit-game-doc-id"> 
+            <label for="edit-game-lottery-display">Loteria:</label>
+            <input type="text" id="edit-game-lottery-display" readonly disabled style="background-color: #3a3a62; cursor: not-allowed;">
+            
+            <label for="edit-game-numbers-input" id="edit-game-numbers-label">Seus números (separados por vírgula):</label>
+            <textarea id="edit-game-numbers-input" rows="3"></textarea>
+            <p id="edit-game-numbers-feedback" class="input-feedback"></p>
+            
+            <button id="submit-edit-game-btn" class="modal-btn">Salvar Alterações</button>
+            <p id="edit-game-error" class="error-message" aria-live="assertive"></p>
         </div>
     </div>
 
