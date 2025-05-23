@@ -46,6 +46,7 @@
             <div class="progress-bar-container" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progresso do carregamento">
                 <div class="progress-bar-fill"></div>
             </div>
+            <p class="b2y-credit">Mais uma solução do grupo <strong>B2Y Group & Lion Solutions</strong></p>
         </div>
     </div>
 
@@ -92,92 +93,6 @@
                     </button>
                 </div>
             </div>
-
-            <section id="platform-highlights-container" class="dashboard-subsection" aria-labelledby="platform-highlights-title-h3">
-                 <h3 id="platform-highlights-title-h3" class="card-title-accessible">
-                    <i class="fas fa-star" aria-hidden="true"></i> Loto Genius em Destaque
-                </h3>
-                <div class="grid-container-highlights">
-                    <div id="platform-highlights" class="card">
-                        <div class="highlights-grid">
-                            <div class="highlight-item"><i class="fas fa-dice-d20" aria-hidden="true"></i><span id="stats-jogos-gerados" class="stat-number">--</span><p>Palpites Gerados</p></div>
-                            <div class="highlight-item"><i class="fas fa-trophy" aria-hidden="true"></i><span id="stats-jogos-premiados" class="stat-number">--</span><p>Palpites Premiados</p></div>
-                            <div class="highlight-item"><i class="fas fa-sack-dollar" aria-hidden="true"></i><span id="stats-valor-premios" class="stat-number">R$ --</span><p>Prêmios Ganhos</p></div>
-                        </div>
-                    </div>
-                    <section id="winning-pools-preview" class="card" aria-labelledby="winning-pools-title">
-                        <h3 id="winning-pools-title"><i class="fas fa-users-crown"></i> Bolões Premiados (Em Breve)</h3>
-                        <ul id="recent-pools-list" aria-live="polite"><li>Funcionalidade de bolões será implementada futuramente.</li></ul>
-                         <p id="pools-error-message" style="color: #ff4765; display: none;"></p>
-                    </section>
-                    <section id="top-winners-preview" class="card" aria-labelledby="top-winners-title">
-                        <h3 id="top-winners-title"><i class="fas fa-medal"></i> Top Ganhadores</h3>
-                        <ol id="top-winners-list" aria-live="polite"><li><div class="spinner small-spinner"></div> Carregando...</li></ol>
-                    </section>
-                </div>
-            </section>
-
-            <section id="lottery-info-section" class="dashboard-subsection" aria-labelledby="lottery-info-title-h3">
-                <h3 id="lottery-info-title-h3" class="card-title-accessible">
-                    <i class="fas fa-chart-bar" aria-hidden="true"></i> Informações e Estatísticas: <span id="dynamic-lottery-name-info">Mega-Sena</span>
-                </h3>
-                <div class="grid-container-stats">
-                    <div class="card" id="results-display-card" aria-labelledby="results-title">
-                         <h3 id="results-title"><i class="fas fa-poll" aria-hidden="true"></i> Últimos Resultados</h3>
-                         <div id="api-results" class="code-block" aria-live="polite" style="min-height: 120px;">Aguardando seleção de loteria...</div>
-                    </div>
-                    <div class="card" id="frequency-stats-card" aria-labelledby="frequency-stats-title">
-                         <h3 id="frequency-stats-title"><i class="fas fa-sort-numeric-up-alt"></i> Mais Sorteados</h3>
-                         <div id="frequency-list-container" class="stats-list-container" aria-live="polite"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
-                    </div>
-                    <div class="card" id="pair-frequency-stats-card" aria-labelledby="pair-frequency-stats-title">
-                         <h3 id="pair-frequency-stats-title"><i class="fas fa-project-diagram"></i> Pares Frequentes</h3>
-                         <div id="pair-frequency-list-container" class="stats-list-container" aria-live="polite"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
-                    </div>
-                    <div class="card" id="city-stats-card" aria-labelledby="city-stats-title">
-                         <h3 id="city-stats-title"><i class="fas fa-city"></i> Cidades Premiadas</h3>
-                         <p class="stats-subtitle">(Ganhadores do prêmio principal)</p>
-                         <div id="city-list-container" class="stats-list-container" aria-live="polite"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
-                    </div>
-                    <div class="card" id="city-prize-sum-card" aria-labelledby="city-prize-sum-title">
-                        <h3 id="city-prize-sum-title"><i class="fas fa-hand-holding-usd"></i> Prêmios por Cidade</h3>
-                        <p class="stats-subtitle">(Soma dos prêmios principais)</p>
-                        <div id="city-prize-sum-list-container" class="stats-list-container" aria-live="polite"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="hunch-generators-section-logged-out" class="dashboard-subsection" aria-labelledby="hunch-generators-title-h3-logged-out">
-                <h3 id="hunch-generators-title-h3-logged-out" class="card-title-accessible">
-                    <i class="fas fa-magic" aria-hidden="true"></i> Geradores de Palpites para <span id="dynamic-lottery-name-hunch-logged-out">Mega-Sena</span>
-                </h3>
-                <div class="grid-container-generators">
-                    <div class="card" id="quick-hunch-card-logged-out" aria-labelledby="quick-hunch-title-logged-out">
-                        <h3 id="quick-hunch-title-logged-out"><i class="fas fa-bolt" aria-hidden="true"></i> Palpite Algoritimo Genius</h3>
-                        <div class="button-group" style="margin-top:1rem;">
-                            <button id="generate-quick-hunch-btn-logged-out" class="action-btn primary-action"><i class="fas fa-random" aria-hidden="true"></i> Gerar Palpite Rápido</button>
-                        </div>
-                        <div id="quick-hunch-output-logged-out" class="game-card" style="display:none;" aria-live="polite" aria-atomic="true">
-                            <h4><i class="fas fa-lightbulb" aria-hidden="true"></i> Seu Palpite Genius:</h4>
-                            <div id="quick-hunch-numbers-logged-out" class="game-numbers"></div>
-                            <p id="quick-hunch-strategy-logged-out" class="strategy-text"></p>
-                            <div class="game-card-actions">
-                                <button id="check-quick-hunch-btn-logged-out" class="action-btn small-btn" title="Conferir este jogo" style="display:none;"><i class="fas fa-check-circle"></i> Conferir</button>
-                            </div>
-                            <div id="quick-hunch-check-result-logged-out" class="check-result-display" aria-live="polite"></div>
-                        </div>
-                    </div>
-                    </div>
-                <div id="cosmic-promo-banner" class="card promo-banner" style="display:block; margin-top: 2rem;">
-                    <h3 class="promo-title"><i class="fas fa-meteor"></i> Palpites Avançados e Personalizados! <i class="fas fa-hat-wizard"></i></h3>
-                    <p class="promo-text">Use a sabedoria ancestral da numerologia, números quentes, frios e mais...</p>
-                    <p class="promo-cta"><strong>Registre-se ou faça login</strong> para ter acesso exclusivo à nossa suíte completa de geradores inteligentes!</p>
-                    <div class="button-group" style="justify-content: center; margin-top:15px;">
-                        <button class="action-btn primary-action" id="promo-register-btn">Quero Me Registrar!</button>
-                        <button class="action-btn" id="promo-login-btn">Já Tenho Conta</button>
-                    </div>
-                </div>
-            </section>
 
             <section id="logged-in-hunch-tabs-section" class="dashboard-subsection" style="display:none;" aria-labelledby="logged-in-hunch-title-h3">
                 <h3 id="logged-in-hunch-title-h3" class="card-title-accessible">
@@ -294,6 +209,92 @@
                             <p>Consulte as estatísticas de "Mais Sorteados" na seção de informações da loteria para complementar sua estratégia.</p>
                             <div id="frequency-list-container-logic-tab" class="stats-list-container" style="margin-top:1rem;"><p>Selecione uma loteria para ver os números mais sorteados.</p></div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="platform-highlights-container" class="dashboard-subsection" aria-labelledby="platform-highlights-title-h3">
+                 <h3 id="platform-highlights-title-h3" class="card-title-accessible">
+                    <i class="fas fa-star" aria-hidden="true"></i> Loto Genius em Destaque
+                </h3>
+                <div class="grid-container-highlights">
+                    <div id="platform-highlights" class="card">
+                        <div class="highlights-grid">
+                            <div class="highlight-item"><i class="fas fa-dice-d20" aria-hidden="true"></i><span id="stats-jogos-gerados" class="stat-number">--</span><p>Palpites Gerados</p></div>
+                            <div class="highlight-item"><i class="fas fa-trophy" aria-hidden="true"></i><span id="stats-jogos-premiados" class="stat-number">--</span><p>Palpites Premiados</p></div>
+                            <div class="highlight-item"><i class="fas fa-sack-dollar" aria-hidden="true"></i><span id="stats-valor-premios" class="stat-number">R$ --</span><p>Prêmios Ganhos</p></div>
+                        </div>
+                    </div>
+                    <section id="winning-pools-preview" class="card" aria-labelledby="winning-pools-title">
+                        <h3 id="winning-pools-title"><i class="fas fa-users-crown"></i> Bolões Premiados (Em Breve)</h3>
+                        <ul id="recent-pools-list" aria-live="polite"><li>Funcionalidade de bolões será implementada futuramente.</li></ul>
+                         <p id="pools-error-message" style="color: #ff4765; display: none;"></p>
+                    </section>
+                    <section id="top-winners-preview" class="card" aria-labelledby="top-winners-title">
+                        <h3 id="top-winners-title"><i class="fas fa-medal"></i> Top Ganhadores</h3>
+                        <ol id="top-winners-list" aria-live="polite"><li><div class="spinner small-spinner"></div> Carregando...</li></ol>
+                    </section>
+                </div>
+            </section>
+
+            <section id="lottery-info-section" class="dashboard-subsection" aria-labelledby="lottery-info-title-h3">
+                <h3 id="lottery-info-title-h3" class="card-title-accessible">
+                    <i class="fas fa-chart-bar" aria-hidden="true"></i> Informações e Estatísticas: <span id="dynamic-lottery-name-info">Mega-Sena</span>
+                </h3>
+                <div class="grid-container-stats">
+                    <div class="card" id="results-display-card" aria-labelledby="results-title">
+                         <h3 id="results-title"><i class="fas fa-poll" aria-hidden="true"></i> Últimos Resultados</h3>
+                         <div id="api-results" class="code-block" aria-live="polite" style="min-height: 120px;">Aguardando seleção de loteria...</div>
+                    </div>
+                    <div class="card" id="frequency-stats-card" aria-labelledby="frequency-stats-title">
+                         <h3 id="frequency-stats-title"><i class="fas fa-sort-numeric-up-alt"></i> Mais Sorteados</h3>
+                         <div id="frequency-list-container" class="stats-list-container" aria-live="polite"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
+                    </div>
+                    <div class="card" id="pair-frequency-stats-card" aria-labelledby="pair-frequency-stats-title">
+                         <h3 id="pair-frequency-stats-title"><i class="fas fa-project-diagram"></i> Pares Frequentes</h3>
+                         <div id="pair-frequency-list-container" class="stats-list-container" aria-live="polite"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
+                    </div>
+                    <div class="card" id="city-stats-card" aria-labelledby="city-stats-title">
+                         <h3 id="city-stats-title"><i class="fas fa-city"></i> Cidades Premiadas</h3>
+                         <p class="stats-subtitle">(Ganhadores do prêmio principal)</p>
+                         <div id="city-list-container" class="stats-list-container" aria-live="polite"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
+                    </div>
+                    <div class="card" id="city-prize-sum-card" aria-labelledby="city-prize-sum-title">
+                        <h3 id="city-prize-sum-title"><i class="fas fa-hand-holding-usd"></i> Prêmios por Cidade</h3>
+                        <p class="stats-subtitle">(Soma dos prêmios principais)</p>
+                        <div id="city-prize-sum-list-container" class="stats-list-container" aria-live="polite"><p class="loading-stats"><div class="spinner small-spinner"></div></p></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="hunch-generators-section-logged-out" class="dashboard-subsection" aria-labelledby="hunch-generators-title-h3-logged-out">
+                <h3 id="hunch-generators-title-h3-logged-out" class="card-title-accessible">
+                    <i class="fas fa-magic" aria-hidden="true"></i> Geradores de Palpites para <span id="dynamic-lottery-name-hunch-logged-out">Mega-Sena</span>
+                </h3>
+                <div class="grid-container-generators">
+                    <div class="card" id="quick-hunch-card-logged-out" aria-labelledby="quick-hunch-title-logged-out">
+                        <h3 id="quick-hunch-title-logged-out"><i class="fas fa-bolt" aria-hidden="true"></i> Palpite Algoritimo Genius</h3>
+                        <div class="button-group" style="margin-top:1rem;">
+                            <button id="generate-quick-hunch-btn-logged-out" class="action-btn primary-action"><i class="fas fa-random" aria-hidden="true"></i> Gerar Palpite Rápido</button>
+                        </div>
+                        <div id="quick-hunch-output-logged-out" class="game-card" style="display:none;" aria-live="polite" aria-atomic="true">
+                            <h4><i class="fas fa-lightbulb" aria-hidden="true"></i> Seu Palpite Genius:</h4>
+                            <div id="quick-hunch-numbers-logged-out" class="game-numbers"></div>
+                            <p id="quick-hunch-strategy-logged-out" class="strategy-text"></p>
+                            <div class="game-card-actions">
+                                <button id="check-quick-hunch-btn-logged-out" class="action-btn small-btn" title="Conferir este jogo" style="display:none;"><i class="fas fa-check-circle"></i> Conferir</button>
+                            </div>
+                            <div id="quick-hunch-check-result-logged-out" class="check-result-display" aria-live="polite"></div>
+                        </div>
+                    </div>
+                    </div>
+                <div id="cosmic-promo-banner" class="card promo-banner" style="display:block; margin-top: 2rem;">
+                    <h3 class="promo-title"><i class="fas fa-meteor"></i> Palpites Avançados e Personalizados! <i class="fas fa-hat-wizard"></i></h3>
+                    <p class="promo-text">Use a sabedoria ancestral da numerologia, números quentes, frios e mais...</p>
+                    <p class="promo-cta"><strong>Registre-se ou faça login</strong> para ter acesso exclusivo à nossa suíte completa de geradores inteligentes!</p>
+                    <div class="button-group" style="justify-content: center; margin-top:15px;">
+                        <button class="action-btn primary-action" id="promo-register-btn">Quero Me Registrar!</button>
+                        <button class="action-btn" id="promo-login-btn">Já Tenho Conta</button>
                     </div>
                 </div>
             </section>
@@ -442,6 +443,33 @@
             <button id="submit-edit-game-btn" class="modal-btn">Salvar Alterações</button>
             <p id="edit-game-error" class="error-message" aria-live="assertive"></p>
         </div>
+    </div>
+    
+    <button id="contact-orb-btn" aria-label="Abrir opções de contato">
+        <i class="fas fa-satellite-dish"></i>
+    </button>
+
+    <div id="contact-modal" class="modal" role="dialog" aria-labelledby="contact-modal-title" aria-modal="true">
+        <div class="modal-content">
+            <button class="close-btn" id="close-contact-modal" aria-label="Fechar modal de contato">&times;</button>
+            <h2 id="contact-modal-title">Conecte-se Conosco</h2>
+            
+            <div class="contact-options" aria-label="Informações de Contato Rápidas">
+                <button class="contact-option-btn" data-type="phone" aria-label="Ver número de telefone">
+                    <i class="fas fa-phone-alt"></i><span>Telefone</span>
+                </button>
+                <button class="contact-option-btn" data-type="address" aria-label="Ver endereço">
+                    <i class="fas fa-map-marker-alt"></i><span>Endereço</span>
+                </button>
+                <button class="contact-option-btn" data-type="website" data-info="https://group-tau.vercel.app/" aria-label="Visitar nosso website">
+                    <i class="fas fa-globe"></i><span>Website</span>
+                </button>
+            </div>
+
+            <div id="contact-info-display" class="contact-info-box" aria-live="polite">
+                </div>
+            
+            </div>
     </div>
 
     <footer role="contentinfo">

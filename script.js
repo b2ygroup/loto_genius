@@ -191,9 +191,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
     let BACKEND_URL_BASE;
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:") {
-        BACKEND_URL_BASE = 'http://127.0.0.1:5000';
+        BACKEND_URL_BASE = 'http://127.0.0.1:5000'; 
     } else {
-        BACKEND_URL_BASE = '';
+        BACKEND_URL_BASE = ''; 
     }
     let firebaseApp, firebaseAuth, firestoreDB, currentUser = null;
     let lastFetchedResults = {};
@@ -587,6 +587,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 editGameNumbersInput.value = ''; 
                 if(editGameNumbersFeedback) editGameNumbersFeedback.textContent = '';
                 editGameErrorP.textContent = ''; 
+            }
+            else if (modalElement.id === 'contact-modal') { // Limpeza específica para o modal de contato
+                 const contactInfoDisplayToClear = document.getElementById('contact-info-display');
+                 if (contactInfoDisplayToClear) {
+                    contactInfoDisplayToClear.innerHTML = '';
+                    contactInfoDisplayToClear.style.display = 'none';
+                 }
             }
             if (previouslyFocusedElementModal) previouslyFocusedElementModal.focus();
         }
@@ -1236,7 +1243,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try { resultsToUse = await fetchData(`api/main/resultados/${currentLottery}`); if(resultsToUse) resultsToUse.loteria_tipo = currentLottery; lastFetchedResults[currentLottery] = resultsToUse; }
             catch (e) { if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = `<span class="misses">Falha ao buscar resultados.</span>`; return; }
         }
-        if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || resultsToUse.numeros.length === 0) { if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = `<span class="misses">Resultados oficiais indisponíveis.</span>`; return; }
+        if (!resultsToUse || resultsToUse.erro || resultsToUse.aviso || !resultsToUse.numeros || !resultsToUse.numeros.length === 0) { if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = `<span class="misses">Resultados oficiais indisponíveis.</span>`; return; }
 
         if(typeof checkGame !== "function" || typeof renderGameNumbers !== "function") {
              if(targetCheckResultDiv) targetCheckResultDiv.innerHTML = "Erro interno (checkGame ou renderGameNumbers não definida).";
@@ -2316,4 +2323,60 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // ===== LÓGICA DO ORBE E MODAL DE CONTATO (SIMPLIFICADO) =====
+    const contactOrbBtn = document.getElementById('contact-orb-btn');
+    const contactModal = document.getElementById('contact-modal');
+    const closeContactModalBtn = document.getElementById('close-contact-modal');
+    const contactOptions = document.querySelector('.contact-options');
+    const contactInfoDisplay = document.getElementById('contact-info-display');
+
+    if (contactOrbBtn && contactModal) {
+        contactOrbBtn.addEventListener('click', () => openModal(contactModal));
+    }
+    if (closeContactModalBtn && contactModal) {
+        closeContactModalBtn.addEventListener('click', () => {
+            closeModal(contactModal);
+            // Limpeza já é feita na função closeModal agora
+        });
+    }
+
+    if (contactOptions && contactInfoDisplay) {
+        contactOptions.addEventListener('click', (e) => {
+            const target = e.target.closest('.contact-option-btn');
+            if (!target) return;
+
+            const type = target.dataset.type;
+            contactInfoDisplay.style.display = 'flex';
+            contactInfoDisplay.innerHTML = ''; // Limpa antes de adicionar novo conteúdo
+
+            if (type === 'phone') {
+                // **!! SUBSTITUA PELO SEU NÚMERO DE TELEFONE REAL !!**
+                const phoneNumber = '(+55 11) 96552-0979'; 
+                contactInfoDisplay.innerHTML = `
+                    <span>${phoneNumber}</span>
+                    <button onclick="navigator.clipboard.writeText('${phoneNumber.replace(/\D/g, '')}')">Copiar</button>
+                `;
+            } else if (type === 'address') {
+                // **!! SUBSTITUA PELO SEU ENDEREÇO REAL !!**
+                const address = 'Torre Jacarandá - Av. Marcos Penteado de Ulhoa Rodrigues, 939 - 8º Andar Alphaville, Barueri - SP, 06460-040';
+                contactInfoDisplay.innerHTML = `
+                    <span>${address}</span>
+                `;
+            } else if (type === 'website') {
+                // O data-info já contém a URL completa do site
+                window.open(target.dataset.info, '_blank');
+                contactInfoDisplay.style.display = 'none'; // Esconde se for só um link externo
+            }
+        });
+    }
+    
+    // Adiciona o listener para fechar o modal de contato também
+    window.addEventListener('click', (event) => { 
+        if (event.target === contactModal) { // Certifique-se que 'contactModal' está definido
+             closeModal(contactModal);
+             // a limpeza do modal é feita na função closeModal agora.
+        }
+    });
+
 });
