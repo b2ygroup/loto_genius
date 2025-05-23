@@ -143,6 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const errorDiv = document.getElementById('global-error-msg');
     const confettiCanvas = document.getElementById('confetti-canvas');
+    const prizeNotificationModal = document.getElementById('prize-notification-modal');
+
 
     const frequencyListContainer = document.getElementById('frequency-list-container');
     const pairFrequencyListContainer = document.getElementById('pair-frequency-list-container');
@@ -170,6 +172,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedGamesContainer = document.getElementById('saved-games-container');
     const noSavedGamesP = document.getElementById('no-saved-games');
     const filterLotteryMyGamesSelect = document.getElementById('filter-lottery-mygames');
+
+    const editGameModal = document.getElementById('edit-game-modal');
+    const closeEditGameModalBtn = document.getElementById('close-edit-game-modal');
+    const editGameDocIdInput = document.getElementById('edit-game-doc-id');
+    const editGameLotteryDisplay = document.getElementById('edit-game-lottery-display');
+    const editGameNumbersInput = document.getElementById('edit-game-numbers-input');
+    const editGameNumbersLabel = document.getElementById('edit-game-numbers-label');
+    const editGameNumbersFeedback = document.getElementById('edit-game-numbers-feedback');
+    const submitEditGameBtn = document.getElementById('submit-edit-game-btn');
+    const editGameErrorP = document.getElementById('edit-game-error');
+
 
     let splashProgressBarFill = mainSplashScreen ? mainSplashScreen.querySelector('.progress-bar-fill') : null;
     let splashProgressContainer = mainSplashScreen ? mainSplashScreen.querySelector('.progress-bar-container') : null;
@@ -483,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         resetHunchDisplay({ 
             outputDiv: coldNumbersHunchOutputDiv, numbersDiv: coldNumbersHunchNumbersDiv,
-            strategyP: coldNumbersHunchStrategyP, checkResultDiv: coldNumbersHunchCheckResultDiv, // CORRIGIDO AQUI
+            strategyP: coldNumbersHunchStrategyP, checkResultDiv: coldNumbersHunchCheckResultDiv,
             saveButton: saveColdHunchBtn, checkButton: checkColdHunchBtn
         });
         resetHunchDisplay({ 
@@ -569,6 +582,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.overflow = '';
             if (modalElement === loginModal && loginEmailInput && loginPasswordInput && loginErrorP) { loginEmailInput.value = ''; loginPasswordInput.value = ''; loginErrorP.textContent = ''; }
             else if (modalElement === registerModal && registerEmailInput && registerPasswordInput && registerConfirmPasswordInput && registerErrorP) { registerEmailInput.value = ''; registerPasswordInput.value = ''; registerConfirmPasswordInput.value = ''; registerErrorP.textContent = ''; }
+            else if (modalElement === editGameModal && editGameDocIdInput && editGameNumbersInput && editGameErrorP) { 
+                editGameDocIdInput.value = ''; 
+                editGameNumbersInput.value = ''; 
+                if(editGameNumbersFeedback) editGameNumbersFeedback.textContent = '';
+                editGameErrorP.textContent = ''; 
+            }
             if (previouslyFocusedElementModal) previouslyFocusedElementModal.focus();
         }
     }
@@ -1308,9 +1327,9 @@ document.addEventListener('DOMContentLoaded', () => {
         card.dataset.id = docId;
         const lotteryName = LOTTERY_CONFIG_JS[gameData.lottery]?.name || gameData.lottery.toUpperCase();
         const gameNumbersDiv = document.createElement('div'); gameNumbersDiv.classList.add('game-numbers');
-
+    
         renderGameNumbers(gameNumbersDiv, gameData.game, gameData.numerosAcertados || [], [], gameData.lottery);
-
+    
         const strategyP = document.createElement('p'); strategyP.classList.add('strategy-text'); strategyP.textContent = `Estratégia: ${gameData.strategy || 'N/A'}`;
         const dateP = document.createElement('p'); dateP.classList.add('game-card-info'); 
         let savedDateString = 'N/A';
@@ -1338,15 +1357,31 @@ document.addEventListener('DOMContentLoaded', () => {
             verificationStatusP.style.fontStyle = 'italic';
             verificationStatusP.style.color = gameData.faixaPremio === "Aguardando novo concurso" ? '#82e0aa' : '#8899aa';
         }
-
+    
         const actionsDiv = document.createElement('div'); actionsDiv.classList.add('game-card-actions');
         
+        const editBtn = document.createElement('button');
+        editBtn.classList.add('action-btn', 'small-btn', 'edit-game-btn');
+        editBtn.innerHTML = '<i class="fas fa-edit"></i> Editar';
+        editBtn.title = "Editar os números deste jogo";
+    
         const playAgainBtn = document.createElement('button');
         playAgainBtn.classList.add('action-btn', 'small-btn', 'play-again-btn');
         playAgainBtn.innerHTML = '<i class="fas fa-redo"></i> Jogar Novamente';
-        playAgainBtn.title = "Exclui este jogo e o joga novamente no próximo concurso";
-        playAgainBtn.addEventListener('click', () => handlePlayAgain(docId, gameData, card)); 
-
+            
+        if (gameData.faixaPremio === "Aguardando novo concurso" && gameData.ultimoConcursoVerificado === null) {
+            playAgainBtn.title = "Este jogo foi marcado para jogar novamente e está aguardando o próximo sorteio.";
+            playAgainBtn.disabled = true;
+            playAgainBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> Aguardando';
+            playAgainBtn.classList.add('awaiting-draw'); 
+            editBtn.disabled = true; 
+            editBtn.title = "Não é possível editar um jogo que está aguardando o próximo sorteio.";
+        } else {
+            playAgainBtn.title = "Exclui este jogo e o joga novamente no próximo concurso";
+            playAgainBtn.addEventListener('click', () => handlePlayAgain(docId, gameData, card));
+            editBtn.addEventListener('click', () => openEditGameModal(docId, gameData));
+        }
+    
         const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'small-btn', 'delete-game-btn'); 
         deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Excluir';
         deleteBtn.addEventListener('click', async () => { 
@@ -1363,6 +1398,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
+        actionsDiv.appendChild(editBtn);
         actionsDiv.appendChild(playAgainBtn); 
         actionsDiv.appendChild(deleteBtn);
         
@@ -1381,22 +1417,22 @@ document.addEventListener('DOMContentLoaded', () => {
             openModal(loginModal);
             return;
         }
-
+    
         if (!confirm(`Deseja realmente jogar novamente o jogo [${originalGameData.game.join(', ')}]? O jogo salvo original será removido e um novo será criado para o próximo concurso.`)) {
             return;
         }
     
-        const playAgainButton = gameCardElement.querySelector('.play-again-btn');
-        if(playAgainButton) {
-            playAgainButton.disabled = true;
-            playAgainButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+        const playAgainButtonInCard = gameCardElement.querySelector('.play-again-btn');
+        if (playAgainButtonInCard) {
+            playAgainButtonInCard.disabled = true;
+            playAgainButtonInCard.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
         }
         
         let originalSavedDateStr = 'data antiga';
         if (originalGameData.savedAt && originalGameData.savedAt.toDate) {
             originalSavedDateStr = new Date(originalGameData.savedAt.toDate()).toLocaleDateString('pt-BR');
         } else if (originalGameData.savedAt) {
-            try { originalSavedDateStr = new Date(originalGameData.savedAt).toLocaleDateString('pt-BR'); } catch(e) {}
+            try { originalSavedDateStr = new Date(originalGameData.savedAt).toLocaleDateString('pt-BR'); } catch (e) {}
         }
     
         const newGameEntry = {
@@ -1427,12 +1463,132 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error("Erro ao tentar jogar novamente:", error);
             alert(`Erro ao tentar jogar novamente: ${error.message}. O jogo original pode não ter sido removido se a cópia falhou.`);
-            if(playAgainButton) { 
-                playAgainButton.disabled = false;
-                playAgainButton.innerHTML = '<i class="fas fa-redo"></i> Jogar Novamente';
+            if (playAgainButtonInCard) { 
+                playAgainButtonInCard.disabled = false;
+                playAgainButtonInCard.innerHTML = '<i class="fas fa-redo"></i> Jogar Novamente';
             }
         }
     }
+
+    function openEditGameModal(docId, gameData) {
+        if (!editGameModal || !editGameDocIdInput || !editGameLotteryDisplay || !editGameNumbersInput || !editGameNumbersLabel || !editGameNumbersFeedback || !editGameErrorP) {
+            console.error("Elementos do modal de edição não encontrados.");
+            return;
+        }
+
+        editGameDocIdInput.value = docId;
+        const lotteryConfig = LOTTERY_CONFIG_JS[gameData.lottery.toLowerCase()];
+        const lotteryName = lotteryConfig?.name || gameData.lottery.toUpperCase();
+        editGameLotteryDisplay.value = lotteryName;
+        editGameLotteryDisplay.dataset.lotteryKey = gameData.lottery.toLowerCase();
+        editGameNumbersInput.value = gameData.game.join(', ');
+
+        if (lotteryConfig) {
+            const expectedCount = lotteryConfig.count_apostadas || lotteryConfig.count;
+            editGameNumbersLabel.textContent = `Seus números (${expectedCount} de ${lotteryConfig.min}-${lotteryConfig.max}, separados por vírgula):`;
+            editGameNumbersInput.placeholder = `Ex: ${Array.from({ length: expectedCount }, (_, i) => String(i + 1).padStart(2, '0')).join(',')}`;
+        } else {
+            editGameNumbersLabel.textContent = `Seus números (separados por vírgula):`;
+            editGameNumbersInput.placeholder = `Confirme a quantidade de números para esta loteria.`;
+        }
+        
+        updateEditGameNumbersFeedback();
+        editGameErrorP.textContent = '';
+        openModal(editGameModal);
+    }
+
+    function updateEditGameNumbersFeedback() {
+        if (!editGameLotteryDisplay || !editGameNumbersInput || !editGameNumbersFeedback) return;
+        
+        const lotteryKey = editGameLotteryDisplay.dataset.lotteryKey;
+        const numbersStr = editGameNumbersInput.value;
+        const userNumbersCount = numbersStr.split(/[ ,;/\t\n]+/).filter(n => n.trim() !== "" && !isNaN(n)).length;
+        
+        const selectedLotteryConfig = LOTTERY_CONFIG_JS[lotteryKey];
+
+        if (selectedLotteryConfig) {
+             const expectedCount = selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count;
+             editGameNumbersFeedback.textContent = `Números: ${userNumbersCount} de ${expectedCount}.`;
+        } else {
+            editGameNumbersFeedback.textContent = `Números: ${userNumbersCount}. (Configuração da loteria não encontrada)`;
+        }
+    }
+
+    async function handleSaveEditedGame() {
+        if (!currentUser || !firestoreDB || !editGameDocIdInput.value || !editGameLotteryDisplay || !editGameNumbersInput || !editGameErrorP) {
+            alert("Erro interno ou dados do formulário de edição ausentes.");
+            return;
+        }
+
+        const docId = editGameDocIdInput.value;
+        const lotteryKey = editGameLotteryDisplay.dataset.lotteryKey;
+
+        if (!lotteryKey) {
+            editGameErrorP.textContent = "Chave da loteria não encontrada.";
+            return;
+        }
+        const selectedLotteryConfig = LOTTERY_CONFIG_JS[lotteryKey];
+        if (!selectedLotteryConfig) {
+            editGameErrorP.textContent = "Configuração da loteria não encontrada.";
+            return;
+        }
+
+        const numbersStr = editGameNumbersInput.value;
+        const userNumbersRaw = numbersStr.split(/[ ,;/\t\n]+/);
+        const userNumbers = userNumbersRaw.map(n => n.trim()).filter(n => n !== "" && !isNaN(n)).map(n => parseInt(n, 10));
+        
+        const expectedCount = selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count;
+        editGameErrorP.textContent = '';
+
+        if (userNumbers.length === 0) {
+            editGameErrorP.textContent = 'Insira os números do seu jogo.'; return;
+        }
+        if (userNumbers.length !== expectedCount) {
+            editGameErrorP.textContent = `Forneça ${expectedCount} números para ${selectedLotteryConfig.name}. Você forneceu ${userNumbers.length}.`; return;
+        }
+        if (new Set(userNumbers).size !== userNumbers.length) {
+            editGameErrorP.textContent = 'Seu jogo contém números repetidos.'; return;
+        }
+        const minNum = selectedLotteryConfig.min; const maxNum = selectedLotteryConfig.max;
+        for (const num of userNumbers) {
+            if (num < minNum || num > maxNum) {
+                editGameErrorP.textContent = `O número ${num} está fora do range (${minNum}-${maxNum}) para ${selectedLotteryConfig.name}.`; return;
+            }
+        }
+
+        const gameDocRef = firestoreDB.collection('userGames').doc(docId);
+
+        const updatedGameData = {
+            game: userNumbers.sort((a, b) => a - b),
+            savedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            isPremiado: false,
+            faixaPremio: "Não verificado (Editado)",
+            acertos: 0,
+            numerosAcertados: [],
+            ultimoConcursoVerificado: null,
+            notificacaoPendente: false,
+            strategy: "Jogo Editado Manualmente" 
+        };
+
+        submitEditGameBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+        submitEditGameBtn.disabled = true;
+
+        try {
+            await gameDocRef.update(updatedGameData);
+            alert("Jogo atualizado com sucesso! Ele será verificado no próximo concurso.");
+            closeModal(editGameModal);
+            if (myGamesSection.classList.contains('active-section')) {
+                loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
+            }
+        } catch (error) {
+            console.error("Erro ao atualizar jogo:", error);
+            editGameErrorP.textContent = `Erro ao salvar: ${error.message}`;
+        } finally {
+            submitEditGameBtn.innerHTML = 'Salvar Alterações';
+            submitEditGameBtn.disabled = false;
+        }
+    }
+
 
     async function checkForPrizesAndNotify(userId) {
         if (!firestoreDB || !userId) return;
@@ -1445,12 +1601,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                     .get();
 
             if (!querySnapshot.empty) {
-                const prizeModal = document.getElementById('prize-notification-modal');
                 const prizeDetailsContainer = document.getElementById('prize-details-container');
                 const prizeMessage = document.getElementById('prize-message');
                 const confettiModalCanvas = document.getElementById('confetti-canvas-modal');
                 
-                if(!prizeModal || !prizeDetailsContainer || !prizeMessage) { return; }
+                if(!prizeNotificationModal || !prizeDetailsContainer || !prizeMessage) { return; }
 
                 prizeDetailsContainer.innerHTML = '';
                 let firstPrize = true;
@@ -1470,25 +1625,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                openModal(prizeModal);
+                openModal(prizeNotificationModal);
                 if(typeof triggerConfetti === 'function' && confettiModalCanvas) triggerConfetti(confettiModalCanvas);
                 
                 const okBtn = document.getElementById('ok-prize-modal-btn');
-                const closeBtn = document.getElementById('close-prize-modal');
+                const closeBtnPrize = document.getElementById('close-prize-modal');
                 const copyPixBtn = document.getElementById('copy-pix-key-btn');
 
                 const handleCloseAndMarkNotified = () => {
-                    closeModal(prizeModal);
+                    closeModal(prizeNotificationModal);
                     gamesToUpdate.forEach(gameId => {
                         firestoreDB.collection('userGames').doc(gameId).update({ notificacaoPendente: false })
                             .catch(err => {});
                     });
                     if(okBtn) okBtn.removeEventListener('click', handleCloseAndMarkNotified);
-                    if(closeBtn) closeBtn.removeEventListener('click', handleCloseAndMarkNotified);
+                    if(closeBtnPrize) closeBtnPrize.removeEventListener('click', handleCloseAndMarkNotified);
                 };
 
                 if(okBtn) okBtn.addEventListener('click', handleCloseAndMarkNotified, { once: true });
-                if(closeBtn) closeBtn.addEventListener('click', handleCloseAndMarkNotified, { once: true });
+                if(closeBtnPrize) closeBtnPrize.addEventListener('click', handleCloseAndMarkNotified, { once: true });
 
                 if (copyPixBtn) {
                     copyPixBtn.onclick = () => {
@@ -1877,7 +2032,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if(registerModalBtn) registerModalBtn.addEventListener('click', () => openModal(registerModal));
     if(closeLoginModalBtn) closeLoginModalBtn.addEventListener('click', () => closeModal(loginModal));
     if(closeRegisterModalBtn) closeRegisterModalBtn.addEventListener('click', () => closeModal(registerModal));
-    window.addEventListener('click', (event) => { if (event.target === loginModal) closeModal(loginModal); if (event.target === registerModal) closeModal(registerModal); });
+    if(submitEditGameBtn) submitEditGameBtn.addEventListener('click', handleSaveEditedGame);
+    if(closeEditGameModalBtn) closeEditGameModalBtn.addEventListener('click', () => closeModal(editGameModal));
+
+    window.addEventListener('click', (event) => { 
+        if (event.target === loginModal) closeModal(loginModal); 
+        if (event.target === registerModal) closeModal(registerModal);
+        if (event.target === editGameModal) closeModal(editGameModal);
+        if (event.target === prizeNotificationModal) {
+            const okBtn = document.getElementById('ok-prize-modal-btn');
+            if (okBtn) okBtn.click();
+        }
+    });
 
     if (navDashboardBtn) navDashboardBtn.addEventListener('click', () => setActiveSection('dashboard-section'));
     if (navMyGamesBtn) navMyGamesBtn.addEventListener('click', () => { setActiveSection('my-games-section'); if (currentUser && typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); });
@@ -1900,6 +2066,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (buyMysteryGameBtn) {
         buyMysteryGameBtn.addEventListener('click', handleBuyMysteryGame); 
+    }
+    if (editGameNumbersInput) {
+        editGameNumbersInput.addEventListener('input', updateEditGameNumbersFeedback);
     }
 
     if (generateQuickHunchBtnLoggedOut) generateQuickHunchBtnLoggedOut.addEventListener('click', generateAndDisplayQuickHunchLoggedOut);
