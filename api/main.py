@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect
 from flask_cors import CORS
 import random
 import os
@@ -14,6 +14,7 @@ import requests
 from datetime import datetime, timedelta, timezone
 import pandas as pd
 
+# Importação relativa para o verificador_jogos
 from .verificador_jogos import verificar_jogos_salvos_batch, initialize_firebase_admin_verificador as init_fb_verificador_main
 from .verificador_jogos import verificar_jogos_para_novo_resultado
 
@@ -86,8 +87,10 @@ LOTTERY_CONFIG = {
         "cols_bolas_prefix": "Bola", "num_bolas_no_arquivo": 15,
         "col_ganhadores_principal": "Ganhadores 15 acertos", "col_cidade_uf_principal": "Cidade / UF",
         "col_rateio_principal": "Rateio 15 acertos", "rateio_15_key": "rateio_principal_valor",
-        "rateio_14_key": "rateio_14_acertos_valor", "rateio_13_key": "rateio_13_acertos_valor",
-        "rateio_12_key": "rateio_12_acertos_valor", "rateio_11_key": "rateio_11_acertos_valor"
+        "col_rateio_14": "Rateio 14 acertos", "rateio_14_key": "rateio_14_acertos_valor", # Exemplo de nome de coluna no XLSX
+        "col_rateio_13": "Rateio 13 acertos", "rateio_13_key": "rateio_13_acertos_valor",
+        "col_rateio_12": "Rateio 12 acertos", "rateio_12_key": "rateio_12_acertos_valor",
+        "col_rateio_11": "Rateio 11 acertos", "rateio_11_key": "rateio_11_acertos_valor"
     },
     "lotomania": {
         "nome_exibicao": "Lotomania", "min": 0, "max": 99, "count_apostadas": 50,
@@ -99,7 +102,7 @@ LOTTERY_CONFIG = {
         "cols_bolas_prefix": "Bola", "num_bolas_no_arquivo": 20,
         "col_ganhadores_principal": "Ganhadores 20 acertos", "col_cidade_uf_principal": "Cidade / UF",
         "col_rateio_principal": "Rateio 20 acertos", "rateio_20_key": "rateio_principal_valor",
-        "rateio_0_key": "rateio_0_acertos_valor"
+        "col_rateio_0": "Rateio 0 acertos", "rateio_0_key": "rateio_0_acertos_valor" 
     },
     "quina": {
         "nome_exibicao": "Quina", "min": 1, "max": 80, "count": 5, "count_apostadas": 5,
@@ -111,8 +114,9 @@ LOTTERY_CONFIG = {
         "cols_bolas_prefix": "Bola", "num_bolas_no_arquivo": 5,
         "col_ganhadores_principal": "Ganhadores 5 acertos", "col_cidade_uf_principal": "Cidade / UF",
         "col_rateio_principal": "Rateio 5 acertos", "rateio_5_key": "rateio_principal_valor",
-        "rateio_4_key": "rateio_4_acertos_valor", "rateio_3_key": "rateio_3_acertos_valor",
-        "rateio_2_key": "rateio_2_acertos_valor"
+        "col_rateio_4": "Rateio 4 acertos", "rateio_4_key": "rateio_4_acertos_valor", 
+        "col_rateio_3": "Rateio 3 acertos", "rateio_3_key": "rateio_3_acertos_valor",
+        "col_rateio_2": "Rateio 2 acertos", "rateio_2_key": "rateio_2_acertos_valor"
     }
 }
 TAXA_SERVICO_JOGO_MISTERIOSO = 1.50
@@ -425,23 +429,21 @@ def processar_loteria_para_cron(loteria_key_func, config_loteria_func, tentar_do
     df = None
     filepath_to_read = None
 
-    # Para todas as loterias, tentamos baixar o XLSX, incluindo Lotomania
     if tentar_download:
         filepath_to_read = baixar_arquivo_loteria_para_vercel(loteria_key_func, config_loteria_func)
     
     if filepath_to_read and os.path.exists(filepath_to_read):
         try: 
-            # Todos os arquivos da Caixa são XLSX
             df = pd.read_excel(filepath_to_read, engine='openpyxl', dtype=str, na_values=['-'], keep_default_na=True)
             app.logger.info(f"CRON SUCESSO [{loteria_key_func.upper()}]: Arquivo {filepath_to_read} lido com pandas.")
         except Exception as e_read: 
             app.logger.error(f"CRON ERRO ao ler arquivo {filepath_to_read} para {loteria_key_func.upper()}: {e_read}")
             if os.path.exists(filepath_to_read) and VERCEL_TMP_DIR in filepath_to_read: os.remove(filepath_to_read)
             return
-    elif tentar_download: # Se o download foi tentado mas falhou (filepath_to_read é None)
+    elif tentar_download:
         app.logger.warning(f"CRON AVISO: Falha no download ou arquivo não encontrado para {loteria_key_func.upper()} após tentativa de download.")
         return
-    else: # Não tentou baixar e não há arquivo (não deve acontecer neste fluxo de cron)
+    else:
         app.logger.info(f"CRON [{loteria_key_func.upper()}]: Download não solicitado e nenhum arquivo encontrado.")
         return
 
@@ -451,7 +453,6 @@ def processar_loteria_para_cron(loteria_key_func, config_loteria_func, tentar_do
         if filepath_to_read and os.path.exists(filepath_to_read) and VERCEL_TMP_DIR in filepath_to_read: os.remove(filepath_to_read)
         return
 
-    # Certifique-se que os nomes das colunas em LOTTERY_CONFIG estão corretos para os arquivos XLSX
     col_concurso = config_loteria_func["col_concurso"]
     col_data = config_loteria_func["col_data_sorteio"]
     cols_bolas_prefix = config_loteria_func["cols_bolas_prefix"]
@@ -460,7 +461,6 @@ def processar_loteria_para_cron(loteria_key_func, config_loteria_func, tentar_do
     col_cidade_uf_principal = config_loteria_func.get("col_cidade_uf_principal")
     col_rateio_principal = config_loteria_func.get("col_rateio_principal")
     
-    # Campos específicos da Mega-Sena
     col_rateio_quina_ms = config_loteria_func.get("col_rateio_quina")
     col_rateio_quadra_ms = config_loteria_func.get("col_rateio_quadra")
 
@@ -498,7 +498,6 @@ def processar_loteria_para_cron(loteria_key_func, config_loteria_func, tentar_do
                     sorteio_data["cidades_ganhadoras_principal"] = cidades_lista
                     sorteio_data["rateio_principal_valor"] = format_currency(parse_currency_to_float(str(rateio_val_str))) if num_ganhadores_parsed > 0 else "R$ 0,00"
 
-
                     if loteria_key_func == 'megasena':
                         if col_rateio_quina_ms and config_loteria_func.get("rateio_quina_key"): 
                             rateio_quina_val_str = row.get(col_rateio_quina_ms, '0')
@@ -507,17 +506,17 @@ def processar_loteria_para_cron(loteria_key_func, config_loteria_func, tentar_do
                             rateio_quadra_val_str = row.get(col_rateio_quadra_ms, '0')
                             sorteio_data[config_loteria_func["rateio_quadra_key"]] = format_currency(parse_currency_to_float(str(rateio_quadra_val_str)))
                     elif loteria_key_func == 'lotofacil':
-                        faixas_lotofacil = {
-                            "rateio_14_key": row.get(config_loteria_func.get("col_rateio_14", "Rateio 14 acertos"), '0'), # Ajuste os nomes das colunas conforme o XLSX
-                            "rateio_13_key": row.get(config_loteria_func.get("col_rateio_13", "Rateio 13 acertos"), '0'),
-                            "rateio_12_key": row.get(config_loteria_func.get("col_rateio_12", "Rateio 12 acertos"), '0'),
-                            "rateio_11_key": row.get(config_loteria_func.get("col_rateio_11", "Rateio 11 acertos"), '0')
+                        faixas_lotofacil_cols = { 
+                            "rateio_14_key": config_loteria_func.get("col_rateio_14", "Rateio 14 acertos"),
+                            "rateio_13_key": config_loteria_func.get("col_rateio_13", "Rateio 13 acertos"),
+                            "rateio_12_key": config_loteria_func.get("col_rateio_12", "Rateio 12 acertos"),
+                            "rateio_11_key": config_loteria_func.get("col_rateio_11", "Rateio 11 acertos")
                         }
-                        for config_key, valor_rateio_str in faixas_lotofacil.items():
-                            json_data_key = LOTTERY_CONFIG[loteria_key_func].get(config_key) # rateio_14_acertos_valor, etc.
-                            if json_data_key:
-                                sorteio_data[json_data_key] = format_currency(parse_currency_to_float(str(valor_rateio_str)))
-                    # Adicionar lógica semelhante para Quina e Lotomania se tiverem colunas de rateio adicionais no XLSX
+                        for config_key_lf, column_name_lf in faixas_lotofacil_cols.items():
+                            json_data_key_lf = LOTTERY_CONFIG[loteria_key_func].get(config_key_lf)
+                            if json_data_key_lf and row.get(column_name_lf) is not None:
+                                rateio_str_val_lf = row.get(column_name_lf, '0')
+                                sorteio_data[json_data_key_lf] = format_currency(parse_currency_to_float(str(rateio_str_val_lf)))
                 
                 results_list.append(sorteio_data)
         except Exception as e_row: 
@@ -562,31 +561,31 @@ def processar_loteria_para_cron(loteria_key_func, config_loteria_func, tentar_do
 
 @app.route('/api/cron/processar-loterias', methods=['POST','GET']) 
 def cron_processar_loterias_endpoint():
-    configured_secret = os.environ.get('CRON_JOB_SECRET') 
-    request_secret = request.headers.get('x-vercel-cron-secret')
+    configured_cron_secret = os.environ.get('CRON_SECRET') 
+    auth_header = request.headers.get('Authorization')
+    bearer_token = None
+    if auth_header and auth_header.startswith('Bearer '):
+        bearer_token = auth_header.split(' ')[1]
 
     is_authorized = False
-    if request.method == 'GET' and not configured_secret:
+    if request.method == 'GET' and not configured_cron_secret:
         is_authorized = True
-        app.logger.info("CRON: Acesso GET local permitido (sem CRON_JOB_SECRET configurado no ambiente).")
-    elif configured_secret and request_secret == configured_secret:
+        app.logger.info("CRON: Acesso GET local permitido (CRON_SECRET não configurado no ambiente).")
+    elif configured_cron_secret and bearer_token == configured_cron_secret:
         is_authorized = True
-    elif request.method == 'POST': # Para POST, sempre exigir secret se configurado
-        if not configured_secret:
-             app.logger.error("CRON: POST não autorizado - CRON_JOB_SECRET não configurado no ambiente.")
+    elif request.method == 'POST': 
+        if not configured_cron_secret:
+             app.logger.error("CRON: POST não autorizado - CRON_SECRET não configurado no ambiente!")
              return jsonify({"error": "Configuração de segurança do servidor ausente"}), 500
-        if not request_secret or request_secret != configured_secret:
-            app.logger.warning("CRON: POST não autorizado - x-vercel-cron-secret inválido ou ausente.")
+        if not bearer_token or bearer_token != configured_cron_secret:
+            app.logger.warning(f"CRON: POST não autorizado - Header 'Authorization' Bearer token inválido ou ausente. Recebido: {auth_header}")
             return jsonify({"error": "Não autorizado"}), 401
-        # Se chegou aqui para POST, está autorizado (pois request_secret == configured_secret já teria sido pego acima)
-        # Esta lógica pode ser simplificada. A verificação principal é: configured_secret E request_secret == configured_secret.
-        # O GET local é uma exceção.
-
-    if not is_authorized: # Se após todas as checagens não estiver autorizado
-        app.logger.warning("CRON: Falha final na autorização do endpoint /api/cron/processar-loterias.")
+            
+    if not is_authorized:
+        app.logger.warning(f"CRON: Falha final na autorização do endpoint. Header 'Authorization': {auth_header}. ENV 'CRON_SECRET': {'Definido' if configured_cron_secret else 'Não definido'}")
         return jsonify({"error": "Não autorizado"}), 401
             
-    app.logger.info("CRON: Endpoint /api/cron/processar-loterias acionado com sucesso.")
+    app.logger.info("CRON: Endpoint /api/cron/processar-loterias acionado com sucesso e autorizado.")
     
     if not FB_ADMIN_INITIALIZED or not db_admin:
         app.logger.error("CRON ERRO FATAL: Firebase (db_admin) não inicializado em main.py. Processamento não pode continuar.")
@@ -615,34 +614,7 @@ def cron_processar_loterias_endpoint():
         return jsonify({"status": "erro_geral_cron", "mensagem": str(e_cron)}), 500
 
 
-@app.route('/api/internal/run-verification', methods=['POST'])
-def trigger_game_verification_endpoint():
-    INTERNAL_API_KEY = os.environ.get("INTERNAL_CRON_SECRET_MANUAL_VERIF") 
-    if not INTERNAL_API_KEY:
-        app.logger.error("INTERNAL_CRON_SECRET_MANUAL_VERIF não configurado.")
-        return jsonify({"error": "Configuração interna do servidor ausente."}), 500
-
-    request_api_key = request.headers.get('X-Internal-Api-Key')
-    if request_api_key != INTERNAL_API_KEY:
-        app.logger.warning("Tentativa de acesso não autorizado ao endpoint de verificação manual em lote.")
-        return jsonify({"error": "Não autorizado"}), 403
-
-    app.logger.info("Disparando verificação em lote de jogos salvos via endpoint /api/internal/run-verification.")
-    try:
-        if not FB_ADMIN_INITIALIZED or not db_admin:
-            app.logger.error("Endpoint de verificação manual: Firebase Admin (db_admin) não está inicializado. Não pode prosseguir.")
-            return jsonify({"status": "error", "message":"Erro interno: Firebase não inicializado."}), 500
-        
-        verificar_jogos_salvos_batch() 
-        message = "Verificação em lote de jogos salvos (manual) concluída com sucesso."
-        app.logger.info(message)
-        return jsonify({"status": "success", "message": message}), 200
-    except Exception as e_manual_verif:
-        error_message = f"Erro ao executar verificação manual em lote: {e_manual_verif}"
-        app.logger.error(error_message, exc_info=True)
-        return jsonify({"status": "error", "message": error_message}), 500
-
-# Suas rotas existentes da API
+# --- ROTAS EXISTENTES DA API ---
 @app.route('/')
 def api_base_root_main():
     return jsonify({"message": "API Loto Genius Python (api/main.py).", "note": "Endpoints em /api/..." })
@@ -653,7 +625,7 @@ def api_home_vercel_main():
 
 @app.route('/api/main/')
 def api_main_home_main():
-    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.9.3 - Lotomania XLSX e Cron Job"})
+    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "5.0.0 - Cron Job Vercel e Lotomania XLSX"})
 
 @app.route('/api/main/platform-stats', methods=['GET'])
 def get_platform_stats_persistent():
