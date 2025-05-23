@@ -27,12 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const navDashboardBtn = document.getElementById('nav-dashboard-btn');
     const navMyGamesBtn = document.getElementById('nav-my-games-btn');
-    const navMyMysteryGamesBtn = document.getElementById('nav-my-mystery-games-btn'); // NOVO JOGO MISTERIOSO
+    const navMyMysteryGamesBtn = document.getElementById('nav-my-mystery-games-btn'); 
     const navPoolsBtn = document.getElementById('nav-pools-btn');
     const mainNav = document.getElementById('main-nav');
     const dashboardSection = document.getElementById('dashboard-section');
     const myGamesSection = document.getElementById('my-games-section');
-    const myMysteryGamesSection = document.getElementById('my-mystery-games-section'); // NOVO JOGO MISTERIOSO
+    const myMysteryGamesSection = document.getElementById('my-mystery-games-section'); 
     const poolsSection = document.getElementById('pools-section');
     const mainSections = document.querySelectorAll('.main-section');
 
@@ -48,13 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const dynamicLotteryNameHunchLoggedOutSpan = document.getElementById('dynamic-lottery-name-hunch-logged-out');
     const dynamicLotteryNameManualSpan = document.getElementById('dynamic-lottery-name-manual');
     
-    // NOVOS SELETORES JOGO MISTERIOSO
-    const dynamicLotteryNameMysterySpan = document.getElementById('dynamic-lottery-name-mystery');
-    const buyMysteryGameBtn = document.getElementById('buy-mystery-game-btn');
-    const mysteryGamePriceSpan = document.getElementById('mystery-game-price');
-    const mysteryGamePurchaseStatusDiv = document.getElementById('mystery-game-purchase-status');
+    // Seletores para o "Jogo Misterioso Teaser" (o card de compra foi movido/simplificado)
+    const dynamicLotteryNameMysterySpan = document.getElementById('dynamic-lottery-name-mystery'); // Este ID pode não existir mais no HTML do teaser
+    const buyMysteryGameBtn = document.getElementById('buy-mystery-game-btn'); // Este ID foi removido do teaser
+    const mysteryGamePriceSpan = document.getElementById('mystery-game-price'); // Este ID foi removido do teaser
+    const mysteryGamePurchaseStatusDiv = document.getElementById('mystery-game-purchase-status'); // Este ID foi removido do teaser
     const myMysteryGamesContainer = document.getElementById('my-mystery-games-container');
-    // FIM NOVOS SELETORES
+
 
     const hunchGeneratorsSectionLoggedOut = document.getElementById('hunch-generators-section-logged-out');
     const generateQuickHunchBtnLoggedOut = document.getElementById('generate-quick-hunch-btn-logged-out');
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const coldNumbersHunchStrategyP = document.getElementById('cold-numbers-hunch-strategy');
     const saveColdHunchBtn = document.getElementById('save-cold-hunch-btn');
     const checkColdHunchBtn = document.getElementById('check-cold-hunch-btn');
-    const coldHunchCheckResultDiv = document.getElementById('cold-hunch-check-result');
+    const coldNumbersHunchCheckResultDiv = document.getElementById('cold-hunch-check-result');
 
     const esotericHunchCard = document.getElementById('esoteric-hunch-card');
     const birthDateInput = document.getElementById('birth-date-input');
@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         quina: { count: 5, count_apostadas: 5, min:1, max:80, color: "#260085", name: "Quina", count_sorteadas: 5, preco_base: 2.5 },
         lotomania: { count_sorteadas: 20, count_apostadas: 50, min:0, max:99, color: "#f78100", name: "Lotomania", preco_base: 3.0 }
     };
-    const TAXA_SERVICO_MISTERIOSO = 1.50; // Exemplo, pode ser configurado por loteria
+    const TAXA_SERVICO_MISTERIOSO = 1.50; 
 
     const bannerConfigurations = {
         'banner-top-dashboard': [
@@ -228,10 +228,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!mainSections || mainSections.length === 0) { return; }
         mainSections.forEach(section => { 
             section.classList.remove('active-section'); 
-            section.style.display = 'none'; // Garante que todas estão escondidas
+            section.style.display = 'none'; 
             if (section.id === sectionId) {
                 section.classList.add('active-section'); 
-                section.style.display = 'block'; // Mostra a seção ativa
+                section.style.display = 'block'; 
             }
         });
         if (mainNav) {
@@ -312,19 +312,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchRecentWinningPools() { 
         if (!recentPoolsList) { return; }
-        const poolsErrorMessage = document.getElementById('pools-error-message');
-        recentPoolsList.innerHTML = '<li><div class="spinner small-spinner"></div> Carregando...</li>';
-        if(poolsErrorMessage) poolsErrorMessage.style.display = 'none';
-
-        try {
-            const pools = await fetchData('api/main/recent-winning-pools');
-            recentPoolsList.innerHTML = '';
-            if (pools && pools.length > 0) { pools.forEach(pool => { const li = document.createElement('li'); li.innerHTML = `<span><i class="fas fa-trophy pool-icon"></i> ${pool.name} (${pool.lottery})</span> <span class="pool-prize">${pool.prize}</span> <small>${pool.date}</small>`; recentPoolsList.appendChild(li); }); }
-            else { recentPoolsList.innerHTML = '<li>Nenhum bolão premiado recentemente.</li>'; }
-        } catch (error) { 
-            recentPoolsList.innerHTML = ''; // Limpa o loading
-            recentPoolsList.innerHTML = '<li>Funcionalidade de Bolões será implementada futuramente.</li>';
-        }
+        // const poolsErrorMessage = document.getElementById('pools-error-message'); // Já definido globalmente
+        recentPoolsList.innerHTML = ''; // Limpa antes
+        // try {
+            // const pools = await fetchData('api/main/recent-winning-pools'); // CHAMADA COMENTADA
+            // recentPoolsList.innerHTML = '';
+            // if (pools && pools.length > 0) { pools.forEach(pool => { const li = document.createElement('li'); li.innerHTML = `<span><i class="fas fa-trophy pool-icon"></i> ${pool.name} (${pool.lottery})</span> <span class="pool-prize">${pool.prize}</span> <small>${pool.date}</small>`; recentPoolsList.appendChild(li); }); }
+            // else { recentPoolsList.innerHTML = '<li>Nenhum bolão premiado recentemente.</li>'; }
+        // } catch (error) { 
+            // recentPoolsList.innerHTML = ''; 
+            // if (poolsErrorMessage) {
+            //     poolsErrorMessage.textContent = 'Erro ao carregar informações dos bolões. Por favor, tente mais tarde.';
+            //     poolsErrorMessage.style.display = 'block';
+            // } else {
+                recentPoolsList.innerHTML = '<li>Funcionalidade de Bolões será implementada futuramente.</li>';
+            // }
+        // }
     }
 
     async function fetchTopWinners() { 
@@ -476,10 +479,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if(verifyPastGameResultDiv) verifyPastGameResultDiv.style.display = 'none';
         }
 
-        // NOVO JOGO MISTERIOSO - Atualiza a UI do card de compra
-        if (typeof updateMysteryGameCardUI === "function") {
-            updateMysteryGameCardUI(selectedLotteryKey);
-        }
+        // Jogo Misterioso - Não precisa mais atualizar o card de compra, pois é um teaser fixo
+        // A função updateMysteryGameCardUI foi removida/simplificada abaixo.
 
         resetHunchDisplay({ 
             outputDiv: quickHunchOutputDivLoggedOut, numbersDiv: quickHunchNumbersDivLoggedOut,
@@ -536,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (manualSaveUserNumbersInput && selectedLotteryConfig) {
             const expectedCount = selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count;
-            manualSaveUserNumbersInput.placeholder = `Ex: 01,... (${expectedCount} de ${selectedLotteryConfig.min}-${selectedLotteryConfig.max} para ${lotteryFriendlyName})`;
+            manualSaveUserNumbersInput.placeholder = `Ex: 01,02,... (${expectedCount} de ${selectedLotteryConfig.min}-${selectedLotteryConfig.max} para ${lotteryFriendlyName})`;
             if (typeof updateManualSaveNumbersFeedback === "function") updateManualSaveNumbersFeedback();
         }
 
@@ -562,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.ganhadores_principal_contagem !== undefined) { content += `Ganhadores: ${data.ganhadores_principal_contagem}\n`; }
             if (data.cidades_ganhadoras_principal && data.cidades_ganhadoras_principal.length > 0) { content += `Cidades: ${data.cidades_ganhadoras_principal.join('; ')}\n`; }
              if (data.rateio_principal_valor !== undefined && data.rateio_principal_valor !== null) {
-                 content += `Rateio: ${data.rateio_principal_valor}\n`;
+                 content += `Rateio: ${data.rateio_principal_valor}\n`; // Mantém como string, conforme main.py
             } else {
                  content += `Rateio: N/A\n`;
             }
@@ -740,17 +741,21 @@ document.addEventListener('DOMContentLoaded', () => {
             voiceContext = { action: null, awaiting: null, data: {} }; return;
         }
         if (command.includes('painel') || command.includes('início') || command.includes('tela principal')) { setActiveSection('dashboard-section'); speak("Navegando para o painel principal."); return; }
-        if (command.includes('meus jogos')) {
+        if (command.includes('meus jogos') || command.includes('jogos salvos')) {
             if (!currentUser) { speak("Você precisa estar logado. Diga 'login'.", {shouldRelisten: true}); voiceContext.action = 'awaiting_login_for_my_games'; awaitingSpecificInput = true; return;}
             setActiveSection('my-games-section'); speak("Navegando para Meus Jogos Salvos."); return;
         }
-        if (command.includes('jogos misteriosos')) { // NOVO JOGO MISTERIOSO
+        if (command.includes('jogos misteriosos')) {
             if (!currentUser) { speak("Você precisa estar logado para ver seus jogos misteriosos. Diga 'login'.", {shouldRelisten: true}); voiceContext.action = 'awaiting_login_for_mystery'; awaitingSpecificInput = true; return;}
-            setActiveSection('my-mystery-games-section'); speak("Navegando para Meus Jogos Misteriosos."); return;
+            setActiveSection('my-mystery-games-section'); speak("Navegando para Meus Jogos Misteriosos. Esta funcionalidade está em breve!"); return;
         }
         if (voiceContext.action === 'awaiting_login_for_my_games' && command.includes('login')) {
             openModal(loginModal); speak("Tela de login aberta. Diga 'digitar email'.", {shouldRelisten: true}); voiceContext.action = 'login_prompt_email'; awaitingSpecificInput = true; return;
         }
+        if (voiceContext.action === 'awaiting_login_for_mystery' && command.includes('login')) { // Para o Jogo Misterioso
+            openModal(loginModal); speak("Tela de login aberta. Diga 'digitar email'.", {shouldRelisten: true}); voiceContext.action = 'login_prompt_email'; awaitingSpecificInput = true; return;
+        }
+
         if ((command.includes('gerar') || command.includes('palpite')) && (command.includes('mega sena') || command.includes('mega'))) {
              if(mainLotterySelect) mainLotterySelect.value = 'megasena';
              if (typeof updateAllDashboardData === 'function') updateAllDashboardData('megasena');
@@ -790,7 +795,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeSectionElement) {
                 if (activeSectionElement.id === 'dashboard-section') sectionName = "o painel principal. Aqui pode gerar jogos e ver estatísticas";
                 else if (activeSectionElement.id === 'my-games-section') sectionName = "a seção de Meus Jogos Salvos";
-                else if (activeSectionElement.id === 'my-mystery-games-section') sectionName = "a seção dos seus Jogos Misteriosos"; // NOVO JOGO MISTERIOSO
+                else if (activeSectionElement.id === 'my-mystery-games-section') sectionName = "a seção dos seus Jogos Misteriosos, que está em breve";
                 else if (activeSectionElement.id === 'pools-section') sectionName = "a seção de Bolões";
             }
             speak(`Você está em ${sectionName}.`); return;
@@ -884,7 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'none'; 
 
             if (typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
-            if (typeof loadMyMysteryGames === "function") loadMyMysteryGames(); // NOVO JOGO MISTERIOSO - Carrega os jogos misteriosos ao logar
+            if (typeof loadMyMysteryGames === "function") loadMyMysteryGames(); // Carrega jogos misteriosos ao logar
             if (typeof checkForPrizesAndNotify === 'function') checkForPrizesAndNotify(user.uid);
             
             const firstTabLink = document.querySelector('.tabs-navigation .tab-link[aria-controls="tab-hot"]');
@@ -907,7 +912,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (savedGamesContainer) savedGamesContainer.innerHTML = '';
             if (noSavedGamesP) noSavedGamesP.style.display = 'block';
-            if (myMysteryGamesContainer) myMysteryGamesContainer.innerHTML = '<p>Faça login para ver e comprar Jogos Misteriosos.</p>'; // NOVO JOGO MISTERIOSO
+            if (myMysteryGamesContainer) myMysteryGamesContainer.innerHTML = '<p>Faça login para ver e comprar Jogos Misteriosos (Em Breve).</p>';
         }
         if (typeof updateSaveButtonVisibility === "function") {
             updateSaveButtonVisibility('quick');
@@ -1197,7 +1202,6 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (expectedHunchType === 'hot') { targetCheckResultDiv = hotHunchCheckResultDiv; targetNumbersDiv = hotNumbersHunchNumbersDiv; }
             else if (expectedHunchType === 'cold') { targetCheckResultDiv = coldHunchCheckResultDiv; targetNumbersDiv = coldNumbersHunchNumbersDiv; }
             else if (expectedHunchType === 'logic') { targetCheckResultDiv = logicHunchCheckResultDiv; targetNumbersDiv = logicHunchNumbersDiv; }
-
         }
 
         if (!currentHunchData.jogo || !Array.isArray(currentHunchData.jogo) || currentHunchData.jogo.length === 0 || currentHunchData.lottery !== currentLottery || currentHunchData.type !== expectedHunchType || !targetCheckResultDiv || !targetNumbersDiv ) {
@@ -1444,7 +1448,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if(manualSaveUserNumbersInput) manualSaveUserNumbersInput.placeholder = `Ex: 01,... (${expectedCount} de ${selectedLotteryConfig.min}-${selectedLotteryConfig.max} para ${selectedLotteryConfig.name})`;
     }
 
-
     function setupAuthEventListeners() {
         if(loginSubmitBtn && loginEmailInput && loginPasswordInput && loginErrorP) {
             loginSubmitBtn.addEventListener('click', () => {
@@ -1543,7 +1546,9 @@ document.addEventListener('DOMContentLoaded', () => {
             appContent.style.display = 'block';
             if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
             if (typeof fetchPlatformStats === "function") fetchPlatformStats();
-            if (typeof fetchRecentWinningPools === "function") fetchRecentWinningPools();
+            // A chamada para fetchRecentWinningPools continua comentada para evitar erro 404,
+            // pois o endpoint não foi implementado no backend.
+            // if (typeof fetchRecentWinningPools === "function") fetchRecentWinningPools(); 
             if (typeof fetchTopWinners === "function") fetchTopWinners();
             if (typeof renderBanners === "function") renderBanners();
             if (typeof initializeCarousels === "function") initializeCarousels();
@@ -1620,106 +1625,81 @@ document.addEventListener('DOMContentLoaded', () => {
         if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('click', () => { handleWelcomeChoice(false); });
     }
     
-    // --- NOVO JOGO MISTERIOSO - Funções ---
+    // --- LÓGICA PARA JOGO MISTERIOSO (AJUSTADA PARA "EM BREVE") ---
     function updateMysteryGameCardUI(lotteryKey) {
+        // Como o card de compra agora é um teaser fixo, esta função pode não ser mais necessária
+        // para atualizar dinamicamente o nome e preço lá. 
+        // Se você reintroduzir esses elementos dinâmicos no teaser, reative as linhas abaixo.
+        /*
         const config = LOTTERY_CONFIG_JS[lotteryKey];
         if (!config) return;
 
-        if (dynamicLotteryNameMysterySpan) {
+        if (dynamicLotteryNameMysterySpan) { // Este ID foi removido do teaser no HTML
             dynamicLotteryNameMysterySpan.textContent = config.name;
         }
         
-        if (mysteryGamePriceSpan) {
-            const precoFinal = config.preco_base + TAXA_SERVICO_MISTERIOSO;
+        if (mysteryGamePriceSpan) { // Este ID foi removido do teaser no HTML
+            const precoFinal = (config.preco_base || 0) + TAXA_SERVICO_MISTERIOSO;
             mysteryGamePriceSpan.textContent = `R$ ${precoFinal.toFixed(2).replace('.', ',')}`;
         }
+        */
     }
 
+    // A função handleBuyMysteryGame não será chamada se o botão #buy-mystery-game-btn não existir no HTML ativo.
+    // Se você adicionar um botão no teaser, ele precisará de um ID diferente ou este listener será ativado.
+    // Por agora, como o botão de compra foi removido do teaser, esta função fica como referência futura.
     async function handleBuyMysteryGame() {
         if (!currentUser) {
             alert("Você precisa estar logado para comprar um Jogo Misterioso.");
             openModal(loginModal);
             return;
         }
-        if (!mainLotterySelect || !mysteryGamePurchaseStatusDiv || !buyMysteryGameBtn) return;
-
-        const lotteryType = mainLotterySelect.value;
-        mysteryGamePurchaseStatusDiv.innerHTML = '<div class="spinner small-spinner"></div> Iniciando sua compra segura...';
-        mysteryGamePurchaseStatusDiv.style.display = 'block';
-        buyMysteryGameBtn.disabled = true;
-
-        try {
-            const response = await fetchData('api/main/jogo-misterioso/iniciar-compra', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    lottery_type: lotteryType, 
-                    userId: currentUser.uid,
-                    userEmail: currentUser.email // Envia o email para referência no backend
-                })
-            });
-
-            if (response.erro) throw new Error(response.erro);
-
-            mysteryGamePurchaseStatusDiv.innerHTML = `<p style="color:#2ecc71; font-weight:bold;">${response.mensagem}</p>
-                <p>Loteria: <strong>${response.loteria}</strong>, Valor: <strong>${response.valor_a_pagar_formatado}</strong></p>
-                <p style="margin-top:0.5rem;"><strong>SIMULAÇÃO DE PAGAMENTO:</strong></p>
-                <p>${response.instrucoes_pagamento}</p>
-                <a href="${response.link_pagamento_simulado}" target="_blank" rel="noopener noreferrer" class="action-btn small-btn" style="margin-top:0.5rem; background-color: #27ae60;">
-                    <i class="fas fa-money-check-alt"></i> Clique Aqui para Simular Pagamento
-                </a>
-                <p style="margin-top:0.5rem;"><small>Após clicar no link acima e ver a mensagem de sucesso, a seção "Meus Jogos Misteriosos" será atualizada.</small></p>`;
-            
-            // Em um cenário real, o link acima seria do Mercado Pago e, após o pagamento,
-            // o usuário seria redirecionado de volta, ou um webhook confirmaria a compra.
-            // Para testar, vamos recarregar a lista de jogos após um tempo.
-            setTimeout(() => {
-                if (myMysteryGamesSection && myMysteryGamesSection.classList.contains('active-section')) {
-                    loadMyMysteryGames();
-                }
-            }, 8000); // 8 segundos para dar tempo de clicar no link
-
-        } catch (error) {
-            mysteryGamePurchaseStatusDiv.innerHTML = `<p class="error-message">Erro ao iniciar compra: ${error.message}</p>`;
-        } finally {
-            buyMysteryGameBtn.disabled = false;
-        }
-    }
-
-    async function loadMyMysteryGames() {
-        if (!myMysteryGamesContainer) return;
-        if (!currentUser) {
-            myMysteryGamesContainer.innerHTML = '<p>Faça login para ver e comprar Jogos Misteriosos.</p>';
+        // O botão 'buyMysteryGameBtn' foi removido do teaser, então esta função não deve ser chamada pelo teaser.
+        // Se for reativar, garanta que os elementos de status e o botão existem.
+        if (!mainLotterySelect || !mysteryGamePurchaseStatusDiv || !buyMysteryGameBtn) {
+            console.warn("Elementos do Jogo Misterioso não encontrados para compra.");
             return;
         }
-        
-        myMysteryGamesContainer.innerHTML = '<div class="spinner small-spinner"></div> Carregando seus Jogos Misteriosos...';
+        // ... (resto da lógica de handleBuyMysteryGame, que não será executada se o botão não existe)
+    }
 
+    // Ajusta para apenas mostrar mensagem de "Em Breve" ou carregar se a funcionalidade estiver ativa
+    async function loadMyMysteryGames() {
+        if (!myMysteryGamesContainer) return;
+
+        // A seção HTML já contém a mensagem "Em Breve".
+        // Se no futuro você reativar a listagem, descomente e adapte o código abaixo.
+        myMysteryGamesContainer.innerHTML = '<p>Funcionalidade de "Meus Jogos Misteriosos" estará disponível em breve!</p>';
+        
+        /* // Código para quando a funcionalidade estiver ativa:
+        if (!currentUser) {
+            myMysteryGamesContainer.innerHTML = '<p>Faça login para ver seus jogos misteriosos.</p>';
+            return;
+        }
+        myMysteryGamesContainer.innerHTML = '<div class="spinner small-spinner"></div> Carregando...';
         try {
             const games = await fetchData(`api/main/jogo-misterioso/meus-jogos/${currentUser.uid}`);
             myMysteryGamesContainer.innerHTML = ''; 
-
             if (games.erro) throw new Error(games.erro);
-
             if (!games || games.length === 0) {
-                myMysteryGamesContainer.innerHTML = '<p>Você ainda não comprou Jogos Misteriosos. Que tal começar?</p>';
+                myMysteryGamesContainer.innerHTML = '<p>Você ainda não comprou Jogos Misteriosos.</p>';
                 return;
             }
-
             games.forEach(game => {
-                const card = createMysteryGameCard(game);
+                const card = createMysteryGameCard(game); // Você precisaria da função createMysteryGameCard
                 myMysteryGamesContainer.appendChild(card);
             });
-
-            // Adicionar event listeners para os botões de revelar que acabaram de ser criados
-            addRevealButtonListeners();
-
+            addRevealButtonListeners(); // E a lógica de revelação
         } catch (error) {
-            myMysteryGamesContainer.innerHTML = `<p class="error-message">Erro ao carregar Jogos Misteriosos: ${error.message}</p>`;
+            myMysteryGamesContainer.innerHTML = `<p class="error-message">Erro ao carregar: ${error.message}</p>`;
         }
+        */
     }
 
+    // A função createMysteryGameCard e addRevealButtonListeners/handleRevealClick são mantidas
+    // para quando você reativar a funcionalidade, mas não serão chamadas agora.
     function createMysteryGameCard(game) {
+        // ... (código da função como gerado anteriormente, será usado no futuro)
         const card = document.createElement('div');
         card.classList.add('card', 'game-card-item', 'mystery-card');
         card.dataset.orderId = game.order_id;
@@ -1730,33 +1710,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const lotteryConfig = LOTTERY_CONFIG_JS[game.lottery_type.toLowerCase()] || { name: game.lottery_type.toUpperCase(), color: '#ccc' };
         
         let numbersHtml = '<div class="game-numbers">';
-        (game.display_numeros || []).forEach(num => {
+        // Adapta para usar 'display_numeros' que vem do backend
+        (game.display_numeros || []).forEach(numStr => {
             let numClass = 'game-number';
-            let numStyle = `background-color: #555; border-color: #777; color: #fff;`;
+            let numStyle = `background-color: #555; border-color: #777; color: #fff;`; // Estilo padrão para '?' ou '-'
             
-            if (game.status_revelacao === 'revelado') {
+            if (numStr === '?') {
+                numClass += ' question-mark'; // Adiciona classe para '?' se quiser estilizar diferente
+            } else if (numStr !== '-') { // Se não for placeholder de falha
                 numStyle = `background-color: ${lotteryConfig.color}; border-color: ${lotteryConfig.color}; color: #1a1a2e;`;
-                if (game.dados_premiacao && game.dados_premiacao.numeros_que_acertou && game.dados_premiacao.numeros_que_acertou.includes(parseInt(num))) {
+                if (game.status_revelacao === 'revelado' && game.dados_premiacao && game.dados_premiacao.numeros_que_acertou && game.dados_premiacao.numeros_que_acertou.includes(parseInt(numStr))) {
                     numClass += ' hit';
                     numStyle = `background-color: #2ecc71; color: #fff;`;
                 }
             }
-            numbersHtml += `<div class="${numClass}" style="${numStyle}">${String(num).padStart(2, '0')}</div>`;
+            numbersHtml += `<div class="${numClass}" style="${numStyle}">${String(numStr).padStart(2, '0')}</div>`;
         });
         numbersHtml += '</div>';
 
-        let statusDisplay = '';
-        if (game.status_pagamento === 'pendente') {
-            statusDisplay = '<p class="game-card-info status-pending">Aguardando Pagamento</p>';
-        } else if (game.status_pagamento !== 'pago') {
-            statusDisplay = `<p class="game-card-info status-failed">Pagamento Falhou (${game.status_pagamento})</p>`;
+        if (game.status_revelacao === 'selado' && game.status_pagamento === 'pago'){
+             const numbersContainerForBlur = card.querySelector('.game-numbers'); // Precisa ser adicionado ao card antes
+             if(numbersContainerForBlur) numbersContainerForBlur.classList.add('sealed-numbers');
         }
-        
+
+
+        let statusPagamentoDisplay = `Pagamento: <span class="${game.status_pagamento}">${game.status_pagamento}</span>`;
+         if (game.status_pagamento === 'pendente' && game.link_pagamento_simulado_frontend) { 
+             statusPagamentoDisplay += ` <a href="${game.link_pagamento_simulado_frontend}" target="_blank" class="action-btn small-btn">Pagar (Sim.)</a>`;
+        }
+
+
         let revelacaoHtml = '';
         if (game.status_pagamento === 'pago' && game.status_revelacao === 'selado') {
             revelacaoHtml = `<button class="action-btn small-btn reveal-mystery-game-btn" data-order-id="${game.order_id}"><i class="fas fa-eye"></i> Revelar Agora!</button>`;
         } else if (game.status_revelacao === 'revelado') {
-            revelacaoHtml = `<p class="strategy-text">Estratégia: ${game.estrategia_usada || 'N/A'}</p>`;
+            revelacaoHtml = `<p class="strategy-text">Estratégia Usada: ${game.estrategia_usada || 'N/A'}</p>`;
             if (game.dados_premiacao) {
                 revelacaoHtml += `<p class="game-card-info">Sorteio Oficial (Conc. ${game.concurso_oficial_referencia}): ${(game.dados_premiacao.numeros_sorteados_oficialmente || []).join(', ')}</p>`;
                 revelacaoHtml += `<p class="game-card-info ${game.dados_premiacao.acertos > 0 ? 'hits' : 'misses'}">Seus Acertos: ${game.dados_premiacao.acertos} (${game.dados_premiacao.faixa_premio || ''})</p>`;
@@ -1765,10 +1753,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         card.innerHTML = `
             <h4>${lotteryConfig.name} (Misterioso)</h4>
-            <p class="game-card-info">Pedido: ${game.order_id.substring(0, 8)}...</p>
+            <p class="game-card-info">Pedido: ${game.order_id ? game.order_id.substring(0,8) : 'N/A'}...</p>
             <p class="game-card-info">Concurso Ref.: <strong>${game.concurso_oficial_referencia || 'N/A'}</strong></p>
             ${numbersHtml}
-            ${statusDisplay}
+            <p class="game-card-info status-${game.status_pagamento}">${statusPagamentoDisplay}</p>
+            <p class="game-card-info">Criado em: ${game.criado_em_display || 'N/A'}</p>
             <div class="mystery-game-reveal-status" style="margin-top:0.5rem; min-height: 2.5em;" aria-live="polite">${revelacaoHtml}</div>
         `;
         return card;
@@ -1776,7 +1765,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addRevealButtonListeners() {
         document.querySelectorAll('.reveal-mystery-game-btn').forEach(button => {
-            button.addEventListener('click', handleRevealClick, { once: true }); // Listener é removido após o primeiro clique
+            // Remove listener antigo para evitar duplicação se a função for chamada múltiplas vezes
+            button.removeEventListener('click', handleRevealClick); 
+            button.addEventListener('click', handleRevealClick);
         });
     }
 
@@ -1789,37 +1780,58 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!revealStatusDiv) return;
         
         revealStatusDiv.innerHTML = '<div class="spinner small-spinner"></div> Revelando...';
-        button.disabled = true;
+        button.style.display = 'none'; // Esconde o botão após o clique inicial
 
         try {
             const result = await fetchData(`/api/main/jogo-misterioso/revelar/${orderId}`, { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: currentUser.uid }) // Envia o ID do usuário para validação no backend (TODO)
+                body: JSON.stringify({ userId: currentUser.uid }) 
             });
             
             if (result.erro) throw new Error(result.erro);
 
             if (result.jogo_selado === true) { 
-                 revealStatusDiv.innerHTML = `<p style="color:#f39c12; font-size: 0.9em;">${result.mensagem || result.aviso}</p>`;
-                 button.disabled = false;
-                 button.addEventListener('click', handleRevealClick, { once: true }); // Adiciona o listener de volta
+                 revealStatusDiv.innerHTML = `<p style="color:#f39c12; font-size: 0.9em;">${result.mensagem || result.aviso}</p><button class="action-btn small-btn reveal-mystery-game-btn" data-order-id="${orderId}"><i class="fas fa-sync-alt"></i> Tentar Revelar Novamente</button>`;
+                 addRevealButtonListeners(); // Adiciona listener ao novo botão
                  return;
             }
             
-            // Sucesso na revelação, atualiza o card
-            const updatedCard = createMysteryGameCard(result);
-            cardElement.parentNode.replaceChild(updatedCard, cardElement);
-            // Animação de revelação
-            updatedCard.classList.add('revealed-animation');
+            // Recria o card com os dados atualizados (revelados)
+            const updatedGameDataFromServer = { // Monta um objeto similar ao que 'loadMyMysteryGames' esperaria
+                order_id: orderId,
+                user_id: currentUser.uid,
+                lottery_type: result.loteria.toLowerCase().replace('-',''), // Ajusta para o formato da chave
+                concurso_oficial_referencia: result.concurso_referencia,
+                display_numeros: result.seus_numeros_apostados, // Agora são os números reais
+                numeros_gerados: result.seus_numeros_apostados, // Adiciona para consistência
+                estrategia_usada: result.estrategia_usada,
+                status_pagamento: 'pago', // Assumindo que só pode revelar se pago
+                status_revelacao: 'revelado',
+                criado_em_display: cardElement.querySelector('.game-card-info') ? cardElement.querySelector('.game-card-info').textContent.replace('Criado em: ','') : 'N/A', // Tenta manter data
+                dados_premiacao: {
+                    foi_premiado: result.acertos > 0, // Ajuste conforme sua lógica de 'foi_premiado' no backend
+                    numeros_sorteados_oficialmente: result.numeros_sorteados_oficialmente,
+                    acertos: result.acertos,
+                    numeros_que_acertou: result.numeros_que_acertou,
+                    faixa_premio: result.faixa_premio
+                }
+            };
+
+            const newCard = createMysteryGameCard(updatedGameDataFromServer);
+            cardElement.parentNode.replaceChild(newCard, cardElement);
+            newCard.classList.add('revealed-animation');
+            if (result.acertos > 0 && typeof triggerConfetti === 'function') {
+                triggerConfetti();
+            }
+
 
         } catch (error) {
-            revealStatusDiv.innerHTML = `<p class="error-message">Erro: ${error.message}</p>`;
-            button.disabled = false;
-            button.addEventListener('click', handleRevealClick, { once: true }); // Adiciona o listener de volta em caso de erro
+            revealStatusDiv.innerHTML = `<p class="error-message">Erro: ${error.message}</p><button class="action-btn small-btn reveal-mystery-game-btn" data-order-id="${orderId}"><i class="fas fa-sync-alt"></i> Tentar Novamente</button>`;
+            addRevealButtonListeners(); // Adiciona listener ao novo botão
         }
     }
-    // --- FIM - NOVO JOGO MISTERIOSO - Funções ---
+    // --- FIM - LÓGICA JOGO MISTERIOSO ---
 
     // --- INICIALIZAÇÃO ---
     initializeVoiceCommands();
@@ -1834,18 +1846,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (navDashboardBtn) navDashboardBtn.addEventListener('click', () => setActiveSection('dashboard-section'));
     if (navMyGamesBtn) navMyGamesBtn.addEventListener('click', () => { setActiveSection('my-games-section'); if (currentUser && typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); });
-    if (navMyMysteryGamesBtn) navMyMysteryGamesBtn.addEventListener('click', () => { setActiveSection('my-mystery-games-section'); if (typeof loadMyMysteryGames === "function") loadMyMysteryGames(); }); // NOVO JOGO MISTERIOSO
+    if (navMyMysteryGamesBtn) navMyMysteryGamesBtn.addEventListener('click', () => { 
+        setActiveSection('my-mystery-games-section'); 
+        if (typeof loadMyMysteryGames === "function") loadMyMysteryGames(); // Chamará a versão simplificada "Em Breve"
+    });
     if (navPoolsBtn) navPoolsBtn.addEventListener('click', () => setActiveSection('pools-section'));
 
     if (mainLotterySelect) {
         mainLotterySelect.addEventListener('change', (e) => {
             updateAllDashboardData(e.target.value);
+            // updateMysteryGameCardUI(e.target.value); // Removido pois o card de compra agora é um teaser
         });
+         // updateMysteryGameCardUI(mainLotterySelect.value); // Chamada inicial removida
     }
     if (refreshAllDashboardDataBtn && mainLotterySelect) {
         refreshAllDashboardDataBtn.addEventListener('click', () => {
             updateAllDashboardData(mainLotterySelect.value);
         });
+    }
+
+    // O botão #buy-mystery-game-btn não existe mais no teaser, então este listener não será ativado.
+    // Se você reintroduzir um botão de compra com este ID, ele funcionará.
+    if (buyMysteryGameBtn) {
+        buyMysteryGameBtn.addEventListener('click', handleBuyMysteryGame); 
     }
 
     if (generateQuickHunchBtnLoggedOut) generateQuickHunchBtnLoggedOut.addEventListener('click', generateAndDisplayQuickHunchLoggedOut);
@@ -1854,7 +1877,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (generateHotNumbersHunchBtn) generateHotNumbersHunchBtn.addEventListener('click', generateAndDisplayHotNumbersHunch);
     if (generateColdNumbersHunchBtn) generateColdNumbersHunchBtn.addEventListener('click', generateAndDisplayColdNumbersHunch);
     if (generateLogicHunchBtn) generateLogicHunchBtn.addEventListener('click', generateAndDisplayLogicHunch);
-    if (buyMysteryGameBtn) buyMysteryGameBtn.addEventListener('click', handleBuyMysteryGame); // NOVO JOGO MISTERIOSO
 
 
     if (typeof setupSaveHunchButtonListeners === "function") setupSaveHunchButtonListeners();
@@ -1887,6 +1909,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const expectedCount = selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count;
             if (userNumbers.length === 0) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Insira os números.</p>`; return; }
             if (new Set(userNumbers).size !== userNumbers.length) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Números repetidos.</p>`; return; }
+             // Permitir que o backend valide a contagem de números para flexibilidade
+            // if (userNumbers.length !== expectedCount) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Forneça ${expectedCount} números para ${selectedLotteryConfig.name}.</p>`; return; }
+
 
             const minNum = selectedLotteryConfig.min; const maxNum = selectedLotteryConfig.max;
             for (const num of userNumbers) { if (num < minNum || num > maxNum) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Número ${num} fora do range (${minNum}-${maxNum}).</p>`; return; } }
@@ -2060,6 +2085,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let htmlResult = `<h4>Resultado da Verificação</h4>`;
                 htmlResult += `<p><strong>Loteria:</strong> ${resultData.loteria_nome_exibicao || selectedLotteryConfig.name}</p>`;
                 htmlResult += `<p><strong>Concurso:</strong> ${resultData.concurso_verificado}</p>`;
+                htmlResult += `<p><strong>Data Sorteio:</strong> ${resultData.data_sorteio_verificado || 'N/A'}</p>`;
                 htmlResult += `<p><strong>Seu Jogo:</strong> ${resultData.jogo_usuario.join(', ')}</p>`;
                 htmlResult += `<p><strong>Números Sorteados Oficiais:</strong> ${resultData.numeros_sorteados.join(', ')}</p>`;
                 htmlResult += `<p><strong>Acertos:</strong> <span class="highlight">${resultData.acertos}</span></p>`;

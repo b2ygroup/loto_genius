@@ -162,8 +162,8 @@ header {
 }
 .logo-container { display: flex; align-items: center; }
 header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; letter-spacing: 1px; color: #ffffff; text-shadow: 0 0 5px #47aeff; }
-#main-nav { display: flex; gap: 0.5rem; flex-wrap: wrap; /* Permite quebrar linha em telas menores */ }
-.nav-item { background-color: transparent; color: #c5c6c7; border: none; padding: 0.5rem 0.8rem; border-radius: 20px; cursor: pointer; transition: background-color 0.3s ease, color 0.3s ease; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; white-space: nowrap; /* Evita quebra de texto dentro do botão */ }
+#main-nav { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.nav-item { background-color: transparent; color: #c5c6c7; border: none; padding: 0.5rem 0.8rem; border-radius: 20px; cursor: pointer; transition: background-color 0.3s ease, color 0.3s ease; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
 .nav-item:hover, .nav-item.active { background-color: #47aeff; color: #1a1a2e; }
 .nav-item i { font-size: 1rem; }
 #auth-section { display: flex; align-items: center; }
@@ -420,24 +420,22 @@ h4 i { margin-right: 5px; }
 
 /* CORREÇÃO PARA TOP GANHADORES E LISTAS SIMILARES */
 #top-winners-preview.card, 
-#winning-pools-preview.card,
-.stats-list-container-parent-card .card { /* Use uma classe pai se precisar aplicar a mais cards com listas */
+#winning-pools-preview.card {
     display: flex; 
     flex-direction: column;
-    /* Se você quiser uma altura mínima para o card em si, ajuste ou remova: */
-    /* min-height: 300px;  Pode não ser necessário se a lista interna controla a altura */
+    /* Defina uma altura explícita para o card se necessário, ou deixe que o conteúdo determine */
+    /* Ex: height: 400px; ou min-height: 300px; */
 }
 
 #top-winners-preview ol, 
-#recent-pools-list,
-.stats-list-container { 
+#recent-pools-list { 
     list-style-type: none; 
     padding-left: 0; 
-    max-height: 280px; /* Altura máxima para a lista antes de rolar */
+    margin: 0; /* Reset de margem para a lista */
+    max-height: 280px; 
     overflow-y: auto; 
-    flex-grow: 1; /* Faz a lista ocupar o espaço vertical disponível no card */
-    padding-right: 8px; /* Espaço para a barra de rolagem não sobrepor o texto */
-    min-height: 100px; /* Garante uma altura mínima mesmo com poucos itens */
+    flex-grow: 1; /* Permite que a lista cresça para preencher o card */
+    padding-right: 8px; 
 }
 /* FIM CORREÇÃO */
 
@@ -452,6 +450,7 @@ h4 i { margin-right: 5px; }
 .winner-prize, .pool-prize { font-weight: bold; color: #2ecc71; font-size: 1.1em; margin-top: 0.2rem; }
 #top-winners-preview li small, #recent-pools-list li small { font-size: 0.8rem; color: #a2d2ff; margin-top: 0.2rem; }
 
+.stats-list-container { max-height: 280px; overflow-y: auto; padding-right: 10px; margin-top: 0.8rem; }
 .stats-list-container .loading-stats, .stats-list-container .no-stats, .stats-list-container .error-message { text-align: center; padding: 20px; color: #a7b5e8; font-style: italic; }
 .stats-list-container .error-message { color: #ff4765; font-style: normal; }
 .frequency-item, .pair-frequency-item, .city-stats-item, .city-prize-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 5px; border-bottom: 1px solid #3b3b6e; font-size: 0.9rem; gap: 10px; }
@@ -700,7 +699,7 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
 /* --- NOVOS ESTILOS PARA JOGO MISTERIOSO --- */
 #mystery-game-purchase-section .card-title-accessible { /* Título da seção do Jogo Misterioso */
     color: #ffd700; /* Dourado */
-    border-bottom-color: #ffd700;
+    border-bottom-color: #e2c000; /* Um dourado um pouco mais escuro para a borda */
 }
 #mystery-game-purchase-card {
     text-align: center;
@@ -724,6 +723,7 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
 }
 #mystery-game-purchase-status { /* Status da compra */
     min-height: 40px; /* Para evitar pulos de layout */
+    text-align: left; /* Alinha o texto à esquerda dentro da caixa de status */
 }
 #mystery-game-purchase-status a.action-btn { 
     display: inline-block; 

@@ -54,8 +54,8 @@
         <nav id="main-nav" style="display:none;" aria-label="Navegação Principal">
             <button id="nav-dashboard-btn" class="nav-item active" title="Painel Principal"><i class="fas fa-tachometer-alt" aria-hidden="true"></i> <span class="nav-text">Painel</span></button>
             <button id="nav-my-games-btn" class="nav-item" title="Meus Jogos Salvos"><i class="fas fa-ticket-alt" aria-hidden="true"></i> <span class="nav-text">Jogos Salvos</span></button>
-            <button id="nav-my-mystery-games-btn" class="nav-item" title="Meus Jogos Misteriosos"><i class="fas fa-gift" aria-hidden="true"></i> <span class="nav-text">Misteriosos</span></button>
-            <button id="nav-pools-btn" class="nav-item" title="Bolões"><i class="fas fa-users" aria-hidden="true"></i> <span class="nav-text">Bolões (Breve)</span></button>
+            <button id="nav-my-mystery-games-btn" class="nav-item" title="Meus Jogos Misteriosos (Em Breve)"><i class="fas fa-gift" aria-hidden="true"></i> <span class="nav-text">Misteriosos (Breve)</span></button>
+            <button id="nav-pools-btn" class="nav-item" title="Bolões (Em Breve)"><i class="fas fa-users" aria-hidden="true"></i> <span class="nav-text">Bolões (Breve)</span></button>
         </nav>
         <div id="auth-section" aria-label="Autenticação do Usuário">
             <button id="voice-command-btn" class="auth-btn" title="Ativar Guia de Voz" aria-pressed="false" style="margin-right: 10px; border-color: #82e0aa; min-width: 140px; display: none;">
@@ -117,21 +117,6 @@
                 </div>
             </section>
 
-            <section id="mystery-game-purchase-section" class="dashboard-subsection" aria-labelledby="mystery-game-purchase-title-h3">
-                <h3 id="mystery-game-purchase-title-h3" class="card-title-accessible" style="text-align:center; color: #ffd700;">
-                    <i class="fas fa-dice-six" aria-hidden="true"></i> Jogo Misterioso Loto Genius!
-                </h3>
-                <div class="card" id="mystery-game-purchase-card" style="border-left: 5px solid #ffd700;">
-                    <h4>Sorte Surpresa da <span id="dynamic-lottery-name-mystery">Mega-Sena</span>!</h4>
-                    <p>Deixe nossa Inteligência Artificial criar um jogo único e misterioso para você. A sorte pode estar a um clique!</p>
-                    <p style="margin-top:0.5rem;">Valor do Jogo Misterioso: <strong id="mystery-game-price" style="color: #82e0aa;">R$ --</strong></p>
-                    <small style="font-size: 0.75em; color: #aaa;">(Este valor inclui o custo da aposta oficial + uma pequena taxa de serviço Loto Genius)</small>
-                    <button id="buy-mystery-game-btn" class="action-btn primary-action" style="margin-top: 1.5rem; background-color: #dbac00; width:100%;">
-                        <i class="fas fa-shopping-cart"></i> Quero meu Jogo Misterioso!
-                    </button>
-                    <div id="mystery-game-purchase-status" class="result-display-box" style="margin-top: 1rem; display:none;" aria-live="polite"></div>
-                </div>
-            </section>
             <section id="lottery-info-section" class="dashboard-subsection" aria-labelledby="lottery-info-title-h3">
                 <h3 id="lottery-info-title-h3" class="card-title-accessible">
                     <i class="fas fa-chart-bar" aria-hidden="true"></i> Informações e Estatísticas: <span id="dynamic-lottery-name-info">Mega-Sena</span>
@@ -350,6 +335,17 @@
                 </div>
             </section>
 
+            <section id="coming-soon-mystery-game" class="dashboard-subsection" aria-labelledby="coming-soon-title-h3">
+                <h3 id="coming-soon-title-h3" class="card-title-accessible" style="text-align:center; color: #b383ff;">
+                    <i class="fas fa-wand-sparkles" aria-hidden="true"></i> Novidades - Em Breve!
+                </h3>
+                <div class="card" id="mystery-game-teaser-card" style="border-left: 5px solid #b383ff; text-align: center;">
+                    <h4><i class="fas fa-question-circle" style="color:#b383ff;"></i> Jogo Misterioso Loto Genius!</h4>
+                    <p>Prepare-se para uma nova forma de testar sua sorte! Em breve, você poderá comprar um Jogo Misterioso, gerado com a inteligência Loto Genius, e descobrir seus números somente após o sorteio oficial!</p>
+                    <p style="margin-top:1rem; font-weight: bold; color: #f0e6ff;">Aguarde esta emocionante funcionalidade!</p>
+                    <div id="mystery-game-purchase-status-teaser" class="result-display-box" style="margin-top: 1rem; display:none;" aria-live="polite"></div>
+                </div>
+            </section>
             <div id="banner-bottom-dashboard" class="ad-placeholder banner-bottom-dashboard carousel-ad" role="complementary" aria-label="Espaço para anúncio inferior" style="margin-top: 2rem;">
                  <p>Carregando anúncio...</p>
             </div>
@@ -371,12 +367,13 @@
         </section>
         
         <section id="my-mystery-games-section" class="main-section" aria-labelledby="my-mystery-games-title" style="display:none;">
-            <h2 id="my-mystery-games-title"><i class="fas fa-gift" aria-hidden="true"></i> Meus Jogos Misteriosos Adquiridos</h2>
-            <p style="margin-bottom: 1rem; color: #c5dcf0;">Aqui você pode acompanhar seus Jogos Misteriosos e revelá-los após o sorteio oficial do concurso correspondente.</p>
+            <h2 id="my-mystery-games-title"><i class="fas fa-gift" aria-hidden="true"></i> Meus Jogos Misteriosos (Em Breve)</h2>
+            <p style="margin-bottom: 1rem; color: #c5dcf0;">Esta funcionalidade está chegando! Em breve, você poderá ver e gerenciar seus Jogos Misteriosos aqui.</p>
             <div id="my-mystery-games-container" class="grid-container cards-display" aria-live="polite">
-                <p>Carregando seus Jogos Misteriosos...</p> 
+                <p>Aguarde...</p> 
             </div>
         </section>
+
         <section id="pools-section" class="main-section" aria-labelledby="pools-title">
              <h2 id="pools-title"><i class="fas fa-users"></i> Bolões Comunitários</h2>
              <p>Em breve: Crie e participe de bolões inteligentes para aumentar suas chances!</p>
