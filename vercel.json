@@ -24,11 +24,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/cron/processar-loterias",
-      "schedule": "0 7 * * *" 
-    }
   ]
 }

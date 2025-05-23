@@ -1,3 +1,4 @@
+import math
 import pandas as pd
 import os
 import json
@@ -7,16 +8,18 @@ from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-# Importa a função de verificação do módulo verificador_jogos
-# Ajuste o caminho da importação se a estrutura de pastas for diferente no seu ambiente local.
-# Se processador_local_loterias.py e verificador_jogos.py estiverem na mesma pasta 'api':
-from verificador_jogos import verificar_jogos_para_novo_resultado, initialize_firebase_admin_verificador
+try:
+    from verificador_jogos import verificar_jogos_para_novo_resultado, initialize_firebase_admin_verificador
+except ImportError:
+    print("AVISO: Não foi possível importar 'verificador_jogos'. A verificação automática de jogos não funcionará.")
+    verificar_jogos_para_novo_resultado = None
+    initialize_firebase_admin_verificador = None
 
 load_dotenv()
 
 DIRETORIO_SCRIPT_ATUAL = os.path.dirname(os.path.abspath(__file__))
 DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS = os.path.join(DIRETORIO_SCRIPT_ATUAL, "arquivos_excel_caixa")
-DIRETORIO_JSON_SAIDA_LOCAL_TEMP = os.path.join(DIRETORIO_SCRIPT_ATUAL, "lottery_data_temp_for_upload") # Para fallback
+DIRETORIO_JSON_SAIDA_LOCAL_TEMP = os.path.join(DIRETORIO_SCRIPT_ATUAL, "lottery_data_temp_for_upload")
 
 if not os.path.exists(DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS):
     os.makedirs(DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS)
@@ -26,14 +29,13 @@ if not os.path.exists(DIRETORIO_JSON_SAIDA_LOCAL_TEMP):
 BLOB_ACCESS_TOKEN = os.environ.get("BLOB_READ_WRITE_TOKEN")
 DOWNLOAD_URL_BASE_CAIXA = "https://servicebus2.caixa.gov.br/portaldeloterias/api/resultados/download"
 
-# Configuração do Firebase Admin SDK para o processador
 SERVICE_ACCOUNT_KEY_PATH_PROCESSOR = os.path.join(DIRETORIO_SCRIPT_ATUAL, "serviceAccountKey.json")
 db_firestore = None
 firebase_app_processor = None 
 
 try:
-    app_name_proc = 'lotteryProcessorAppScriptLocal' # Nome único para esta instância
-    if app_name_proc not in firebase_admin._apps:
+    app_name_proc = 'lotteryProcessorAppScriptLocalMain' 
+    if not firebase_admin._apps or app_name_proc not in firebase_admin._apps :
         service_account_json_str_env = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON')
         cred_proc = None
         if service_account_json_str_env:
@@ -47,22 +49,38 @@ try:
             print(f"ALERTA [{app_name_proc}]: Credenciais Firebase não encontradas (ENV VAR ou local).")
 
         if cred_proc:
-            firebase_app_processor = firebase_admin.initialize_app(cred_proc, name=app_name_proc)
-    else: 
+            if app_name_proc not in firebase_admin._apps:
+                 firebase_app_processor = firebase_admin.initialize_app(cred_proc, name=app_name_proc)
+            else: 
+                 firebase_app_processor = firebase_admin.get_app(name=app_name_proc)
+
+    elif app_name_proc in firebase_admin._apps: 
         firebase_app_processor = firebase_admin.get_app(name=app_name_proc)
         print(f"Firebase Admin SDK ({app_name_proc}) já inicializado (Processador Local). Reutilizando.")
+    
+    elif not firebase_admin._apps:
+        service_account_json_str_env = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON')
+        cred_proc = None
+        if service_account_json_str_env:
+            service_account_info_env = json.loads(service_account_json_str_env)
+            cred_proc = credentials.Certificate(service_account_info_env)
+        elif os.path.exists(SERVICE_ACCOUNT_KEY_PATH_PROCESSOR):
+            cred_proc = credentials.Certificate(SERVICE_ACCOUNT_KEY_PATH_PROCESSOR)
+        
+        if cred_proc:
+            firebase_app_processor = firebase_admin.initialize_app(cred_proc) 
+            app_name_proc = firebase_app_processor.name 
+            print(f"Firebase Admin SDK inicializado como app default ({app_name_proc}) para Processador Local.")
+
 
     if firebase_app_processor:
         db_firestore = firestore.client(app=firebase_app_processor)
-        print(f"Cliente Firestore obtido para {app_name_proc} (Processador Local).")
-        # Inicializa o Firebase para o verificador também, se ele for usado como módulo importado
-        if initialize_firebase_admin_verificador: # Verifica se a função foi importada
-             initialize_firebase_admin_verificador(app_name_suffix='VerifViaProcLocal')
+        print(f"Cliente Firestore obtido para app {app_name_proc} (Processador Local).")
+        if initialize_firebase_admin_verificador: 
+             initialize_firebase_admin_verificador(app_name_suffix=f'VerifViaProcLocal_{app_name_proc}')
 except Exception as e_fb_admin_proc:
     print(f"Erro GERAL ao inicializar Firebase Admin SDK no processador local: {e_fb_admin_proc}")
 
-
-# Configuração das Loterias para o Processador (ajuste os nomes das colunas conforme os arquivos XLSX da Caixa)
 LOTTERY_CONFIG_PROCESSAMENTO = {
     "megasena": {
         "modalidade_param_value": "Mega-Sena",
@@ -72,8 +90,8 @@ LOTTERY_CONFIG_PROCESSAMENTO = {
         "cols_bolas_prefix": "Bola", "num_bolas_no_arquivo": 6,
         "col_ganhadores_principal": "Ganhadores 6 acertos", "col_cidade_uf_principal": "Cidade / UF",
         "col_rateio_principal": "Rateio 6 acertos",
-        "col_rateio_quina": "Rateio 5 acertos", 
-        "col_rateio_quadra": "Rateio 4 acertos"
+        "rateio_quina_key": "rateio_quina_valor", "col_rateio_quina": "Rateio 5 acertos", 
+        "rateio_quadra_key": "rateio_quadra_valor", "col_rateio_quadra": "Rateio 4 acertos"
     },
     "lotofacil": {
         "modalidade_param_value": "Lotofácil",
@@ -83,20 +101,21 @@ LOTTERY_CONFIG_PROCESSAMENTO = {
         "cols_bolas_prefix": "Bola", "num_bolas_no_arquivo": 15,
         "col_ganhadores_principal": "Ganhadores 15 acertos", "col_cidade_uf_principal": "Cidade / UF",
         "col_rateio_principal": "Rateio 15 acertos",
-        "col_rateio_14": "Rateio 14 acertos", # Nome da coluna no XLSX
-        "col_rateio_13": "Rateio 13 acertos",
-        "col_rateio_12": "Rateio 12 acertos",
-        "col_rateio_11": "Rateio 11 acertos"
+        "rateio_14_key": "rateio_14_acertos_valor", "col_rateio_14": "Rateio 14 acertos", 
+        "rateio_13_key": "rateio_13_acertos_valor", "col_rateio_13": "Rateio 13 acertos",
+        "rateio_12_key": "rateio_12_acertos_valor", "col_rateio_12": "Rateio 12 acertos",
+        "rateio_11_key": "rateio_11_acertos_valor", "col_rateio_11": "Rateio 11 acertos"
     },
     "lotomania": {
-        "modalidade_param_value": "Lotomania",
-        "master_file_name_local": "Lotomania_Resultados.xlsx", # Agora baixa e processa XLSX
+        "modalidade_param_value": "Lotomania", # Usado para baixar o XLSX se o CSV manual não for usado
+        "master_file_name_local": "Lotomania_Resultados.xlsx", # Nome para o XLSX baixado
+        "manual_csv_filename": "Lotomania_Resultados_MANUAL.csv", # Nome do CSV manual
         "processed_json_name": "lotomania_processed_results.json",
-        "col_concurso": "Concurso", "col_data_sorteio": "Data Sorteio",
+        "col_concurso": "Concurso", "col_data_sorteio": "Data Sorteio", 
         "cols_bolas_prefix": "Bola", "num_bolas_no_arquivo": 20,
         "col_ganhadores_principal": "Ganhadores 20 acertos", "col_cidade_uf_principal": "Cidade / UF",
         "col_rateio_principal": "Rateio 20 acertos",
-        "col_rateio_0": "Rateio 0 acertos" # Nome da coluna para 0 acertos no XLSX
+        "rateio_0_key": "rateio_0_acertos_valor", "col_rateio_0": "Rateio 0 acertos"
     },
     "quina": {
         "modalidade_param_value": "Quina",
@@ -106,9 +125,9 @@ LOTTERY_CONFIG_PROCESSAMENTO = {
         "cols_bolas_prefix": "Bola", "num_bolas_no_arquivo": 5,
         "col_ganhadores_principal": "Ganhadores 5 acertos", "col_cidade_uf_principal": "Cidade / UF",
         "col_rateio_principal": "Rateio 5 acertos",
-        "col_rateio_4": "Rateio 4 acertos", 
-        "col_rateio_3": "Rateio 3 acertos",
-        "col_rateio_2": "Rateio 2 acertos"
+        "rateio_4_key": "rateio_4_acertos_valor", "col_rateio_4": "Rateio 4 acertos", 
+        "rateio_3_key": "rateio_3_acertos_valor", "col_rateio_3": "Rateio 3 acertos",
+        "rateio_2_key": "rateio_2_acertos_valor", "col_rateio_2": "Rateio 2 acertos"
     }
 }
 
@@ -169,7 +188,7 @@ def parse_ganhadores_cidades_local(cidade_uf_str, num_ganhadores_str):
 
 def baixar_arquivo_loteria_local(loteria_key_func, config_loteria_func):
     modalidade_valor = config_loteria_func.get("modalidade_param_value")
-    nome_arquivo_local_func = config_loteria_func.get("master_file_name_local")
+    nome_arquivo_local_func = config_loteria_func.get("master_file_name_local") 
     if not modalidade_valor or not nome_arquivo_local_func:
         print(f"ERRO [{loteria_key_func.upper()}]: Configuração de download incompleta.")
         return False
@@ -224,25 +243,46 @@ def processar_e_salvar_loteria_json_local(loteria_key_func, config_loteria_func)
     print(f"Iniciando processamento JSON para {loteria_key_func.upper()}")
     json_file_name_for_blob = config_loteria_func["processed_json_name"]
     df = None
-    
-    # Todas as loterias agora tentam ler o XLSX baixado
-    master_filename_xlsx = config_loteria_func.get("master_file_name_local")
-    filepath_to_read = os.path.join(DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS, master_filename_xlsx)
+    filepath_to_read = None # Inicializa filepath_to_read
 
-    if os.path.exists(filepath_to_read):
-        try: 
-            # Especificar na_values aqui também pode ajudar com traços em colunas que não são de moeda
-            df = pd.read_excel(filepath_to_read, engine='openpyxl', dtype=str, na_values=['-'])
-            print(f"Arquivo {filepath_to_read} lido com sucesso.")
-        except Exception as e: 
-            print(f"ERRO ao ler XLSX {filepath_to_read} para {loteria_key_func.upper()}: {e}")
+    if loteria_key_func == 'lotomania':
+        manual_csv_filename = config_loteria_func.get("manual_csv_filename")
+        if manual_csv_filename:
+            filepath_to_read = os.path.join(DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS, manual_csv_filename)
+            if os.path.exists(filepath_to_read):
+                print(f"[{loteria_key_func.upper()}]: Lendo do arquivo CSV manual: {filepath_to_read}")
+                try: 
+                    # Tenta com ponto e vírgula primeiro, depois com vírgula
+                    df = pd.read_csv(filepath_to_read, sep=';', dtype=str, na_values=['-'], keep_default_na=True, engine='python')
+                except Exception: 
+                    try:
+                        df = pd.read_csv(filepath_to_read, sep=',', dtype=str, na_values=['-'], keep_default_na=True, engine='python')
+                    except Exception as e_csv:
+                        print(f"ERRO ao ler CSV manual {filepath_to_read}: {e_csv}. Nenhum arquivo da Lotomania será processado.")
+                        return # Retorna se não conseguir ler o CSV manual
+            else:
+                print(f"AVISO [{loteria_key_func.upper()}]: CSV manual '{manual_csv_filename}' não encontrado. Nenhum arquivo da Lotomania será processado.")
+                return # Retorna se o CSV manual não for encontrado
+        else:
+            print(f"AVISO [{loteria_key_func.upper()}]: Nome do arquivo CSV manual não configurado. Nenhum arquivo da Lotomania será processado.")
+            return # Retorna se o nome do arquivo CSV não estiver configurado
+    else: # Para outras loterias, lê diretamente o XLSX baixado
+        master_filename_xlsx = config_loteria_func.get("master_file_name_local")
+        filepath_to_read = os.path.join(DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS, master_filename_xlsx)
+        if os.path.exists(filepath_to_read):
+            try: 
+                df = pd.read_excel(filepath_to_read, engine='openpyxl', dtype=str, na_values=['-'])
+            except Exception as e: 
+                print(f"ERRO ao ler XLSX {filepath_to_read} para {loteria_key_func.upper()}: {e}")
+                return
+        else: 
+            print(f"AVISO: Arquivo mestre {master_filename_xlsx} não encontrado em {DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS}.")
             return
-    else: 
-        print(f"AVISO: Arquivo mestre {master_filename_xlsx} não encontrado em {DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS}.")
-        return
 
     if df is None or df.empty: 
         print(f"AVISO FINAL: DataFrame não carregado ou vazio para {loteria_key_func.upper()}.")
+        # A limpeza do arquivo já lido (ou tentado) não é mais necessária aqui, pois `filepath_to_read` pode não estar definido
+        # se o arquivo não existia. A limpeza será feita ao final da função se `filepath_to_read` tiver sido definido.
         return
 
     col_concurso = config_loteria_func["col_concurso"]
@@ -288,11 +328,20 @@ def processar_e_salvar_loteria_json_local(loteria_key_func, config_loteria_func)
                     sorteio_data["rateio_principal_valor"] = format_currency_local(parse_currency_to_float_local(str(rateio_val_str))) if num_ganhadores_parsed > 0 else "R$ 0,00"
 
                     # Adiciona rateios de faixas secundárias se configurado
-                    for key_col_rateio, key_json_rateio in config_loteria_func.items():
-                        if key_col_rateio.startswith("col_rateio_") and key_col_rateio != "col_rateio_principal" and isinstance(key_json_rateio, str) and key_json_rateio.startswith("rateio_"):
-                            nome_coluna_excel = config_loteria_func[key_col_rateio] # Ex: "Rateio 5 acertos"
-                            valor_rateio_faixa_str = row.get(nome_coluna_excel, '0')
-                            sorteio_data[key_json_rateio] = format_currency_local(parse_currency_to_float_local(str(valor_rateio_faixa_str)))
+                    rateio_keys_map = {
+                        "megasena": {"col_rateio_quina": "rateio_quina_valor", "col_rateio_quadra": "rateio_quadra_valor"},
+                        "lotofacil": {"col_rateio_14": "rateio_14_acertos_valor", "col_rateio_13": "rateio_13_acertos_valor", "col_rateio_12": "rateio_12_acertos_valor", "col_rateio_11": "rateio_11_acertos_valor"},
+                        "quina": {"col_rateio_4": "rateio_4_acertos_valor", "col_rateio_3": "rateio_3_acertos_valor", "col_rateio_2": "rateio_2_acertos_valor"},
+                        "lotomania": {"col_rateio_0": "rateio_0_acertos_valor"}
+                    }
+                    if loteria_key_func in rateio_keys_map:
+                        for col_excel_key_name_in_config, json_field_key_name_in_config in rateio_keys_map[loteria_key_func].items():
+                            coluna_excel_real = config_loteria_func.get(col_excel_key_name_in_config) # Ex: "Rateio 5 acertos"
+                            json_field_real = config_loteria_func.get(json_field_key_name_in_config) # Ex: "rateio_quina_valor"
+                            
+                            if coluna_excel_real and json_field_real and row.get(coluna_excel_real) is not None:
+                                valor_rateio_faixa_str = row.get(coluna_excel_real, '0')
+                                sorteio_data[json_field_real] = format_currency_local(parse_currency_to_float_local(str(valor_rateio_faixa_str)))
                 
                 results_list.append(sorteio_data)
         except Exception as e_row: 
@@ -334,13 +383,13 @@ def processar_e_salvar_loteria_json_local(loteria_key_func, config_loteria_func)
     else:
         print(f"AVISO FINAL [{loteria_key_func.upper()}]: Nenhum resultado válido processado.")
 
-    # Limpa o arquivo XLSX baixado do diretório local
+    # Limpa o arquivo baixado (XLSX ou CSV manual se foi lido) do diretório local de downloads
     if filepath_to_read and os.path.exists(filepath_to_read) and DIRETORIO_ARQUIVOS_MESTRE_BAIXADOS in filepath_to_read:
         try:
             os.remove(filepath_to_read)
-            print(f"Arquivo baixado {filepath_to_read} removido.")
+            print(f"Arquivo {filepath_to_read} removido.")
         except OSError as e_remove_local:
-            print(f"Erro ao remover arquivo baixado {filepath_to_read}: {e_remove_local}")
+            print(f"Erro ao remover arquivo {filepath_to_read}: {e_remove_local}")
 
 
 if __name__ == '__main__':
@@ -348,9 +397,7 @@ if __name__ == '__main__':
         print("ERRO CRÍTICO: A variável de ambiente BLOB_READ_WRITE_TOKEN não está configurada.")
         exit()
     if not db_firestore:
-        print("AVISO: Firebase Admin não foi inicializado. URLs dos Blobs não serão salvos no Firestore e a verificação automática de jogos não ocorrerá.")
-        # Você pode optar por sair ou continuar sem a funcionalidade do Firestore se for apenas para gerar JSON local
-        # exit()
+        print("AVISO: Firebase Admin não foi inicializado. URLs dos Blobs não serão salvos no Firestore e a verificação automática de jogos pode não ocorrer se `verificador_jogos` também não conseguir inicializar o Firebase.")
 
     print("Iniciando script de download, processamento e UPLOAD para Vercel Blob...")
     
@@ -359,8 +406,14 @@ if __name__ == '__main__':
 
     for loteria_key_loop, config_loop in LOTTERY_CONFIG_PROCESSAMENTO.items():
         print(f"\n--- Processando {loteria_key_loop.upper()} ---")
-        if fazer_download: # Agora tenta baixar para todas, incluindo Lotomania (que pegará o XLSX)
-            baixar_arquivo_loteria_local(loteria_key_loop, config_loop)
+        if fazer_download:
+            if loteria_key_loop == 'lotomania':
+                # Para lotomania, mesmo que faça download do XLSX, o processamento priorizará o CSV manual se existir.
+                # O download do XLSX da Lotomania aqui serve como fallback se o CSV não for encontrado.
+                print(f"AVISO [{loteria_key_loop.upper()}]: Tentando baixar XLSX como fallback, mas o processamento priorizará 'Lotomania_Resultados_MANUAL.csv' se existir.")
+                baixar_arquivo_loteria_local(loteria_key_loop, config_loop) # Tenta baixar o XLSX
+            else:
+                baixar_arquivo_loteria_local(loteria_key_loop, config_loop)
         
         processar_e_salvar_loteria_json_local(loteria_key_loop, config_loop)
             
