@@ -27,12 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const navDashboardBtn = document.getElementById('nav-dashboard-btn');
     const navMyGamesBtn = document.getElementById('nav-my-games-btn');
-    const navMyMysteryGamesBtn = document.getElementById('nav-my-mystery-games-btn'); // Para Jogo Misterioso
+    const navMyMysteryGamesBtn = document.getElementById('nav-my-mystery-games-btn');
     const navPoolsBtn = document.getElementById('nav-pools-btn');
     const mainNav = document.getElementById('main-nav');
     const dashboardSection = document.getElementById('dashboard-section');
     const myGamesSection = document.getElementById('my-games-section');
-    const myMysteryGamesSection = document.getElementById('my-mystery-games-section'); // Para Jogo Misterioso
+    const myMysteryGamesSection = document.getElementById('my-mystery-games-section');
     const poolsSection = document.getElementById('pools-section');
     const mainSections = document.querySelectorAll('.main-section');
 
@@ -48,11 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const dynamicLotteryNameHunchLoggedOutSpan = document.getElementById('dynamic-lottery-name-hunch-logged-out');
     const dynamicLotteryNameManualSpan = document.getElementById('dynamic-lottery-name-manual');
     
-    // Jogo Misterioso Teaser - Seletores
-    // const dynamicLotteryNameMysterySpan = document.getElementById('dynamic-lottery-name-mystery'); // Não usado no teaser atual
-    // const buyMysteryGameBtn = document.getElementById('buy-mystery-game-btn'); // Não usado no teaser atual
-    // const mysteryGamePriceSpan = document.getElementById('mystery-game-price'); // Não usado no teaser atual
-    // const mysteryGamePurchaseStatusDiv = document.getElementById('mystery-game-purchase-status'); // Não usado no teaser atual
+    const dynamicLotteryNameMysterySpan = document.getElementById('dynamic-lottery-name-mystery'); 
+    const buyMysteryGameBtn = document.getElementById('buy-mystery-game-btn'); 
+    const mysteryGamePriceSpan = document.getElementById('mystery-game-price'); 
+    const mysteryGamePurchaseStatusDiv = document.getElementById('mystery-game-purchase-status'); 
     const myMysteryGamesContainer = document.getElementById('my-mystery-games-container');
 
 
@@ -93,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const coldNumbersHunchStrategyP = document.getElementById('cold-numbers-hunch-strategy');
     const saveColdHunchBtn = document.getElementById('save-cold-hunch-btn');
     const checkColdHunchBtn = document.getElementById('check-cold-hunch-btn');
-    const coldHunchCheckResultDiv = document.getElementById('cold-hunch-check-result'); // **GARANTIDO QUE ESTÁ AQUI**
+    const coldNumbersHunchCheckResultDiv = document.getElementById('cold-hunch-check-result'); 
 
     const esotericHunchCard = document.getElementById('esoteric-hunch-card');
     const birthDateInput = document.getElementById('birth-date-input');
@@ -438,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (elements.outputDiv) elements.outputDiv.style.display = 'none';
         if (elements.numbersDiv) elements.numbersDiv.innerHTML = '';
         if (elements.strategyP) elements.strategyP.textContent = '';
-        if (elements.checkResultDiv) elements.checkResultDiv.innerHTML = ''; // Certifique-se que checkResultDiv existe
+        if (elements.checkResultDiv) elements.checkResultDiv.innerHTML = '';
         if (elements.saveButton) elements.saveButton.style.display = 'none';
         if (elements.checkButton) elements.checkButton.style.display = 'none';
     }
@@ -465,12 +464,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if(verifyPastGameResultDiv) verifyPastGameResultDiv.style.display = 'none';
         }
         
-        // updateMysteryGameCardUI não precisa ser chamada aqui pois o card é um teaser.
-        // Se for reativar, descomente a chamada abaixo.
-        // if (typeof updateMysteryGameCardUI === "function") {
-        //     updateMysteryGameCardUI(selectedLotteryKey);
-        // }
-
         resetHunchDisplay({ 
             outputDiv: quickHunchOutputDivLoggedOut, numbersDiv: quickHunchNumbersDivLoggedOut,
             strategyP: quickHunchStrategyPLoggedOut, checkResultDiv: quickHunchCheckResultDivLoggedOut,
@@ -552,7 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.ganhadores_principal_contagem !== undefined) { content += `Ganhadores: ${data.ganhadores_principal_contagem}\n`; }
             if (data.cidades_ganhadoras_principal && data.cidades_ganhadoras_principal.length > 0) { content += `Cidades: ${data.cidades_ganhadoras_principal.join('; ')}\n`; }
              if (data.rateio_principal_valor !== undefined && data.rateio_principal_valor !== null) {
-                 content += `Rateio: ${data.rateio_principal_valor}\n`; // Mantém como string, conforme main.py
+                 content += `Rateio: ${data.rateio_principal_valor}\n`; 
             } else {
                  content += `Rateio: N/A\n`;
             }
@@ -801,7 +794,6 @@ document.addEventListener('DOMContentLoaded', () => {
             recognition.onerror = (event) => {
                 isListening = false; awaitingSpecificInput = false;
                 if(voiceCommandBtn) voiceCommandBtn.classList.remove('listening');
-                if (event.error !== 'no-speech' && event.error !== 'aborted') { /*speak("Erro no reconhecimento de voz.");*/ }
             };
             recognition.onend = () => {
                 const wasAwaiting = awaitingSpecificInput;
@@ -878,7 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cosmicPromoBanner) cosmicPromoBanner.style.display = 'none'; 
 
             if (typeof loadUserGames === "function") loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
-            if (typeof loadMyMysteryGames === "function") loadMyMysteryGames(); // Carrega jogos misteriosos ao logar
+            if (typeof loadMyMysteryGames === "function") loadMyMysteryGames(); 
             if (typeof checkForPrizesAndNotify === 'function') checkForPrizesAndNotify(user.uid);
             
             const firstTabLink = document.querySelector('.tabs-navigation .tab-link[aria-controls="tab-hot"]');
@@ -1027,7 +1019,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if(saveColdHunchBtn) saveColdHunchBtn.style.display = 'none';
         if(checkColdHunchBtn) checkColdHunchBtn.style.display = 'none';
-        if(coldHunchCheckResultDiv) coldHunchCheckResultDiv.innerHTML = '';
+        if(coldNumbersHunchCheckResultDiv) coldNumbersHunchCheckResultDiv.innerHTML = '';
 
         try {
             const data = await fetchData(`api/main/gerar_jogo/numeros_frios/${lottery}?num_concursos_analisar=${analyzeCount}`);
@@ -1052,7 +1044,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 estrategia_metodo: data.estrategia_usada || 'Números Frios',
                 outputDiv: coldNumbersHunchOutputDiv,
                 numbersDiv: coldNumbersHunchNumbersDiv,
-                checkResultDiv: coldHunchCheckResultDiv,
+                checkResultDiv: coldNumbersHunchCheckResultDiv,
                 saveButton: saveColdHunchBtn,
                 checkButton: checkColdHunchBtn
             };
@@ -1162,9 +1154,29 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Logue-se e gere um palpite válido deste tipo para salvar."); return;
         }
         const { lottery, jogo, estrategia_metodo } = lastGeneratedHunch;
-        firestoreDB.collection('userGames').add({ userId: currentUser.uid, userEmail: currentUser.email, lottery: lottery, game: jogo, strategy: estrategia_metodo, savedAt: firebase.firestore.FieldValue.serverTimestamp(), isPremiado: false, faixaPremio: "Não verificado", acertos: 0, numerosAcertados: [], ultimoConcursoVerificado: null, notificacaoPendente: false })
-            .then(() => { alert("Palpite salvo!"); if (myGamesSection && myGamesSection.classList.contains('active-section') && typeof loadUserGames === "function") { loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); } })
-            .catch((error) => { alert(`Erro ao salvar: ${error.message}`); });
+        firestoreDB.collection('userGames').add({ 
+            userId: currentUser.uid, 
+            userEmail: currentUser.email, 
+            lottery: lottery, 
+            game: jogo, 
+            strategy: estrategia_metodo, 
+            savedAt: firebase.firestore.FieldValue.serverTimestamp(), 
+            isPremiado: false, 
+            faixaPremio: "Não verificado", 
+            acertos: 0, 
+            numerosAcertados: [], 
+            ultimoConcursoVerificado: null, 
+            notificacaoPendente: false 
+        })
+            .then(() => { 
+                alert("Palpite salvo!"); 
+                if (myGamesSection && myGamesSection.classList.contains('active-section') && typeof loadUserGames === "function") { 
+                    loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos"); 
+                } 
+            })
+            .catch((error) => { 
+                alert(`Erro ao salvar: ${error.message}`); 
+            });
     }
 
     function setupCheckHunchButtonListeners() {
@@ -1300,7 +1312,16 @@ document.addEventListener('DOMContentLoaded', () => {
         renderGameNumbers(gameNumbersDiv, gameData.game, gameData.numerosAcertados || [], [], gameData.lottery);
 
         const strategyP = document.createElement('p'); strategyP.classList.add('strategy-text'); strategyP.textContent = `Estratégia: ${gameData.strategy || 'N/A'}`;
-        const dateP = document.createElement('p'); dateP.classList.add('game-card-info'); dateP.textContent = `Salvo em: ${gameData.savedAt ? new Date(gameData.savedAt.toDate()).toLocaleDateString() : 'N/A'}`;
+        const dateP = document.createElement('p'); dateP.classList.add('game-card-info'); 
+        let savedDateString = 'N/A';
+        if (gameData.savedAt && gameData.savedAt.toDate) { 
+            savedDateString = new Date(gameData.savedAt.toDate()).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        } else if (gameData.savedAt) { 
+            try {
+                savedDateString = new Date(gameData.savedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            } catch (e) { }
+        }
+        dateP.textContent = `Salvo em: ${savedDateString}`;
         
         const verificationStatusP = document.createElement('p');
         verificationStatusP.classList.add('game-card-info', 'verification-status');
@@ -1313,16 +1334,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 verificationStatusP.style.color = '#a2d2ff';
             }
         } else {
-            verificationStatusP.textContent = "Aguardando verificação do resultado.";
+            verificationStatusP.textContent = gameData.faixaPremio === "Aguardando novo concurso" ? "Ativo para próximo concurso." : "Aguardando verificação.";
             verificationStatusP.style.fontStyle = 'italic';
-            verificationStatusP.style.color = '#8899aa';
+            verificationStatusP.style.color = gameData.faixaPremio === "Aguardando novo concurso" ? '#82e0aa' : '#8899aa';
         }
 
         const actionsDiv = document.createElement('div'); actionsDiv.classList.add('game-card-actions');
-        const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'small-btn'); deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Excluir';
-        deleteBtn.addEventListener('click', async () => { if (confirm("Excluir este jogo?")) { try { await firestoreDB.collection('userGames').doc(docId).delete(); card.remove(); if (savedGamesContainer.children.length === 0) noSavedGamesP.style.display = 'block'; } catch (e) { alert("Erro ao excluir.");}}});
         
+        const playAgainBtn = document.createElement('button');
+        playAgainBtn.classList.add('action-btn', 'small-btn', 'play-again-btn');
+        playAgainBtn.innerHTML = '<i class="fas fa-redo"></i> Jogar Novamente';
+        playAgainBtn.title = "Jogar este jogo novamente no próximo concurso";
+        playAgainBtn.addEventListener('click', () => handlePlayAgain(gameData, card)); 
+
+        const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'small-btn', 'delete-game-btn'); 
+        deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Excluir';
+        deleteBtn.addEventListener('click', async () => { 
+            if (confirm("Excluir este jogo? Esta ação não pode ser desfeita.")) { 
+                try { 
+                    await firestoreDB.collection('userGames').doc(docId).delete(); 
+                    card.remove(); 
+                    if (savedGamesContainer.children.length === 0) {
+                        noSavedGamesP.style.display = 'block';
+                    }
+                } catch (e) { 
+                    alert("Erro ao excluir o jogo: " + e.message);
+                }
+            }
+        });
+        
+        actionsDiv.appendChild(playAgainBtn); 
         actionsDiv.appendChild(deleteBtn);
+        
         card.innerHTML = `<h4>${lotteryName}</h4>`;
         card.appendChild(gameNumbersDiv);
         card.appendChild(strategyP);
@@ -1330,6 +1373,60 @@ document.addEventListener('DOMContentLoaded', () => {
         card.appendChild(verificationStatusP);
         card.appendChild(actionsDiv);
         return card;
+    }
+    
+    async function handlePlayAgain(originalGameData, gameCardElement) {
+        if (!currentUser || !firestoreDB) {
+            alert("Você precisa estar logado para jogar novamente.");
+            openModal(loginModal);
+            return;
+        }
+    
+        const playAgainButton = gameCardElement.querySelector('.play-again-btn');
+        if(playAgainButton) {
+            playAgainButton.disabled = true;
+            playAgainButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Copiando...';
+        }
+        
+        let originalSavedDateStr = 'data antiga';
+        if (originalGameData.savedAt && originalGameData.savedAt.toDate) {
+            originalSavedDateStr = new Date(originalGameData.savedAt.toDate()).toLocaleDateString('pt-BR');
+        } else if (originalGameData.savedAt) {
+            try { originalSavedDateStr = new Date(originalGameData.savedAt).toLocaleDateString('pt-BR'); } catch(e) {}
+        }
+    
+        const newGameEntry = {
+            userId: currentUser.uid,
+            userEmail: currentUser.email,
+            lottery: originalGameData.lottery,
+            game: originalGameData.game, 
+            strategy: `Repetição (original de ${originalSavedDateStr})`,
+            savedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            isPremiado: false,
+            faixaPremio: "Aguardando novo concurso", 
+            acertos: 0,
+            numerosAcertados: [],
+            ultimoConcursoVerificado: null, 
+            notificacaoPendente: false
+        };
+    
+        try {
+            await firestoreDB.collection('userGames').add(newGameEntry);
+            
+            const lotteryFriendlyName = LOTTERY_CONFIG_JS[originalGameData.lottery]?.name || originalGameData.lottery.toUpperCase();
+            alert(`Jogo [${originalGameData.game.join(', ')}] copiado e ativado para o próximo concurso da ${lotteryFriendlyName}!`);
+            
+            if (myGamesSection.classList.contains('active-section')) {
+                loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
+            }
+        } catch (error) {
+            console.error("Erro ao tentar jogar novamente:", error);
+            alert(`Erro ao tentar jogar novamente: ${error.message}`);
+            if(playAgainButton) { 
+                playAgainButton.disabled = false;
+                playAgainButton.innerHTML = '<i class="fas fa-redo"></i> Jogar Novamente';
+            }
+        }
     }
 
     async function checkForPrizesAndNotify(userId) {
@@ -1440,7 +1537,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if(manualSaveUserNumbersInput) manualSaveUserNumbersInput.placeholder = `Ex: 01,... (${expectedCount} de ${selectedLotteryConfig.min}-${selectedLotteryConfig.max} para ${selectedLotteryConfig.name})`;
     }
 
-
     function setupAuthEventListeners() {
         if(loginSubmitBtn && loginEmailInput && loginPasswordInput && loginErrorP) {
             loginSubmitBtn.addEventListener('click', () => {
@@ -1489,10 +1585,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 firebaseAuth.onAuthStateChanged(user => {
                     currentUser = user;
                     if (typeof updateLoginUI === "function") updateLoginUI(user);
-                    // Ajuste: Verifica se a tela de boas-vindas está efetivamente escondida pelo estilo
                     if (inclusiveWelcomeScreen && inclusiveWelcomeScreen.style.display === 'none') {
-                        // Ajuste: Verifica se o splash já foi escondido OU se está na tela de splash e ela está escondida
-                        if (splashHiddenTimestamp > 0 || (mainSplashScreen && (mainSplashScreen.classList.contains('hidden') || mainSplashScreen.style.display === 'none')) ) {
+                        if (splashHiddenTimestamp > 0 || (mainSplashScreen && mainSplashScreen.style.display === 'none') ) {
                              if (typeof effectivelyShowApp === "function") effectivelyShowApp();
                         }
                     }
@@ -1504,7 +1598,6 @@ document.addEventListener('DOMContentLoaded', () => {
              if (inclusiveWelcomeScreen && inclusiveWelcomeScreen.style.display === 'none') {
                 if (typeof effectivelyShowApp === "function") {
                     const timeSinceDOMLoad = Date.now() - domContentLoadedTimestamp;
-                    // Garante que o splash seja exibido por um tempo mínimo, mesmo se Firebase falhar rápido
                     setTimeout(effectivelyShowApp, SPLASH_MINIMUM_VISIBLE_TIME > timeSinceDOMLoad ? SPLASH_MINIMUM_VISIBLE_TIME - timeSinceDOMLoad : 0);
                 }
             }
@@ -1520,18 +1613,18 @@ document.addEventListener('DOMContentLoaded', () => {
             else {
                 if (typeof showGlobalError === "function") showGlobalError("Não foi possível carregar os serviços. Tente recarregar.");
                 if(typeof disableFirebaseFeatures === "function") disableFirebaseFeatures();
-                if (typeof effectivelyShowApp === "function") { effectivelyShowApp(); } // Mostra o app mesmo com falha do Firebase
+                if (typeof effectivelyShowApp === "function") { effectivelyShowApp(); }
             }
         }
     }
 
     function effectivelyShowApp() {
         if (criticalSplashTimeout) { clearTimeout(criticalSplashTimeout); criticalSplashTimeout = null; }
-        if (inclusiveWelcomeScreen && inclusiveWelcomeScreen.style.display !== 'none') { // Usa .style.display
+        if (inclusiveWelcomeScreen && inclusiveWelcomeScreen.style.display !== 'none') {
             inclusiveWelcomeScreen.style.display = 'none';
         }
-        if (mainSplashScreen && mainSplashScreen.style.display !== 'none' && splashHiddenTimestamp === 0) { // Garante que só mexe se estiver visível
-            mainSplashScreen.classList.add('hidden'); // Pode continuar usando classe aqui se a animação depender disso
+        if (mainSplashScreen && mainSplashScreen.style.display !== 'none' && splashHiddenTimestamp === 0) {
+            mainSplashScreen.classList.add('hidden'); 
             splashHiddenTimestamp = Date.now();
         }
         showAppContentNow();
@@ -1542,8 +1635,6 @@ document.addEventListener('DOMContentLoaded', () => {
             appContent.style.display = 'block';
             if (typeof setActiveSection === "function") setActiveSection('dashboard-section');
             if (typeof fetchPlatformStats === "function") fetchPlatformStats();
-            // A chamada para fetchRecentWinningPools continua comentada
-            // if (typeof fetchRecentWinningPools === "function") fetchRecentWinningPools(); 
             if (typeof fetchTopWinners === "function") fetchTopWinners();
             if (typeof renderBanners === "function") renderBanners();
             if (typeof initializeCarousels === "function") initializeCarousels();
@@ -1618,30 +1709,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (activateVoiceGuideBtn) activateVoiceGuideBtn.addEventListener('click', () => { handleWelcomeChoice(true); });
         if (declineVoiceGuideBtn) declineVoiceGuideBtn.addEventListener('click', () => { handleWelcomeChoice(false); });
-        // A chamada playInitialGreetingAndListen() foi removida daqui para corrigir o problema inicial do Android.
     }
     
-    // --- LÓGICA PARA JOGO MISTERIOSO (AJUSTADA PARA "EM BREVE") ---
     function updateMysteryGameCardUI(lotteryKey) {
-        // Como o card de compra agora é um teaser fixo, esta função é desnecessária no momento.
-        // Se você reintroduzir elementos dinâmicos no teaser, reative e ajuste esta função.
     }
     
     async function handleBuyMysteryGame() {
-        // Esta função não será chamada pelo teaser card atual, pois o botão de compra foi removido dele.
-        // Mantida aqui para referência futura, caso você reative a compra direta.
-        const actualBuyButton = document.getElementById('buy-mystery-game-btn'); // Procura o botão original
-        const actualStatusDiv = document.getElementById('mystery-game-purchase-status'); // Procura o status div original
-        
         if (!currentUser) {
             alert("Você precisa estar logado para comprar um Jogo Misterioso.");
             openModal(loginModal);
             return;
         }
+        const actualBuyButton = document.getElementById('buy-mystery-game-btn'); 
+        const actualStatusDiv = document.getElementById('mystery-game-purchase-status');
+        
         if (!mainLotterySelect || !actualStatusDiv || !actualBuyButton) {
-            // console.warn("Elementos do Jogo Misterioso (compra) não encontrados.");
-            // Se o botão de compra do teaser (#mystery-game-teaser-card) chamar esta função,
-            // você pode exibir a mensagem de "Em Breve" aqui.
             const teaserStatusDiv = document.getElementById('mystery-game-purchase-status-teaser');
             if(teaserStatusDiv) {
                 teaserStatusDiv.innerHTML = `<p style="color:#f0ad4e;">Esta funcionalidade estará disponível em breve!</p>`;
@@ -1649,29 +1731,143 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return;
         }
-        // O restante da lógica de `handleBuyMysteryGame` (chamada de API, etc.) seria aqui,
-        // mas não será executada pelo teaser atual.
     }
 
-    function loadMyMysteryGames() {
+    async function loadMyMysteryGames() {
         if (!myMysteryGamesContainer) return;
-        const placeholderText = !currentUser 
-            ? '<p>Faça login para ver seus Jogos Misteriosos (Em Breve).</p>'
-            : '<p>Esta funcionalidade para listar seus Jogos Misteriosos comprados estará disponível em breve!</p>';
-        myMysteryGamesContainer.innerHTML = placeholderText;
+        myMysteryGamesContainer.innerHTML = '<p>Funcionalidade de "Meus Jogos Misteriosos" estará disponível em breve!</p>';
     }
 
-    // Funções createMysteryGameCard, addRevealButtonListeners, handleRevealClick mantidas para uso futuro.
-    function createMysteryGameCard(game) { /* ... (código original mantido) ... */ return document.createElement('div');}
-    function addRevealButtonListeners() { /* ... (código original mantido) ... */ }
-    async function handleRevealClick(event) { /* ... (código original mantido) ... */ }
-    // --- FIM - LÓGICA JOGO MISTERIOSO ---
+    function createMysteryGameCard(game) { 
+        const card = document.createElement('div');
+        card.classList.add('card', 'game-card-item', 'mystery-card');
+        card.dataset.orderId = game.order_id;
+        
+        if (game.status_pagamento !== 'pago') card.classList.add('pending-payment');
+        if (game.dados_premiacao && game.dados_premiacao.foi_premiado) card.classList.add('premiado');
 
-    // --- INICIALIZAÇÃO ---
+        const lotteryConfig = LOTTERY_CONFIG_JS[game.lottery_type.toLowerCase()] || { name: game.lottery_type.toUpperCase(), color: '#ccc' };
+        
+        let numbersHtml = '<div class="game-numbers">';
+        (game.display_numeros || []).forEach(numStr => {
+            let numClass = 'game-number';
+            let numStyle = `background-color: #555; border-color: #777; color: #fff;`; 
+            
+            if (numStr === '?') {
+                numClass += ' question-mark'; 
+            } else if (numStr !== '-') { 
+                numStyle = `background-color: ${lotteryConfig.color}; border-color: ${lotteryConfig.color}; color: #1a1a2e;`;
+                if (game.status_revelacao === 'revelado' && game.dados_premiacao && game.dados_premiacao.numeros_que_acertou && game.dados_premiacao.numeros_que_acertou.includes(parseInt(numStr))) {
+                    numClass += ' hit';
+                    numStyle = `background-color: #2ecc71; color: #fff;`;
+                }
+            }
+            numbersHtml += `<div class="${numClass}" style="${numStyle}">${String(numStr).padStart(2, '0')}</div>`;
+        });
+        numbersHtml += '</div>';
+
+        if (game.status_revelacao === 'selado' && game.status_pagamento === 'pago'){
+             const numbersContainerForBlur = card.querySelector('.game-numbers'); 
+             if(numbersContainerForBlur) numbersContainerForBlur.classList.add('sealed-numbers');
+        }
+
+        let statusPagamentoDisplay = `Pagamento: <span class="${game.status_pagamento}">${game.status_pagamento}</span>`;
+         if (game.status_pagamento === 'pendente' && game.link_pagamento_simulado_frontend) { 
+             statusPagamentoDisplay += ` <a href="${game.link_pagamento_simulado_frontend}" target="_blank" class="action-btn small-btn">Pagar (Sim.)</a>`;
+        }
+
+        let revelacaoHtml = '';
+        if (game.status_pagamento === 'pago' && game.status_revelacao === 'selado') {
+            revelacaoHtml = `<button class="action-btn small-btn reveal-mystery-game-btn" data-order-id="${game.order_id}"><i class="fas fa-eye"></i> Revelar Agora!</button>`;
+        } else if (game.status_revelacao === 'revelado') {
+            revelacaoHtml = `<p class="strategy-text">Estratégia Usada: ${game.estrategia_usada || 'N/A'}</p>`;
+            if (game.dados_premiacao) {
+                revelacaoHtml += `<p class="game-card-info">Sorteio Oficial (Conc. ${game.concurso_oficial_referencia}): ${(game.dados_premiacao.numeros_sorteados_oficialmente || []).join(', ')}</p>`;
+                revelacaoHtml += `<p class="game-card-info ${game.dados_premiacao.acertos > 0 ? 'hits' : 'misses'}">Seus Acertos: ${game.dados_premiacao.acertos} (${game.dados_premiacao.faixa_premio || ''})</p>`;
+            }
+        }
+        
+        card.innerHTML = `
+            <h4>${lotteryConfig.name} (Misterioso)</h4>
+            <p class="game-card-info">Pedido: ${game.order_id ? game.order_id.substring(0,8) : 'N/A'}...</p>
+            <p class="game-card-info">Concurso Ref.: <strong>${game.concurso_oficial_referencia || 'N/A'}</strong></p>
+            ${numbersHtml}
+            <p class="game-card-info status-${game.status_pagamento}">${statusPagamentoDisplay}</p>
+            <p class="game-card-info">Criado em: ${game.criado_em_display || 'N/A'}</p>
+            <div class="mystery-game-reveal-status" style="margin-top:0.5rem; min-height: 2.5em;" aria-live="polite">${revelacaoHtml}</div>
+        `;
+        return card;
+    }
+
+    function addRevealButtonListeners() { 
+        document.querySelectorAll('.reveal-mystery-game-btn').forEach(button => {
+            button.removeEventListener('click', handleRevealClick); 
+            button.addEventListener('click', handleRevealClick);
+        });
+    }
+
+    async function handleRevealClick(event) { 
+        const button = event.currentTarget;
+        const orderId = button.dataset.orderId;
+        const cardElement = button.closest('.game-card-item');
+        const revealStatusDiv = cardElement.querySelector('.mystery-game-reveal-status');
+
+        if (!revealStatusDiv) return;
+        
+        revealStatusDiv.innerHTML = '<div class="spinner small-spinner"></div> Revelando...';
+        button.style.display = 'none'; 
+
+        try {
+            const result = await fetchData(`/api/main/jogo-misterioso/revelar/${orderId}`, { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: currentUser.uid }) 
+            });
+            
+            if (result.erro) throw new Error(result.erro);
+
+            if (result.jogo_selado === true) { 
+                 revealStatusDiv.innerHTML = `<p style="color:#f39c12; font-size: 0.9em;">${result.mensagem || result.aviso}</p><button class="action-btn small-btn reveal-mystery-game-btn" data-order-id="${orderId}"><i class="fas fa-sync-alt"></i> Tentar Revelar Novamente</button>`;
+                 addRevealButtonListeners(); 
+                 return;
+            }
+            
+            const updatedGameDataFromServer = { 
+                order_id: orderId,
+                user_id: currentUser.uid,
+                lottery_type: result.loteria.toLowerCase().replace('-',''), 
+                concurso_oficial_referencia: result.concurso_referencia,
+                display_numeros: result.seus_numeros_apostados, 
+                numeros_gerados: result.seus_numeros_apostados, 
+                estrategia_usada: result.estrategia_usada,
+                status_pagamento: 'pago', 
+                status_revelacao: 'revelado',
+                criado_em_display: cardElement.querySelector('.game-card-info') ? cardElement.querySelector('.game-card-info').textContent.replace('Criado em: ','') : 'N/A', 
+                dados_premiacao: {
+                    foi_premiado: result.acertos > 0, 
+                    numeros_sorteados_oficialmente: result.numeros_sorteados_oficialmente,
+                    acertos: result.acertos,
+                    numeros_que_acertou: result.numeros_que_acertou,
+                    faixa_premio: result.faixa_premio
+                }
+            };
+
+            const newCard = createMysteryGameCard(updatedGameDataFromServer);
+            cardElement.parentNode.replaceChild(newCard, cardElement);
+            newCard.classList.add('revealed-animation');
+            if (result.acertos > 0 && typeof triggerConfetti === 'function') {
+                triggerConfetti();
+            }
+
+        } catch (error) {
+            revealStatusDiv.innerHTML = `<p class="error-message">Erro: ${error.message}</p><button class="action-btn small-btn reveal-mystery-game-btn" data-order-id="${orderId}"><i class="fas fa-sync-alt"></i> Tentar Novamente</button>`;
+            addRevealButtonListeners(); 
+        }
+    }
+    
     initializeVoiceCommands();
     initializeInclusiveWelcome();
 
-    // Listeners de Eventos
     if(loginModalBtn) loginModalBtn.addEventListener('click', () => openModal(loginModal));
     if(registerModalBtn) registerModalBtn.addEventListener('click', () => openModal(registerModal));
     if(closeLoginModalBtn) closeLoginModalBtn.addEventListener('click', () => closeModal(loginModal));
@@ -1697,14 +1893,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // O listener para #buy-mystery-game-btn não deve ser ativado pelo teaser.
-    // Se você adicionar um botão diferente no teaser com outro ID, pode adicionar um listener específico para ele:
-    // const teaserButton = document.getElementById('ID_DO_BOTAO_NO_TEASER');
-    // if (teaserButton) {
-    //     teaserButton.addEventListener('click', () => {
-    //         alert("Jogo Misterioso - Em Breve!");
-    //     });
-    // }
+    if (buyMysteryGameBtn) {
+        buyMysteryGameBtn.addEventListener('click', handleBuyMysteryGame); 
+    }
 
     if (generateQuickHunchBtnLoggedOut) generateQuickHunchBtnLoggedOut.addEventListener('click', generateAndDisplayQuickHunchLoggedOut);
     if (generateQuickHunchBtn) generateQuickHunchBtn.addEventListener('click', generateAndDisplayQuickHunch);
@@ -1741,7 +1932,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const userNumbersRaw = numbersStr.split(/[ ,;/\t\n]+/);
             const userNumbers = userNumbersRaw.map(n => n.trim()).filter(n => n !== "" && !isNaN(n)).map(n => parseInt(n,10));
 
-            // const expectedCount = selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count; // Validação de contagem agora no backend
+            const expectedCount = selectedLotteryConfig.count_apostadas || selectedLotteryConfig.count;
             if (userNumbers.length === 0) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Insira os números.</p>`; return; }
             if (new Set(userNumbers).size !== userNumbers.length) { manualProbabilityResultDisplay.innerHTML = `<p class="error-message">Números repetidos.</p>`; return; }
 

@@ -1,4 +1,3 @@
-/* Estilos Globais e Reset Básico */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
@@ -308,7 +307,7 @@ h4 i { margin-right: 5px; }
 .game-number.hit { background-color: #2ecc71 !important; color: #fff !important; transform: scale(1.1); border-color: #2ecc71 !important;}
 .game-number.almost { background-color: #f1c40f !important; color: #333 !important; transform: scale(1.05); border-color: #f1c40f !important;}
 .strategy-text { font-size: 0.8rem; color: #c5c6c7; font-style: italic; margin-bottom: 0.5rem; text-align: center;}
-.game-card-actions { display: flex; gap: 0.5rem; margin-top: auto; justify-content: flex-end; padding-top: 0.5rem;}
+.game-card-actions { display: flex; gap: 0.5rem; margin-top: auto; justify-content: flex-end; padding-top: 0.5rem; }
 .game-card-info { font-size: 0.8rem; color: #8899aa; margin-top: 0.5rem; }
 .check-result-display { margin-top: 0.8rem; font-size: 0.9rem; font-weight: bold; min-height: 1.2em; }
 .check-result-display .hits { color: #2ecc71; } .check-result-display .almost-text { color: #f1c40f; } .check-result-display .misses { color: #ff4765; } .check-result-display .prize { color: #f1c40f; }
@@ -367,7 +366,7 @@ h4 i { margin-right: 5px; }
 .grid-container-stats,
 .grid-container-generators,
 .grid-container-tools,
-.cards-display { /* Unificado para Meus Jogos e Meus Jogos Misteriosos */
+.cards-display {
     display: grid;
     gap: 1.5rem;
     margin-top: 1rem;
@@ -418,27 +417,22 @@ h4 i { margin-right: 5px; }
 .carousel-ad > p { color: #8a9ac4; font-size: 1rem; text-align: center; }
 .carousel-ad:not(:empty) > p { display: none; }
 
-/* CORREÇÃO PARA TOP GANHADORES E LISTAS SIMILARES */
 #top-winners-preview.card, 
 #winning-pools-preview.card {
     display: flex; 
     flex-direction: column;
-    /* Defina uma altura explícita para o card se necessário, ou deixe que o conteúdo determine */
-    /* Ex: height: 400px; ou min-height: 300px; */
 }
 
 #top-winners-preview ol, 
 #recent-pools-list { 
     list-style-type: none; 
     padding-left: 0; 
-    margin: 0; /* Reset de margem para a lista */
+    margin: 0; 
     max-height: 280px; 
     overflow-y: auto; 
-    flex-grow: 1; /* Permite que a lista cresça para preencher o card */
+    flex-grow: 1; 
     padding-right: 8px; 
 }
-/* FIM CORREÇÃO */
-
 
 #top-winners-preview li, #recent-pools-list li { background-color: #2a2a50; padding: 0.9rem 1.2rem; margin-bottom: 0.6rem; border-radius: 8px; font-size: 0.95rem; display: flex; flex-direction: column; gap: 0.3rem; transition: background-color 0.3s ease; min-height: 70px; box-sizing: border-box; }
 #top-winners-preview li { border-left: 5px solid #ffd700; }
@@ -568,7 +562,7 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
 .spinner.small-spinner { width: 25px; height: 25px; border-width: 3px; margin: 5px auto; border-top-color: #47aeff; border-radius: 50%; border-style: solid; border-color: rgba(173, 216, 230, 0.3); animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 #confetti-canvas, #confetti-canvas-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100000; overflow: hidden; }
-#confetti-canvas-modal .confetti { /* Garante que o confetti no modal fique dentro do modal se ele for o pai */
+#confetti-canvas-modal .confetti {
     position: absolute;
 }
 .confetti { position: absolute; top: -20px; width: 10px; height: 20px; background-color: #f00; opacity: 0.7; animation: fall linear forwards; }
@@ -649,13 +643,13 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
 .game-card-item {
     background-color: #1e1e3f;
     border: 1px solid #3b3b6e;
-    border-left: 5px solid #47aeff; /* Azul padrão para jogos normais */
-    display: flex; /* Adicionado para melhor controle interno */
-    flex-direction: column; /* Garante que o conteúdo flua verticalmente */
+    border-left: 5px solid #47aeff;
+    display: flex; 
+    flex-direction: column; 
 }
 .game-card-item.premiado {
-    border-left-color: #ffd700 !important; /* Destaque para premiado */
-    background-color: #2f2f60 !important; /* Fundo um pouco diferente para premiado */
+    border-left-color: #ffd700 !important; 
+    background-color: #2f2f60 !important; 
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
 }
 .game-card-item h4 {
@@ -664,46 +658,52 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     font-size: 1.1rem;
 }
 .game-card-item .verification-status,
-.game-card-item .mystery-game-reveal-status { /* Unificando estilo base */
+.game-card-item .mystery-game-reveal-status { 
     font-size: 0.85rem;
     margin-top: 0.8rem;
     padding-top: 0.8rem;
     border-top: 1px dashed #303050;
-    word-wrap: break-word; /* Para quebrar texto longo */
+    word-wrap: break-word; 
 }
 .game-card-item .verification-status i,
 .game-card-item .mystery-game-reveal-status i {
     margin-right: 5px;
 }
-.game-card-item .game-card-actions button,
-.game-card-item .mystery-game-reveal-status button.reveal-mystery-game-btn { /* Seletor mais específico para o botão de revelar */
-    background-color: #303050;
-    border-color: #47aeff; /* Borda azul para consistência */
-    color: #e0e0e0;
-}
-.game-card-item .game-card-actions button:hover { /* Hover para botão de excluir */
-    background-color: #ff4765;
-    border-color: #ff4765;
-    color: #fff;
-}
-.game-card-item .mystery-game-reveal-status button.reveal-mystery-game-btn {
-    background-color: #5cb85c; /* Verde para botão de revelar */
-    color: #fff;
+
+.game-card-actions .play-again-btn {
+    background-color: #5cb85c; 
     border-color: #4cae4c;
+    color: #fff;
+    margin-right: 0.5rem; 
 }
-.game-card-item .mystery-game-reveal-status button.reveal-mystery-game-btn:hover {
-    background-color: #4cae4c;
+.game-card-actions .play-again-btn:hover {
+    background-color: #45a045; 
+    border-color: #3e8e41;
+}
+.game-card-actions .play-again-btn:disabled {
+    background-color: #cccccc;
+    border-color: #bbbbbb;
+    color: #666666;
+    cursor: not-allowed;
+}
+.game-card-actions .delete-game-btn { 
+    background-color: #e74c3c; 
+    border-color: #c0392b;
+    color: #fff;
+}
+.game-card-actions .delete-game-btn:hover {
+    background-color: #c0392b;
+    border-color: #a93226;
 }
 
 
-/* --- NOVOS ESTILOS PARA JOGO MISTERIOSO --- */
-#mystery-game-purchase-section .card-title-accessible { /* Título da seção do Jogo Misterioso */
-    color: #ffd700; /* Dourado */
-    border-bottom-color: #e2c000; /* Um dourado um pouco mais escuro para a borda */
+#mystery-game-purchase-section .card-title-accessible { 
+    color: #ffd700; 
+    border-bottom-color: #e2c000; 
 }
 #mystery-game-purchase-card {
     text-align: center;
-    border-left: 5px solid #ffd700; /* Destaque dourado no card de compra */
+    border-left: 5px solid #ffd700; 
 }
 #mystery-game-purchase-card h4 { 
     color: #ffd700; 
@@ -721,9 +721,9 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     background-color: #ec971f;
     box-shadow: 0 0 12px rgba(240, 173, 78, 0.7);
 }
-#mystery-game-purchase-status { /* Status da compra */
-    min-height: 40px; /* Para evitar pulos de layout */
-    text-align: left; /* Alinha o texto à esquerda dentro da caixa de status */
+#mystery-game-purchase-status { 
+    min-height: 40px; 
+    text-align: left; 
 }
 #mystery-game-purchase-status a.action-btn { 
     display: inline-block; 
@@ -737,23 +737,22 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     background-color: #229954;
 }
 
-/* Estilos para os cards na lista "Meus Jogos Misteriosos" */
 #my-mystery-games-container .game-card-item.mystery-card {
-    border-left-color: #f0ad4e; /* Borda dourada para jogos misteriosos */
+    border-left-color: #f0ad4e; 
 }
 .mystery-card.pending-payment {
     opacity: 0.7;
     border-left-color: #777 !important; 
-    background-color: #2c2c4a; /* Um pouco mais escuro para indicar pendência */
+    background-color: #2c2c4a; 
 }
 .mystery-card .status-pending { color: #f0ad4e; font-weight: bold; }
 .mystery-card .status-failed { color: #d9534f; font-weight: bold; }
 
 .mystery-card .game-numbers { 
     transition: filter 0.5s ease-in-out;
-    min-height: 35px; /* Para evitar colapso se vazio */
+    min-height: 35px; 
 }
-.mystery-card .game-numbers.sealed-numbers .game-number { /* Aplicado via JS se selado */
+.mystery-card .game-numbers.sealed-numbers .game-number { 
     background-color: #555 !important;
     border-color: #777 !important;
     color: #fff !important;
@@ -771,7 +770,6 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
 .mystery-game-reveal-status .spinner.small-spinner {
     margin-bottom: 0.5rem; 
 }
-/* --- FIM NOVOS ESTILOS JOGO MISTERIOSO --- */
 
 #prize-notification-modal .modal-content {
     border-color: #ffd700;
@@ -786,7 +784,6 @@ footer { text-align: center; padding: 2rem; background-color: #121224; color: #8
     border-left: 3px solid #82e0aa;
 }
 
-/* Media Queries */
 @media (max-width: 768px) {
     header { padding: 0.8rem 1rem; flex-direction: column; align-items: center; }
     .logo-container { margin-bottom: 0.8rem; }
