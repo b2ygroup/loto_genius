@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         resetHunchDisplay({ 
             outputDiv: coldNumbersHunchOutputDiv, numbersDiv: coldNumbersHunchNumbersDiv,
-            strategyP: coldNumbersHunchStrategyP, checkResultDiv: coldHunchCheckResultDiv,
+            strategyP: coldNumbersHunchStrategyP, checkResultDiv: coldNumbersHunchCheckResultDiv, // CORRIGIDO AQUI
             saveButton: saveColdHunchBtn, checkButton: checkColdHunchBtn
         });
         resetHunchDisplay({ 
@@ -1203,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (expectedHunchType === 'quick') { targetCheckResultDiv = quickHunchCheckResultDiv; targetNumbersDiv = quickHunchNumbersDiv; }
             else if (expectedHunchType === 'esoteric') { targetCheckResultDiv = esotericHunchHistoryCheckDiv; targetNumbersDiv = esotericHunchNumbersDiv; }
             else if (expectedHunchType === 'hot') { targetCheckResultDiv = hotHunchCheckResultDiv; targetNumbersDiv = hotNumbersHunchNumbersDiv; }
-            else if (expectedHunchType === 'cold') { targetCheckResultDiv = coldHunchCheckResultDiv; targetNumbersDiv = coldNumbersHunchNumbersDiv; }
+            else if (expectedHunchType === 'cold') { targetCheckResultDiv = coldNumbersHunchCheckResultDiv; targetNumbersDiv = coldNumbersHunchNumbersDiv; }
             else if (expectedHunchType === 'logic') { targetCheckResultDiv = logicHunchCheckResultDiv; targetNumbersDiv = logicHunchNumbersDiv; }
 
         }
@@ -1344,8 +1344,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const playAgainBtn = document.createElement('button');
         playAgainBtn.classList.add('action-btn', 'small-btn', 'play-again-btn');
         playAgainBtn.innerHTML = '<i class="fas fa-redo"></i> Jogar Novamente';
-        playAgainBtn.title = "Jogar este jogo novamente no próximo concurso";
-        playAgainBtn.addEventListener('click', () => handlePlayAgain(gameData, card)); 
+        playAgainBtn.title = "Exclui este jogo e o joga novamente no próximo concurso";
+        playAgainBtn.addEventListener('click', () => handlePlayAgain(docId, gameData, card)); 
 
         const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'small-btn', 'delete-game-btn'); 
         deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Excluir';
@@ -1375,17 +1375,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return card;
     }
     
-    async function handlePlayAgain(originalGameData, gameCardElement) {
+    async function handlePlayAgain(originalDocId, originalGameData, gameCardElement) {
         if (!currentUser || !firestoreDB) {
             alert("Você precisa estar logado para jogar novamente.");
             openModal(loginModal);
+            return;
+        }
+
+        if (!confirm(`Deseja realmente jogar novamente o jogo [${originalGameData.game.join(', ')}]? O jogo salvo original será removido e um novo será criado para o próximo concurso.`)) {
             return;
         }
     
         const playAgainButton = gameCardElement.querySelector('.play-again-btn');
         if(playAgainButton) {
             playAgainButton.disabled = true;
-            playAgainButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Copiando...';
+            playAgainButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
         }
         
         let originalSavedDateStr = 'data antiga';
@@ -1412,16 +1416,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
         try {
             await firestoreDB.collection('userGames').add(newGameEntry);
+            await firestoreDB.collection('userGames').doc(originalDocId).delete();
             
             const lotteryFriendlyName = LOTTERY_CONFIG_JS[originalGameData.lottery]?.name || originalGameData.lottery.toUpperCase();
-            alert(`Jogo [${originalGameData.game.join(', ')}] copiado e ativado para o próximo concurso da ${lotteryFriendlyName}!`);
+            alert(`Jogo [${originalGameData.game.join(', ')}] original removido e uma nova versão foi ativada para o próximo concurso da ${lotteryFriendlyName}!`);
             
             if (myGamesSection.classList.contains('active-section')) {
                 loadUserGames(filterLotteryMyGamesSelect ? filterLotteryMyGamesSelect.value : "todos");
             }
         } catch (error) {
             console.error("Erro ao tentar jogar novamente:", error);
-            alert(`Erro ao tentar jogar novamente: ${error.message}`);
+            alert(`Erro ao tentar jogar novamente: ${error.message}. O jogo original pode não ter sido removido se a cópia falhou.`);
             if(playAgainButton) { 
                 playAgainButton.disabled = false;
                 playAgainButton.innerHTML = '<i class="fas fa-redo"></i> Jogar Novamente';

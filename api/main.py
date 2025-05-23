@@ -13,7 +13,8 @@ from firebase_admin import credentials, firestore as admin_firestore, exceptions
 import requests
 from datetime import datetime, timedelta, timezone
 
-from verificador_jogos import verificar_jogos_salvos_batch, initialize_firebase_admin_verificador as init_fb_verificador_main
+# Alteração na importação para ser relativa ao pacote 'api'
+from .verificador_jogos import verificar_jogos_salvos_batch, initialize_firebase_admin_verificador as init_fb_verificador_main
 
 app = Flask(__name__)
 CORS(app)
@@ -308,7 +309,7 @@ def api_home_vercel():
 
 @app.route('/api/main/')
 def api_main_home():
-    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.9.1 - Correções de Notificação e Jogo Novamente"})
+    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.9.2 - Module Import Fix"})
 
 @app.route('/api/main/platform-stats', methods=['GET'])
 def get_platform_stats_persistent():
