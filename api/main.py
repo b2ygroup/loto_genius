@@ -13,7 +13,6 @@ from firebase_admin import credentials, firestore as admin_firestore, exceptions
 import requests
 from datetime import datetime, timedelta, timezone
 
-# Importa a função de verificação em lote do verificador_jogos
 from verificador_jogos import verificar_jogos_salvos_batch, initialize_firebase_admin_verificador as init_fb_verificador_main
 
 app = Flask(__name__)
@@ -24,27 +23,29 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 FB_ADMIN_INITIALIZED = False
 db_admin = None
-firebase_app_main = None # Guardar a instância da app
+firebase_app_main = None
 
 try:
-    MAIN_APP_NAME = 'lotoGeniusApiAppMainPy' # Nome único para esta app
+    MAIN_APP_NAME = 'lotoGeniusApiAppMainPy'
     if MAIN_APP_NAME not in firebase_admin._apps:
         SERVICE_ACCOUNT_KEY_PATH_MAIN = os.path.join(APP_ROOT, "serviceAccountKey.json")
         service_account_json_str_env = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON')
-
+        cred = None
         if service_account_json_str_env:
             service_account_info = json.loads(service_account_json_str_env)
             cred = credentials.Certificate(service_account_info)
-            firebase_app_main = firebase_admin.initialize_app(cred, name=MAIN_APP_NAME)
-            app.logger.info(f"Firebase Admin SDK inicializado para {MAIN_APP_NAME} (main.py) via Vercel ENV.")
+            app.logger.info(f"Usando credenciais do Firebase via ENV VAR para {MAIN_APP_NAME}.")
         elif os.path.exists(SERVICE_ACCOUNT_KEY_PATH_MAIN):
             cred = credentials.Certificate(SERVICE_ACCOUNT_KEY_PATH_MAIN)
+            app.logger.info(f"Usando credenciais do Firebase via arquivo local para {MAIN_APP_NAME}.")
+        
+        if cred:
             firebase_app_main = firebase_admin.initialize_app(cred, name=MAIN_APP_NAME)
-            app.logger.info(f"Firebase Admin SDK inicializado para {MAIN_APP_NAME} (main.py) via arquivo local.")
+            app.logger.info(f"Firebase Admin SDK inicializado para {MAIN_APP_NAME} (main.py).")
         else:
-            app.logger.error(f"ERRO CRÍTICO [{MAIN_APP_NAME}]: serviceAccountKey.json ou ENV VAR não encontrados.")
-            # FB_ADMIN_INITIALIZED permanece False
-    else: # App com este nome já existe
+            app.logger.error(f"ERRO CRÍTICO [{MAIN_APP_NAME}]: Credenciais do Firebase não encontradas (ENV VAR ou local).")
+            
+    else: 
         firebase_app_main = firebase_admin.get_app(name=MAIN_APP_NAME)
         app.logger.info(f"Firebase Admin SDK ({MAIN_APP_NAME}) já estava inicializado (main.py). Reutilizando.")
 
@@ -52,10 +53,9 @@ try:
         db_admin = admin_firestore.client(app=firebase_app_main)
         FB_ADMIN_INITIALIZED = True
         app.logger.info(f"Cliente Firestore Admin obtido para {MAIN_APP_NAME} (main.py).")
-        # Inicializa o Firebase no módulo verificador para uso pelo endpoint de cron
         init_fb_verificador_main(app_name_suffix='VerifViaMainCron')
     else:
-         app.logger.warning(f"Credenciais do Firebase Admin não configuradas corretamente para {MAIN_APP_NAME} e nenhuma app existente encontrada.")
+         app.logger.warning(f"Falha ao obter instância da app Firebase {MAIN_APP_NAME}. Cliente Firestore não será configurado.")
 
 except Exception as e_fb_admin_main:
     app.logger.error(f"Erro GERAL ao inicializar Firebase Admin SDK em main.py para {MAIN_APP_NAME}: {e_fb_admin_main}", exc_info=True)
@@ -74,29 +74,27 @@ LOTTERY_CONFIG = {
         "nome_exibicao": "Lotofácil", "min": 1, "max": 25, "count": 15, "count_apostadas": 15,
         "color": "#930089", "processed_json_name": "lotofacil_processed_results.json",
         "count_sorteadas": 15, "preco_aposta_base": 3.0,
-        # Adicione chaves de rateio específicas se disponíveis nos seus JSONs de resultados
-        "rateio_15_key": "rateio_principal_valor", # Exemplo, ajuste conforme seus dados
-        "rateio_14_key": "rateio_14_acertos_valor", # Exemplo
-        "rateio_13_key": "rateio_13_acertos_valor", # Exemplo
-        "rateio_12_key": "rateio_12_acertos_valor", # Exemplo
-        "rateio_11_key": "rateio_11_acertos_valor"  # Exemplo
+        "rateio_15_key": "rateio_principal_valor", 
+        "rateio_14_key": "rateio_14_acertos_valor", 
+        "rateio_13_key": "rateio_13_acertos_valor", 
+        "rateio_12_key": "rateio_12_acertos_valor", 
+        "rateio_11_key": "rateio_11_acertos_valor"
     },
     "lotomania": {
         "nome_exibicao": "Lotomania", "min": 0, "max": 99, "count_apostadas": 50,
         "count_sorteadas": 20, "color": "#f78100",
         "processed_json_name": "lotomania_processed_results.json", "preco_aposta_base": 3.0,
-        "rateio_20_key": "rateio_principal_valor", # Exemplo
-        "rateio_0_key": "rateio_0_acertos_valor" # Exemplo
-        # Adicione outras chaves de rateio para Lotomania se necessário
+        "rateio_20_key": "rateio_principal_valor", 
+        "rateio_0_key": "rateio_0_acertos_valor"
     },
     "quina": {
         "nome_exibicao": "Quina", "min": 1, "max": 80, "count": 5, "count_apostadas": 5,
         "color": "#260085", "processed_json_name": "quina_processed_results.json",
         "count_sorteadas": 5, "preco_aposta_base": 2.50,
-        "rateio_5_key": "rateio_principal_valor", # Exemplo
-        "rateio_4_key": "rateio_4_acertos_valor", # Exemplo
-        "rateio_3_key": "rateio_3_acertos_valor", # Exemplo
-        "rateio_2_key": "rateio_2_acertos_valor"  # Exemplo
+        "rateio_5_key": "rateio_principal_valor", 
+        "rateio_4_key": "rateio_4_acertos_valor", 
+        "rateio_3_key": "rateio_3_acertos_valor", 
+        "rateio_2_key": "rateio_2_acertos_valor"
     }
 }
 TAXA_SERVICO_JOGO_MISTERIOSO = 1.50
@@ -109,7 +107,7 @@ if FB_ADMIN_INITIALIZED and db_admin:
     PLATFORM_STATS_DOC_REF = db_admin.collection('platform_statistics').document('global_metrics')
     FICTITIOUS_WINNERS_COL_REF = db_admin.collection('fictitious_top_winners')
 else:
-    app.logger.warning("db_admin não está configurado em main.py. Algumas funcionalidades do Firestore estarão desabilitadas.")
+    app.logger.warning("db_admin não está configurado em main.py. PLATFORM_STATS_DOC_REF e FICTITIOUS_WINNERS_COL_REF serão None.")
 
 
 FICTITIOUS_NICKS = [
@@ -141,7 +139,7 @@ def parse_currency_to_float(currency_str):
 def load_processed_lottery_data(lottery_key):
     global FB_ADMIN_INITIALIZED, db_admin
     if not FB_ADMIN_INITIALIZED or not db_admin:
-        app.logger.error(f"Firebase Admin não inicializado em main.py. Não é possível buscar URL do Blob para {lottery_key}.")
+        app.logger.error(f"Firebase Admin (db_admin) não inicializado em main.py. Não é possível buscar URL do Blob para {lottery_key}.")
         return None
     config = LOTTERY_CONFIG.get(lottery_key)
     if not config:
@@ -193,8 +191,8 @@ def combinations_count(n, k):
     return res
 
 def get_or_create_platform_stats_from_firestore():
-    if not PLATFORM_STATS_DOC_REF:
-        app.logger.warning("Firestore não disponível para get_or_create_platform_stats_from_firestore (main.py).")
+    if not PLATFORM_STATS_DOC_REF or not db_admin:
+        app.logger.warning("Firestore (PLATFORM_STATS_DOC_REF ou db_admin) não disponível para get_or_create_platform_stats_from_firestore (main.py).")
         return {
             "total_generated_games": random.randint(35000, 45000),
             "total_fictitious_prizes_awarded": random.randint(400, 900),
@@ -235,7 +233,7 @@ def get_or_create_platform_stats_from_firestore():
 def _simulate_fictitious_win(current_stats_dict):
     global db_admin
     if not FICTITIOUS_WINNERS_COL_REF or not PLATFORM_STATS_DOC_REF or not db_admin:
-        app.logger.warning("Firestore não disponível para simular ganho fictício (main.py).")
+        app.logger.warning("Firestore (refs ou db_admin) não disponível para simular ganho fictício (main.py).")
         return current_stats_dict
 
     try:
@@ -310,12 +308,12 @@ def api_home_vercel():
 
 @app.route('/api/main/')
 def api_main_home():
-    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.9.0 - Notificação de Prêmios Altos"})
+    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "4.9.1 - Correções de Notificação e Jogo Novamente"})
 
 @app.route('/api/main/platform-stats', methods=['GET'])
 def get_platform_stats_persistent():
-    if not FB_ADMIN_INITIALIZED or not PLATFORM_STATS_DOC_REF:
-        app.logger.warning("Firestore não inicializado, usando estatísticas em memória para /platform-stats (main.py).")
+    if not FB_ADMIN_INITIALIZED or not PLATFORM_STATS_DOC_REF or not db_admin:
+        app.logger.warning("Firestore não inicializado ou refs não disponíveis, usando estatísticas em memória para /platform-stats (main.py).")
         in_memory_platform_stats = {
             "jogos_gerados_total": random.randint(35000, 45000),
             "jogos_premiados_total": random.randint(400, 900),
@@ -353,8 +351,8 @@ def get_platform_stats_persistent():
 
 @app.route('/api/main/top-winners', methods=['GET'])
 def get_top_winners_persistent():
-    if not FB_ADMIN_INITIALIZED or not FICTITIOUS_WINNERS_COL_REF:
-        app.logger.warning("Firestore não inicializado, usando ganhadores fallback para /top-winners (main.py).")
+    if not FB_ADMIN_INITIALIZED or not FICTITIOUS_WINNERS_COL_REF or not db_admin:
+        app.logger.warning("Firestore não inicializado ou refs não disponíveis, usando ganhadores fallback para /top-winners (main.py).")
         winners_fallback = [{"nick": "Sortudo Virtual #777", "prize_total": format_currency(random.uniform(100000, 500000)), "lottery": "Mega-Sena", "date": "23/05/2025"}]
         return jsonify(winners_fallback)
 
@@ -1078,8 +1076,6 @@ def gerar_jogo_logico_api(lottery_name):
 
 
 def determinar_faixa_premio_main(lottery_type, acertos):
-    # Esta função é usada pelo endpoint /verificar-jogo-passado.
-    # Ela NÃO precisa retornar 'gera_notificacao_especial', apenas a faixa e se foi premiado.
     config_loteria = LOTTERY_CONFIG.get(lottery_type)
     if not config_loteria:
         return "Desconhecida", False
@@ -1111,9 +1107,9 @@ def determinar_faixa_premio_main(lottery_type, acertos):
         elif acertos == 15: faixa, is_premiado_geral = "15 Pontos", True
         elif acertos == 0: faixa, is_premiado_geral = "0 Acertos (Especial)", True
 
-    if not is_premiado_geral and acertos > 0: # Se teve algum acerto mas não se qualificou como premiado
+    if not is_premiado_geral and acertos > 0:
          faixa = f"{acertos} Acertos (Não Premiado)"
-    elif not is_premiado_geral and acertos == 0 and lottery_type != "lotomania": # Lotomania já trata 0 acertos
+    elif not is_premiado_geral and acertos == 0 and lottery_type != "lotomania":
          faixa = "Nenhum Acerto"
 
     return faixa, is_premiado_geral
@@ -1198,15 +1194,10 @@ def verificar_jogo_passado_api():
         elif lottery_type_req == "lotomania":
             if acertos_req == 20: key_rateio = config_req.get("rateio_20_key")
             elif acertos_req == 0: key_rateio = config_req.get("rateio_0_key")
-            # Adicione mais chaves para 15, 16, 17, 18, 19 acertos se tiver nos seus dados.
+
 
         if key_rateio and sorteio_encontrado_req.get(key_rateio) is not None:
             valor_premio_real_str = sorteio_encontrado_req.get(key_rateio)
-            # O valor do rateio já vem como string formatada "R$ X.XXX,XX" do processador.
-            # Para cálculo, precisamos converter para float. Para exibição, já está bom.
-            # Para o JSON de resposta, vamos manter como string se for para exibição.
-            # Se for usar para cálculo no frontend, o frontend teria que parsear.
-            # No entanto, a função parse_currency_to_float já existe, então usamos ela.
             valor_premio_real = parse_currency_to_float(valor_premio_real_str)
         elif key_rateio and premiado_geral_flag_req :
              aviso_premio_req = f"Valor do prêmio da {faixa_premio_txt_req} não disponível na base de dados para este concurso."
@@ -1221,7 +1212,7 @@ def verificar_jogo_passado_api():
         "acertos": acertos_req,
         "premiado": premiado_geral_flag_req,
         "faixa_premio": faixa_premio_txt_req,
-        "valor_premio_bruto_estimado": valor_premio_real, # float
+        "valor_premio_bruto_estimado": valor_premio_real,
         "valor_premio_formatado_estimado": format_currency(valor_premio_real) if premiado_geral_flag_req and valor_premio_real > 0 else ("Não aplicável" if not aviso_premio_req and premiado_geral_flag_req else "R$ 0,00"),
         "aviso": aviso_premio_req
     }), 200
@@ -1241,10 +1232,10 @@ def trigger_game_verification_endpoint():
 
     app.logger.info("Disparando verificação em lote de jogos salvos via endpoint /api/internal/run-verification.")
     try:
-        # Esta chamada assume que `verificar_jogos_salvos_batch` dentro de `verificador_jogos.py`
-        # usa sua própria inicialização do Firebase, que é o caso para o `if __name__ == '__main__'`
-        # e para a função `verificar_jogos_salvos_batch` quando chamada externamente assim.
-        # A `init_fb_verificador_main` no início deste arquivo já tentou preparar o verificador.
+        if not FB_ADMIN_INITIALIZED or not db_admin:
+            app.logger.error("Endpoint de Cron: Firebase Admin (db_admin) não está inicializado em main.py. A verificação em lote não pode prosseguir.")
+            return jsonify({"status": "error", "message":"Erro interno: Firebase não inicializado para a tarefa."}), 500
+        
         verificar_jogos_salvos_batch()
         message = "Verificação em lote de jogos salvos concluída com sucesso (via endpoint)."
         app.logger.info(message)
