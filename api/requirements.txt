@@ -3,5 +3,4 @@ Flask-Cors
 requests
 python-dotenv
 firebase-admin
-pandas 
-openpyxl
+# Remova pandas e openpyxl daqui para o deploy na Vercel

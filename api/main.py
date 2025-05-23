@@ -12,11 +12,12 @@ import firebase_admin
 from firebase_admin import credentials, firestore as admin_firestore, exceptions as firebase_exceptions
 import requests
 from datetime import datetime, timedelta, timezone
-import pandas as pd
+# import pandas as pd # Removido - não será usado pelo main.py na Vercel
 
-# Importação relativa para o verificador_jogos
+# A importação de verificar_jogos_para_novo_resultado não é mais necessária aqui,
+# pois será chamada pelo processador_local_loterias.py que rodará localmente.
 from .verificador_jogos import verificar_jogos_salvos_batch, initialize_firebase_admin_verificador as init_fb_verificador_main
-from .verificador_jogos import verificar_jogos_para_novo_resultado
+# from .verificador_jogos import verificar_jogos_para_novo_resultado # Removido do main.py
 
 app = Flask(__name__)
 CORS(app)
@@ -56,7 +57,8 @@ try:
         db_admin = admin_firestore.client(app=firebase_app_main)
         FB_ADMIN_INITIALIZED = True
         app.logger.info(f"Cliente Firestore Admin obtido para {MAIN_APP_NAME} (main.py).")
-        init_fb_verificador_main(app_name_suffix='VerifViaMain')
+        # Chamada para inicializar o verificador, caso o endpoint de verificação manual seja usado
+        init_fb_verificador_main(app_name_suffix='VerifViaMainInternal') 
     else:
          app.logger.warning(f"Falha ao obter instância da app Firebase {MAIN_APP_NAME}. Cliente Firestore não será configurado.")
 
@@ -66,76 +68,54 @@ except Exception as e_fb_admin_main:
 LOTTERY_CONFIG = {
     "megasena": {
         "nome_exibicao": "Mega-Sena", "min": 1, "max": 60, "count": 6, "count_apostadas": 6,
-        "color": "#209869", "count_sorteadas": 6, "preco_aposta_base": 5.0,
-        "modalidade_param_value": "Mega-Sena",
-        "master_file_name_local": "Mega-Sena_Resultados.xlsx",
-        "processed_json_name": "megasena_processed_results.json",
-        "col_concurso": "Concurso", "col_data_sorteio": "Data do Sorteio",
-        "cols_bolas_prefix": "Bola", "num_bolas_no_arquivo": 6,
-        "col_ganhadores_principal": "Ganhadores 6 acertos", "col_cidade_uf_principal": "Cidade / UF",
-        "col_rateio_principal": "Rateio 6 acertos", "rateio_sena_key": "rateio_principal_valor",
-        "col_rateio_quina": "Rateio 5 acertos", "rateio_quina_key": "rateio_quina_valor",
-        "col_rateio_quadra": "Rateio 4 acertos", "rateio_quadra_key": "rateio_quadra_valor"
+        "color": "#209869", "processed_json_name": "megasena_processed_results.json", # Usado pelo frontend para buscar do Blob
+        "count_sorteadas": 6, "preco_aposta_base": 5.0,
+        "rateio_sena_key": "rateio_principal_valor", 
+        "rateio_quina_key": "rateio_quina_valor",   
+        "rateio_quadra_key": "rateio_quadra_valor"  
     },
     "lotofacil": {
         "nome_exibicao": "Lotofácil", "min": 1, "max": 25, "count": 15, "count_apostadas": 15,
-        "color": "#930089", "count_sorteadas": 15, "preco_aposta_base": 3.0,
-        "modalidade_param_value": "Lotofácil",
-        "master_file_name_local": "Lotofácil_Resultados.xlsx",
-        "processed_json_name": "lotofacil_processed_results.json",
-        "col_concurso": "Concurso", "col_data_sorteio": "Data Sorteio",
-        "cols_bolas_prefix": "Bola", "num_bolas_no_arquivo": 15,
-        "col_ganhadores_principal": "Ganhadores 15 acertos", "col_cidade_uf_principal": "Cidade / UF",
-        "col_rateio_principal": "Rateio 15 acertos", "rateio_15_key": "rateio_principal_valor",
-        "col_rateio_14": "Rateio 14 acertos", "rateio_14_key": "rateio_14_acertos_valor", # Exemplo de nome de coluna no XLSX
-        "col_rateio_13": "Rateio 13 acertos", "rateio_13_key": "rateio_13_acertos_valor",
-        "col_rateio_12": "Rateio 12 acertos", "rateio_12_key": "rateio_12_acertos_valor",
-        "col_rateio_11": "Rateio 11 acertos", "rateio_11_key": "rateio_11_acertos_valor"
+        "color": "#930089", "processed_json_name": "lotofacil_processed_results.json",
+        "count_sorteadas": 15, "preco_aposta_base": 3.0,
+        "rateio_15_key": "rateio_principal_valor", 
+        "rateio_14_key": "rateio_14_acertos_valor", 
+        "rateio_13_key": "rateio_13_acertos_valor", 
+        "rateio_12_key": "rateio_12_acertos_valor", 
+        "rateio_11_key": "rateio_11_acertos_valor"
     },
     "lotomania": {
         "nome_exibicao": "Lotomania", "min": 0, "max": 99, "count_apostadas": 50,
-        "count_sorteadas": 20, "color": "#f78100", "preco_aposta_base": 3.0,
-        "modalidade_param_value": "Lotomania",
-        "master_file_name_local": "Lotomania_Resultados.xlsx", 
-        "processed_json_name": "lotomania_processed_results.json",
-        "col_concurso": "Concurso", "col_data_sorteio": "Data Sorteio", 
-        "cols_bolas_prefix": "Bola", "num_bolas_no_arquivo": 20,
-        "col_ganhadores_principal": "Ganhadores 20 acertos", "col_cidade_uf_principal": "Cidade / UF",
-        "col_rateio_principal": "Rateio 20 acertos", "rateio_20_key": "rateio_principal_valor",
-        "col_rateio_0": "Rateio 0 acertos", "rateio_0_key": "rateio_0_acertos_valor" 
+        "count_sorteadas": 20, "color": "#f78100",
+        "processed_json_name": "lotomania_processed_results.json", "preco_aposta_base": 3.0,
+        "rateio_20_key": "rateio_principal_valor", 
+        "rateio_0_key": "rateio_0_acertos_valor"
     },
     "quina": {
         "nome_exibicao": "Quina", "min": 1, "max": 80, "count": 5, "count_apostadas": 5,
-        "color": "#260085", "count_sorteadas": 5, "preco_aposta_base": 2.50,
-        "modalidade_param_value": "Quina",
-        "master_file_name_local": "Quina_Resultados.xlsx",
-        "processed_json_name": "quina_processed_results.json",
-        "col_concurso": "Concurso", "col_data_sorteio": "Data Sorteio",
-        "cols_bolas_prefix": "Bola", "num_bolas_no_arquivo": 5,
-        "col_ganhadores_principal": "Ganhadores 5 acertos", "col_cidade_uf_principal": "Cidade / UF",
-        "col_rateio_principal": "Rateio 5 acertos", "rateio_5_key": "rateio_principal_valor",
-        "col_rateio_4": "Rateio 4 acertos", "rateio_4_key": "rateio_4_acertos_valor", 
-        "col_rateio_3": "Rateio 3 acertos", "rateio_3_key": "rateio_3_acertos_valor",
-        "col_rateio_2": "Rateio 2 acertos", "rateio_2_key": "rateio_2_acertos_valor"
+        "color": "#260085", "processed_json_name": "quina_processed_results.json",
+        "count_sorteadas": 5, "preco_aposta_base": 2.50,
+        "rateio_5_key": "rateio_principal_valor", 
+        "rateio_4_key": "rateio_4_acertos_valor", 
+        "rateio_3_key": "rateio_3_acertos_valor", 
+        "rateio_2_key": "rateio_2_acertos_valor"
     }
 }
-TAXA_SERVICO_JOGO_MISTERIOSO = 1.50
+TAXA_SERVICO_JOGO_MISTERIOSO = 1.50 
 
 PLATFORM_STATS_DOC_REF = None
 FICTITIOUS_WINNERS_COL_REF = None
 MYSTERY_GAMES_COLLECTION = 'mystery_games'
-VERCEL_TMP_DIR = '/tmp' 
-DOWNLOAD_URL_BASE_CAIXA = "https://servicebus2.caixa.gov.br/portaldeloterias/api/resultados/download"
 
 if FB_ADMIN_INITIALIZED and db_admin:
     PLATFORM_STATS_DOC_REF = db_admin.collection('platform_statistics').document('global_metrics')
     FICTITIOUS_WINNERS_COL_REF = db_admin.collection('fictitious_top_winners')
 else:
-    app.logger.warning("db_admin não está configurado em main.py. PLATFORM_STATS_DOC_REF e FICTITIOUS_WINNERS_COL_REF serão None.")
+    app.logger.warning("db_admin não está configurado. Algumas funcionalidades do Firestore estarão desabilitadas.")
 
 
 FICTITIOUS_NICKS = [
-    "Mestre dos Números", "Rainha da Sorte", "Profeta da Fortuna", "Ás da Loteria",
+    "Mestre dos Números", "Rainha da Sorte", "Profeta da Fortuna", "Ás da Loteria", 
     "Imperador dos Palpites", "Dama da Premiação", "Oráculo Milionário", "Gênio da Quina",
     "Estrela da Mega", "Visionário da Lotofácil", "Sábio das Dezenas", "Apostador Lendário",
     "Bruxo dos Bolões", "Ninja dos Números", "Explorador da Sorte", "Arquiteto da Fortuna",
@@ -161,41 +141,41 @@ def parse_currency_to_float(currency_str):
     except ValueError: return 0.0
 
 def load_processed_lottery_data(lottery_key):
-    global FB_ADMIN_INITIALIZED, db_admin
+    global FB_ADMIN_INITIALIZED, db_admin 
     if not FB_ADMIN_INITIALIZED or not db_admin:
-        app.logger.error(f"Firebase Admin (db_admin) não inicializado em main.py. Não é possível buscar URL do Blob para {lottery_key}.")
+        app.logger.error(f"Firebase Admin não inicializado. Não é possível buscar URL do Blob para {lottery_key}.")
         return None
     config = LOTTERY_CONFIG.get(lottery_key)
-    if not config:
-        app.logger.error(f"Configuração não encontrada para {lottery_key} em main.py")
+    if not config: 
+        app.logger.error(f"Configuração não encontrada para {lottery_key}")
         return None
-
-    app.logger.info(f"Buscando URL do Blob no Firestore para {lottery_key.upper()} (via main.py)...")
+    
+    app.logger.info(f"Buscando URL do Blob no Firestore para {lottery_key.upper()}...")
     blob_url = None
     try:
         doc_ref = db_admin.collection('lottery_data_source_urls').document(lottery_key)
         doc = doc_ref.get()
-        if not doc.exists:
-            app.logger.error(f"URL do Blob não encontrado no Firestore para {lottery_key} (main.py).")
+        if not doc.exists: 
+            app.logger.error(f"URL do Blob não encontrado no Firestore para {lottery_key}.")
             return None
         data_source_info = doc.to_dict()
         blob_url = data_source_info.get('blob_url')
-        if not blob_url:
-            app.logger.error(f"Campo 'blob_url' não encontrado no Firestore para {lottery_key} (main.py).")
+        if not blob_url: 
+            app.logger.error(f"Campo 'blob_url' não encontrado no Firestore para {lottery_key}.")
             return None
-
-        app.logger.info(f"Carregando dados de {lottery_key.upper()} do Vercel Blob: {blob_url} (main.py)")
+        
+        app.logger.info(f"Carregando dados de {lottery_key.upper()} do Vercel Blob: {blob_url}")
         response = requests.get(blob_url, timeout=20)
-        response.raise_for_status()
+        response.raise_for_status() 
         data = response.json()
-        app.logger.info(f"Sucesso ao carregar {lottery_key.upper()} ({len(data) if isinstance(data, list) else 'N/A'} registros) do Vercel Blob (main.py)")
+        app.logger.info(f"Sucesso ao carregar {lottery_key.upper()} ({len(data) if isinstance(data, list) else 'N/A'} registros) do Vercel Blob")
         return data
-    except firebase_exceptions.FirebaseError as fb_err:
-        app.logger.error(f"Erro do Firebase ao buscar URL para {lottery_key} (main.py): {fb_err}")
-    except requests.exceptions.RequestException as e:
-        app.logger.error(f"Erro de requisição ao buscar JSON do Blob {(blob_url if blob_url else 'URL_DESCONHECIDO')} (main.py): {e}")
-    except Exception as e_gen:
-        app.logger.error(f"Erro genérico ao carregar dados de {(blob_url if blob_url else 'URL_DESCONHECIDO')} (main.py): {e_gen}", exc_info=True)
+    except firebase_exceptions.FirebaseError as fb_err: 
+        app.logger.error(f"Erro do Firebase ao buscar URL para {lottery_key}: {fb_err}")
+    except requests.exceptions.RequestException as e: 
+        app.logger.error(f"Erro de requisição ao buscar JSON do Blob {(blob_url if 'blob_url' in locals() and blob_url else 'URL_DESCONHECIDO')}: {e}")
+    except Exception as e_gen: 
+        app.logger.error(f"Erro genérico ao carregar dados de {(blob_url if 'blob_url' in locals() and blob_url else 'URL_DESCONHECIDO')}: {e_gen}", exc_info=True)
     return None
 
 def get_data_for_stats(lottery_name_lower):
@@ -215,8 +195,8 @@ def combinations_count(n, k):
     return res
 
 def get_or_create_platform_stats_from_firestore():
-    if not PLATFORM_STATS_DOC_REF or not db_admin:
-        app.logger.warning("Firestore (PLATFORM_STATS_DOC_REF ou db_admin) não disponível para get_or_create_platform_stats_from_firestore (main.py).")
+    if not PLATFORM_STATS_DOC_REF: 
+        app.logger.warning("Firestore não disponível para get_or_create_platform_stats_from_firestore.")
         return {
             "total_generated_games": random.randint(35000, 45000),
             "total_fictitious_prizes_awarded": random.randint(400, 900),
@@ -229,64 +209,64 @@ def get_or_create_platform_stats_from_firestore():
             data = doc.to_dict()
             if 'last_fictitious_winner_update_timestamp' in data and not isinstance(data['last_fictitious_winner_update_timestamp'], datetime):
                  ts_val = data['last_fictitious_winner_update_timestamp']
-                 if hasattr(ts_val, 'seconds'):
+                 if hasattr(ts_val, 'seconds'): 
                      data['last_fictitious_winner_update_timestamp'] = datetime.fromtimestamp(ts_val.seconds, tz=timezone.utc)
-                 else:
-                     data['last_fictitious_winner_update_timestamp'] = datetime.now(timezone.utc) - timedelta(hours=2)
+                 else: 
+                     data['last_fictitious_winner_update_timestamp'] = datetime.now(timezone.utc) - timedelta(hours=2) 
             return data
         else:
             initial_stats = {
                 "total_generated_games": 30000,
                 "total_fictitious_prizes_awarded": 150,
                 "total_fictitious_prize_value_bruto": 200000.0,
-                "last_fictitious_winner_update_timestamp": admin_firestore.SERVER_TIMESTAMP
+                "last_fictitious_winner_update_timestamp": admin_firestore.SERVER_TIMESTAMP 
             }
             PLATFORM_STATS_DOC_REF.set(initial_stats)
-            app.logger.info("Documento de estatísticas da plataforma inicializado no Firestore (main.py).")
+            app.logger.info("Documento de estatísticas da plataforma inicializado no Firestore.")
             initial_stats_for_return = initial_stats.copy()
             initial_stats_for_return['last_fictitious_winner_update_timestamp'] = datetime.now(timezone.utc)
             return initial_stats_for_return
     except firebase_exceptions.FirebaseError as e:
-        app.logger.error(f"Erro ao acessar estatísticas no Firestore (main.py): {e}")
-        return {
+        app.logger.error(f"Erro ao acessar estatísticas no Firestore: {e}")
+        return { 
             "total_generated_games": 35000, "total_fictitious_prizes_awarded": 400,
             "total_fictitious_prize_value_bruto": 150000.0,
             "last_fictitious_winner_update_timestamp": datetime.now(timezone.utc) - timedelta(hours=2)
         }
 
 def _simulate_fictitious_win(current_stats_dict):
-    global db_admin
+    global db_admin 
     if not FICTITIOUS_WINNERS_COL_REF or not PLATFORM_STATS_DOC_REF or not db_admin:
-        app.logger.warning("Firestore (refs ou db_admin) não disponível para simular ganho fictício (main.py).")
+        app.logger.warning("Firestore não disponível para simular ganho fictício.")
         return current_stats_dict
 
     try:
-        is_new_winner = random.random() < 0.70
+        is_new_winner = random.random() < 0.70 
         winner_nick_base = random.choice(FICTITIOUS_NICKS)
         chosen_lottery = random.choice(list(LOTTERY_CONFIG.keys()))
-        prize_value = random.uniform(50.0, 50000.0)
-        if random.random() < 0.05:
+        prize_value = random.uniform(50.0, 50000.0) 
+        if random.random() < 0.05: 
             prize_value = random.uniform(50001.0, 750000.0)
 
         winner_doc_ref = None
         winner_data_to_set = {}
 
-        if not is_new_winner:
-            existing_winners_query = FICTITIOUS_WINNERS_COL_REF.order_by("last_win_date", direction=admin_firestore.Query.ASCENDING).limit(1).stream()
+        if not is_new_winner: 
+            existing_winners_query = FICTITIOUS_WINNERS_COL_REF.order_by("last_win_date", direction=admin_firestore.Query.ASCENDING).limit(1).stream() 
             existing_winners_list = [doc for doc in existing_winners_query]
             if existing_winners_list:
-                winner_doc_to_update = random.choice(existing_winners_list)
+                winner_doc_to_update = random.choice(existing_winners_list) 
                 winner_doc_ref = winner_doc_to_update.reference
                 winner_data_fs = winner_doc_to_update.to_dict()
-
+                
                 winner_data_to_set["nick"] = winner_data_fs.get("nick", f"{winner_nick_base} #{random.randint(100,999)}")
                 winner_data_to_set["total_prize_value_bruto"] = winner_data_fs.get("total_prize_value_bruto", 0) + prize_value
                 winner_data_to_set["number_of_wins"] = winner_data_fs.get("number_of_wins", 0) + 1
                 winner_data_to_set["last_win_lottery"] = chosen_lottery
                 winner_data_to_set["last_win_date"] = admin_firestore.SERVER_TIMESTAMP
-                app.logger.info(f"Atualizando ganhador fictício existente: {winner_data_to_set['nick']} (main.py)")
+                app.logger.info(f"Atualizando ganhador fictício existente: {winner_data_to_set['nick']}")
             else:
-                is_new_winner = True
+                is_new_winner = True 
 
         if is_new_winner:
             winner_data_to_set = {
@@ -296,325 +276,32 @@ def _simulate_fictitious_win(current_stats_dict):
                 "last_win_date": admin_firestore.SERVER_TIMESTAMP,
                 "number_of_wins": 1
             }
-            winner_doc_ref = FICTITIOUS_WINNERS_COL_REF.document()
-            app.logger.info(f"Criando novo ganhador fictício: {winner_data_to_set['nick']} (main.py)")
+            winner_doc_ref = FICTITIOUS_WINNERS_COL_REF.document() 
+            app.logger.info(f"Criando novo ganhador fictício: {winner_data_to_set['nick']}")
 
-        if winner_doc_ref:
-            winner_doc_ref.set(winner_data_to_set, merge=True)
+        if winner_doc_ref: 
+            winner_doc_ref.set(winner_data_to_set, merge=True) 
 
         prizes_awarded = current_stats_dict.get("total_fictitious_prizes_awarded", 0) + 1
         prize_value_total = current_stats_dict.get("total_fictitious_prize_value_bruto", 0) + prize_value
-
+        
         PLATFORM_STATS_DOC_REF.update({
             "total_fictitious_prizes_awarded": prizes_awarded,
             "total_fictitious_prize_value_bruto": prize_value_total,
             "last_fictitious_winner_update_timestamp": admin_firestore.SERVER_TIMESTAMP
         })
-        app.logger.info("Estatísticas da plataforma atualizadas com ganho fictício (main.py).")
+        app.logger.info("Estatísticas da plataforma atualizadas com ganho fictício.")
         current_stats_dict["total_fictitious_prizes_awarded"] = prizes_awarded
         current_stats_dict["total_fictitious_prize_value_bruto"] = prize_value_total
-        current_stats_dict["last_fictitious_winner_update_timestamp"] = datetime.now(timezone.utc)
+        current_stats_dict["last_fictitious_winner_update_timestamp"] = datetime.now(timezone.utc) 
 
     except firebase_exceptions.FirebaseError as e:
-        app.logger.error(f"Erro ao simular ganho fictício no Firestore (main.py): {e}")
+        app.logger.error(f"Erro ao simular ganho fictício no Firestore: {e}")
     except Exception as e_gen_fict:
-        app.logger.error(f"Erro genérico ao simular ganho fictício (main.py): {e_gen_fict}", exc_info=True)
-
+        app.logger.error(f"Erro genérico ao simular ganho fictício: {e_gen_fict}", exc_info=True)
+    
     return current_stats_dict
 
-def parse_ganhadores_cidades_cron(cidade_uf_str, num_ganhadores_str):
-    cidades_parsed = []
-    try:
-        num_ganhadores_cleaned = str(num_ganhadores_str).strip()
-        if num_ganhadores_cleaned.lower() == 'nan': num_ganhadores = 0
-        elif num_ganhadores_cleaned.isdigit(): num_ganhadores = int(num_ganhadores_cleaned)
-        else: num_ganhadores = 0
-    except ValueError: num_ganhadores = 0
-
-    if num_ganhadores > 0 and isinstance(cidade_uf_str, str) and \
-       cidade_uf_str.strip() and cidade_uf_str.strip() != "-" and \
-       cidade_uf_str.lower() != 'nan':
-        temp_str = re.sub(r'\s*\(\s*(\d+)\s*\)\s*', r'(\1)', cidade_uf_str)
-        if ";" in temp_str: entries = [entry.strip() for entry in temp_str.split(';')]
-        else: entries = [entry.strip() for entry in temp_str.split(',')]
-        
-        parsed_from_entries = []
-        for entry in entries:
-            if not entry: continue
-            match_contagem = re.search(r'\((?P<contagem>\d+)\)$', entry)
-            contagem_na_string = 1; cidade_limpa = entry
-            if match_contagem:
-                contagem_na_string = int(match_contagem.group("contagem"))
-                cidade_limpa = re.sub(r'\s*\(\d+\)$', '', entry).strip()
-            if cidade_limpa: parsed_from_entries.extend([cidade_limpa] * contagem_na_string)
-        
-        cidades_parsed = [c for c in parsed_from_entries if c]
-        
-        if num_ganhadores > 0:
-            if not cidades_parsed: cidades_parsed = ["Não especificada"] * num_ganhadores
-            elif len(cidades_parsed) < num_ganhadores:
-                if len(cidades_parsed) == 1: cidades_parsed = [cidades_parsed[0]] * num_ganhadores
-                else: cidades_parsed.extend(["Não especificada"] * (num_ganhadores - len(cidades_parsed)))
-            elif len(cidades_parsed) > num_ganhadores: cidades_parsed = cidades_parsed[:num_ganhadores]
-    elif num_ganhadores > 0: cidades_parsed = ["Não especificada"] * num_ganhadores
-    return cidades_parsed, num_ganhadores
-
-
-def baixar_arquivo_loteria_para_vercel(loteria_key_func, config_loteria_func):
-    modalidade_valor = config_loteria_func.get("modalidade_param_value", config_loteria_func.get("nome_exibicao"))
-    nome_arquivo_base = config_loteria_func.get("master_file_name_local")
-    
-    if not modalidade_valor or not nome_arquivo_base:
-        app.logger.error(f"CRON ERRO [{loteria_key_func.upper()}]: Configuração de download incompleta (modalidade ou nome base).")
-        return None
-
-    caminho_completo_destino = os.path.join(VERCEL_TMP_DIR, nome_arquivo_base)
-    
-    params = {'modalidade': modalidade_valor}
-    session = requests.Session()
-    session.headers.update({
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-        'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-        'Referer': 'https://loterias.caixa.gov.br/'
-    })
-    try:
-        app.logger.info(f"CRON Baixando arquivo para {loteria_key_func.upper()} de {DOWNLOAD_URL_BASE_CAIXA} com params {params} para {caminho_completo_destino}...")
-        response = session.get(DOWNLOAD_URL_BASE_CAIXA, params=params, stream=True, timeout=60, allow_redirects=True)
-        response.raise_for_status()
-        with open(caminho_completo_destino, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192): f.write(chunk)
-        app.logger.info(f"CRON SUCESSO [{loteria_key_func.upper()}]: Arquivo salvo em {caminho_completo_destino}")
-        return caminho_completo_destino
-    except requests.exceptions.RequestException as e:
-        app.logger.error(f"CRON ERRO ao baixar para {loteria_key_func.upper()}: {e}")
-    return None
-
-def upload_json_to_vercel_blob_cron(pathname_in_blob, json_content_str, loteria_key_func):
-    BLOB_ACCESS_TOKEN_CRON = os.environ.get("BLOB_READ_WRITE_TOKEN")
-    if not BLOB_ACCESS_TOKEN_CRON:
-        app.logger.error(f"CRON ERRO CRÍTICO [{loteria_key_func.upper()}]: BLOB_READ_WRITE_TOKEN não configurado.")
-        return None
-        
-    upload_url = f"https://blob.vercel-storage.com/{pathname_in_blob}"
-    headers = {
-        "Authorization": f"Bearer {BLOB_ACCESS_TOKEN_CRON}",
-        "Content-Type": "application/json; charset=utf-8",
-        "x-api-version": "6" 
-    }
-    app.logger.info(f"CRON Fazendo upload de '{pathname_in_blob}' para Vercel Blob...")
-    try:
-        response = requests.put(upload_url, headers=headers, data=json_content_str.encode('utf-8'), timeout=30)
-        response.raise_for_status()
-        blob_data = response.json()
-        blob_access_url = blob_data.get('url') 
-        app.logger.info(f"CRON SUCESSO [{loteria_key_func.upper()}]: JSON enviado para Vercel Blob. URL: {blob_access_url}")
-        return blob_access_url
-    except requests.exceptions.HTTPError as http_err:
-        app.logger.error(f"CRON ERRO HTTP ao enviar JSON para Vercel Blob ({loteria_key_func.upper()}): {http_err} - {http_err.response.text if http_err.response else ''}")
-    except requests.exceptions.RequestException as e_blob:
-        app.logger.error(f"CRON ERRO de requisição ao enviar JSON para Vercel Blob ({loteria_key_func.upper()}): {e_blob}")
-    except Exception as e_gen_blob:
-        app.logger.error(f"CRON Erro genérico ao enviar para Vercel Blob ({loteria_key_func.upper()}): {e_gen_blob}")
-    return None
-
-def processar_loteria_para_cron(loteria_key_func, config_loteria_func, tentar_download=True):
-    global db_admin 
-    if not db_admin:
-        app.logger.error(f"CRON ERRO [{loteria_key_func.upper()}]: Cliente Firestore (db_admin) não está disponível.")
-        return
-
-    app.logger.info(f"CRON Iniciando processamento JSON para {loteria_key_func.upper()}")
-    json_file_name_for_blob = config_loteria_func["processed_json_name"]
-    df = None
-    filepath_to_read = None
-
-    if tentar_download:
-        filepath_to_read = baixar_arquivo_loteria_para_vercel(loteria_key_func, config_loteria_func)
-    
-    if filepath_to_read and os.path.exists(filepath_to_read):
-        try: 
-            df = pd.read_excel(filepath_to_read, engine='openpyxl', dtype=str, na_values=['-'], keep_default_na=True)
-            app.logger.info(f"CRON SUCESSO [{loteria_key_func.upper()}]: Arquivo {filepath_to_read} lido com pandas.")
-        except Exception as e_read: 
-            app.logger.error(f"CRON ERRO ao ler arquivo {filepath_to_read} para {loteria_key_func.upper()}: {e_read}")
-            if os.path.exists(filepath_to_read) and VERCEL_TMP_DIR in filepath_to_read: os.remove(filepath_to_read)
-            return
-    elif tentar_download:
-        app.logger.warning(f"CRON AVISO: Falha no download ou arquivo não encontrado para {loteria_key_func.upper()} após tentativa de download.")
-        return
-    else:
-        app.logger.info(f"CRON [{loteria_key_func.upper()}]: Download não solicitado e nenhum arquivo encontrado.")
-        return
-
-
-    if df is None or df.empty: 
-        app.logger.warning(f"CRON AVISO FINAL: DataFrame não carregado ou vazio para {loteria_key_func.upper()}.")
-        if filepath_to_read and os.path.exists(filepath_to_read) and VERCEL_TMP_DIR in filepath_to_read: os.remove(filepath_to_read)
-        return
-
-    col_concurso = config_loteria_func["col_concurso"]
-    col_data = config_loteria_func["col_data_sorteio"]
-    cols_bolas_prefix = config_loteria_func["cols_bolas_prefix"]
-    num_bolas_a_ler = config_loteria_func["num_bolas_no_arquivo"]
-    col_ganhadores_principal = config_loteria_func.get("col_ganhadores_principal")
-    col_cidade_uf_principal = config_loteria_func.get("col_cidade_uf_principal")
-    col_rateio_principal = config_loteria_func.get("col_rateio_principal")
-    
-    col_rateio_quina_ms = config_loteria_func.get("col_rateio_quina")
-    col_rateio_quadra_ms = config_loteria_func.get("col_rateio_quadra")
-
-    results_list = []
-
-    for index, row in df.iterrows():
-        try:
-            concurso_str = str(row.get(col_concurso, '')).strip()
-            data_str = str(row.get(col_data, '')).strip()
-            concurso_str_cleaned = concurso_str.replace(',', '')
-            if pd.isna(concurso_str_cleaned) or not concurso_str_cleaned or concurso_str_cleaned.lower() == 'nan' or concurso_str_cleaned == '-': continue
-            try: concurso_val = int(float(concurso_str_cleaned))
-            except ValueError: continue
-            if pd.isna(data_str) or not data_str or data_str.lower() == 'nan' or data_str == '-': continue
-            data_formatada = data_str
-            try: 
-                dt_obj = pd.to_datetime(data_str, errors='coerce', dayfirst=True)
-                data_formatada = dt_obj.strftime('%d/%m/%Y') if pd.notna(dt_obj) else data_str
-            except Exception: pass
-            
-            dezenas_lidas = []
-            for i in range(1, num_bolas_a_ler + 1):
-                dezena_val_str = str(row.get(f'{cols_bolas_prefix}{i}', '')).strip()
-                if dezena_val_str.isdigit(): 
-                    dezenas_lidas.append(int(dezena_val_str))
-            
-            if len(dezenas_lidas) == num_bolas_a_ler:
-                sorteio_data = {"concurso": concurso_val, "data": data_formatada, "numeros": sorted(dezenas_lidas)}
-                if col_ganhadores_principal and col_cidade_uf_principal and col_rateio_principal:
-                    ganhadores_val = row.get(col_ganhadores_principal, '0'); cidade_uf_val = row.get(col_cidade_uf_principal, '')
-                    rateio_val_str = row.get(col_rateio_principal, '0')
-                    cidades_lista, num_ganhadores_parsed = parse_ganhadores_cidades_cron(str(cidade_uf_val), str(ganhadores_val))
-                    
-                    sorteio_data["ganhadores_principal_contagem"] = num_ganhadores_parsed
-                    sorteio_data["cidades_ganhadoras_principal"] = cidades_lista
-                    sorteio_data["rateio_principal_valor"] = format_currency(parse_currency_to_float(str(rateio_val_str))) if num_ganhadores_parsed > 0 else "R$ 0,00"
-
-                    if loteria_key_func == 'megasena':
-                        if col_rateio_quina_ms and config_loteria_func.get("rateio_quina_key"): 
-                            rateio_quina_val_str = row.get(col_rateio_quina_ms, '0')
-                            sorteio_data[config_loteria_func["rateio_quina_key"]] = format_currency(parse_currency_to_float(str(rateio_quina_val_str)))
-                        if col_rateio_quadra_ms and config_loteria_func.get("rateio_quadra_key"):
-                            rateio_quadra_val_str = row.get(col_rateio_quadra_ms, '0')
-                            sorteio_data[config_loteria_func["rateio_quadra_key"]] = format_currency(parse_currency_to_float(str(rateio_quadra_val_str)))
-                    elif loteria_key_func == 'lotofacil':
-                        faixas_lotofacil_cols = { 
-                            "rateio_14_key": config_loteria_func.get("col_rateio_14", "Rateio 14 acertos"),
-                            "rateio_13_key": config_loteria_func.get("col_rateio_13", "Rateio 13 acertos"),
-                            "rateio_12_key": config_loteria_func.get("col_rateio_12", "Rateio 12 acertos"),
-                            "rateio_11_key": config_loteria_func.get("col_rateio_11", "Rateio 11 acertos")
-                        }
-                        for config_key_lf, column_name_lf in faixas_lotofacil_cols.items():
-                            json_data_key_lf = LOTTERY_CONFIG[loteria_key_func].get(config_key_lf)
-                            if json_data_key_lf and row.get(column_name_lf) is not None:
-                                rateio_str_val_lf = row.get(column_name_lf, '0')
-                                sorteio_data[json_data_key_lf] = format_currency(parse_currency_to_float(str(rateio_str_val_lf)))
-                
-                results_list.append(sorteio_data)
-        except Exception as e_row: 
-            app.logger.error(f"CRON ERRO ao processar linha {index+1} ({loteria_key_func.upper()}): {e_row}")
-    
-    if results_list:
-        results_list.sort(key=lambda x: x["concurso"], reverse=True)
-        json_content_to_upload = json.dumps(results_list, ensure_ascii=False, separators=(',', ':'))
-        
-        blob_url_retornado = upload_json_to_vercel_blob_cron(json_file_name_for_blob, json_content_to_upload, loteria_key_func)
-        
-        if blob_url_retornado and db_admin:
-            try:
-                doc_ref = db_admin.collection('lottery_data_source_urls').document(loteria_key_func)
-                doc_ref.set({
-                    'lottery_name': loteria_key_func,
-                    'blob_url': blob_url_retornado,
-                    'updated_at': admin_firestore.SERVER_TIMESTAMP,
-                    'latest_contest_number': results_list[0]['concurso'] if results_list else None
-                }, merge=True)
-                app.logger.info(f"CRON URL do Blob para {loteria_key_func.upper()} salvo no Firestore.")
-                
-                if results_list: 
-                    novo_resultado_oficial_para_verificar = results_list[0]
-                    app.logger.info(f"CRON Disparando verificação de jogos para {loteria_key_func.upper()}, concurso {novo_resultado_oficial_para_verificar.get('concurso')}")
-                    verificar_jogos_para_novo_resultado(loteria_key_func, novo_resultado_oficial_para_verificar, db_client=db_admin)
-
-            except Exception as e_firestore_cron:
-                app.logger.error(f"CRON ERRO ao salvar URL do Blob ou ao chamar verificação para {loteria_key_func.upper()}: {e_firestore_cron}")
-
-        elif not blob_url_retornado:
-            app.logger.error(f"CRON FALHA NO UPLOAD [{loteria_key_func.upper()}]: JSON não foi para o Blob.")
-    else:
-        app.logger.warning(f"CRON AVISO FINAL [{loteria_key_func.upper()}]: Nenhum resultado válido processado.")
-
-    if filepath_to_read and os.path.exists(filepath_to_read) and VERCEL_TMP_DIR in filepath_to_read:
-        try:
-            os.remove(filepath_to_read)
-            app.logger.info(f"CRON Arquivo temporário {filepath_to_read} removido.")
-        except OSError as e_remove:
-            app.logger.error(f"CRON Erro ao remover arquivo temporário {filepath_to_read}: {e_remove}")
-
-@app.route('/api/cron/processar-loterias', methods=['POST','GET']) 
-def cron_processar_loterias_endpoint():
-    configured_cron_secret = os.environ.get('CRON_SECRET') 
-    auth_header = request.headers.get('Authorization')
-    bearer_token = None
-    if auth_header and auth_header.startswith('Bearer '):
-        bearer_token = auth_header.split(' ')[1]
-
-    is_authorized = False
-    if request.method == 'GET' and not configured_cron_secret:
-        is_authorized = True
-        app.logger.info("CRON: Acesso GET local permitido (CRON_SECRET não configurado no ambiente).")
-    elif configured_cron_secret and bearer_token == configured_cron_secret:
-        is_authorized = True
-    elif request.method == 'POST': 
-        if not configured_cron_secret:
-             app.logger.error("CRON: POST não autorizado - CRON_SECRET não configurado no ambiente!")
-             return jsonify({"error": "Configuração de segurança do servidor ausente"}), 500
-        if not bearer_token or bearer_token != configured_cron_secret:
-            app.logger.warning(f"CRON: POST não autorizado - Header 'Authorization' Bearer token inválido ou ausente. Recebido: {auth_header}")
-            return jsonify({"error": "Não autorizado"}), 401
-            
-    if not is_authorized:
-        app.logger.warning(f"CRON: Falha final na autorização do endpoint. Header 'Authorization': {auth_header}. ENV 'CRON_SECRET': {'Definido' if configured_cron_secret else 'Não definido'}")
-        return jsonify({"error": "Não autorizado"}), 401
-            
-    app.logger.info("CRON: Endpoint /api/cron/processar-loterias acionado com sucesso e autorizado.")
-    
-    if not FB_ADMIN_INITIALIZED or not db_admin:
-        app.logger.error("CRON ERRO FATAL: Firebase (db_admin) não inicializado em main.py. Processamento não pode continuar.")
-        return jsonify({"status": "erro_fatal", "mensagem": "Configuração interna do servidor (Firebase) incompleta."}), 500
-        
-    try:
-        loterias_a_processar = list(LOTTERY_CONFIG.keys()) 
-        tentar_download_cron = True 
-        resultados_finais_processamento = {}
-
-        for loteria_key in loterias_a_processar:
-            config_atual_loteria = LOTTERY_CONFIG.get(loteria_key)
-            if not config_atual_loteria:
-                app.logger.error(f"CRON: Configuração para loteria '{loteria_key}' não encontrada.")
-                resultados_finais_processamento[loteria_key] = "erro_configuracao"
-                continue
-            
-            app.logger.info(f"CRON: Iniciando processamento para {loteria_key.upper()}.")
-            processar_loteria_para_cron(loteria_key, config_atual_loteria, tentar_download_cron)
-            resultados_finais_processamento[loteria_key] = "processamento_concluido_com_verificacao_disparada"
-
-        app.logger.info("CRON: Processamento de todas as loterias agendadas concluído.")
-        return jsonify({"status": "sucesso_geral", "detalhes_por_loteria": resultados_finais_processamento}), 200
-    except Exception as e_cron:
-        app.logger.error(f"CRON: Erro geral ao processar loterias: {e_cron}", exc_info=True)
-        return jsonify({"status": "erro_geral_cron", "mensagem": str(e_cron)}), 500
-
-
-# --- ROTAS EXISTENTES DA API ---
 @app.route('/')
 def api_base_root_main():
     return jsonify({"message": "API Loto Genius Python (api/main.py).", "note": "Endpoints em /api/..." })
@@ -623,15 +310,16 @@ def api_base_root_main():
 def api_home_vercel_main():
     return jsonify({"message": "API Loto Genius Python (api/main.py).", "note": "Endpoints em /api/main/..."})
 
+
 @app.route('/api/main/')
 def api_main_home_main():
-    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "5.0.0 - Cron Job Vercel e Lotomania XLSX"})
+    return jsonify({"mensagem": "API Loto Genius AI Refatorada!", "versao": "5.0.1 - Processamento Local"})
 
 @app.route('/api/main/platform-stats', methods=['GET'])
 def get_platform_stats_persistent():
     if not FB_ADMIN_INITIALIZED or not PLATFORM_STATS_DOC_REF or not db_admin:
-        app.logger.warning("Firestore não inicializado ou refs não disponíveis, usando estatísticas em memória para /platform-stats (main.py).")
-        in_memory_platform_stats = {
+        app.logger.warning("Firestore não inicializado, usando estatísticas em memória para /platform-stats.")
+        in_memory_platform_stats = { 
             "jogos_gerados_total": random.randint(35000, 45000),
             "jogos_premiados_total": random.randint(400, 900),
             "valor_premios_total_formatado": format_currency(random.uniform(150000, 500000)),
@@ -646,7 +334,7 @@ def get_platform_stats_persistent():
         PLATFORM_STATS_DOC_REF.update({"total_generated_games": new_total_generated_games})
         current_stats["total_generated_games"] = new_total_generated_games 
     except firebase_exceptions.FirebaseError as e:
-        app.logger.error(f"Erro ao atualizar total_generated_games no Firestore (main.py): {e}")
+        app.logger.error(f"Erro ao atualizar total_generated_games no Firestore: {e}")
 
     should_simulate_win = False
     if random.random() < 0.15: 
@@ -669,7 +357,7 @@ def get_platform_stats_persistent():
 @app.route('/api/main/top-winners', methods=['GET'])
 def get_top_winners_persistent():
     if not FB_ADMIN_INITIALIZED or not FICTITIOUS_WINNERS_COL_REF or not db_admin:
-        app.logger.warning("Firestore não inicializado ou refs não disponíveis, usando ganhadores fallback para /top-winners (main.py).")
+        app.logger.warning("Firestore não inicializado, usando ganhadores fallback para /top-winners.")
         winners_fallback = [{"nick": "Sortudo Virtual #777", "prize_total": format_currency(random.uniform(100000, 500000)), "lottery": "Mega-Sena", "date": "23/05/2025"}]
         return jsonify(winners_fallback)
 
@@ -693,7 +381,7 @@ def get_top_winners_persistent():
             })
         
         if not winners_list and FICTITIOUS_WINNERS_COL_REF: 
-            app.logger.info("Lista de Top Winners vazia, adicionando alguns ganhadores iniciais... (main.py)")
+            app.logger.info("Lista de Top Winners vazia, adicionando alguns ganhadores iniciais...")
             initial_stats_dict = get_or_create_platform_stats_from_firestore() 
             for _ in range(random.randint(3,5)): 
                 initial_stats_dict = _simulate_fictitious_win(initial_stats_dict) 
@@ -714,10 +402,10 @@ def get_top_winners_persistent():
         
         return jsonify(winners_list)
     except firebase_exceptions.FirebaseError as e:
-        app.logger.error(f"Erro ao buscar top winners do Firestore (main.py): {e}")
+        app.logger.error(f"Erro ao buscar top winners do Firestore: {e}")
         return jsonify({"error": "Não foi possível buscar os top winners"}), 500
     except Exception as e_gen_tw:
-        app.logger.error(f"Erro genérico ao buscar top winners (main.py): {e_gen_tw}", exc_info=True)
+        app.logger.error(f"Erro genérico ao buscar top winners: {e_gen_tw}", exc_info=True)
         return jsonify({"error": "Erro interno ao buscar top winners"}), 500
 
 @app.route('/api/main/resultados/<lottery_name>', methods=['GET'])
